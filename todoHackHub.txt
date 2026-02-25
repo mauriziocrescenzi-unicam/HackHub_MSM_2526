@@ -1,0 +1,3 @@
+Modificare la creazione del hackathon utilizzando il pattern build
+-class diagram
+-sequence
