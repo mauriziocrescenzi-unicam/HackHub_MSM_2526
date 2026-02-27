@@ -1,3 +1,11 @@
 Modificare la creazione del hackathon utilizzando il pattern build
 -class diagram
 -sequence
+
+Controllo sequence iscirvere team prima parte sulla visualizzazione delle informazioni
+
+caso d'uso abbandono team, eliminare utente
+
+come gestire TeamHackathon
+
+controllo amministratore cosa fa
