@@ -9,3 +9,5 @@ caso d'uso abbandono team, eliminare utente
 come gestire TeamHackathon
 
 controllo amministratore cosa fa
+
+controllo se tutti i metodi sono presenti nel class
