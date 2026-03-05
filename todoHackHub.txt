@@ -11,3 +11,5 @@ come gestire TeamHackathon
 controllo amministratore cosa fa
 
 controllo se tutti i metodi sono presenti nel class
+
+gestire ID account con le varie tabelle (ora ogni id è univoco)
