@@ -1,5 +1,7 @@
 package it.unicam.cs.model;
 
-public class TeamHackathon {
+import java.util.Objects;
 
+public class TeamHackathon {
+    
 }
