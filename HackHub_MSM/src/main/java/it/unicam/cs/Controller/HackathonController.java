@@ -32,6 +32,10 @@ public class HackathonController {
         persistence.create(hackathon);
         return hackathon != null;
     }
+
+    /**
+     * Verifica che le date siano valide.
+     */
     public boolean verificaRequisiti( LocalDateTime scadenzaIscrizione, LocalDateTime dataInizio, LocalDateTime dataFine){
         if(scadenzaIscrizione.isBefore(LocalDateTime.now()) || dataInizio.isBefore(LocalDateTime.now())
                 || dataFine.isBefore(LocalDateTime.now())) return false;
@@ -39,6 +43,10 @@ public class HackathonController {
         if (dataInizio.isAfter(dataFine)) return false;
         return true;
     }
+
+    /**
+     * Restituisce lo stato del hackathon.
+     */
     public StatoHackathon getStatoHackathon(Hackathon hackathon){
         return hackathon.getStato();
     }
