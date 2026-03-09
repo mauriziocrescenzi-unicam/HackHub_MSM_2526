@@ -1,49 +1,71 @@
 package it.unicam.cs.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Getter
+/**
+ * Entità che rappresenta un Team partecipante agli hackathon.
+ * Classe modello passiva: contiene solo dati e relazioni, senza logica di business.
+ * La logica di gestione (creazione, iscrizioni, membri) è delegata al TeamController.
+ *
+ */
 @Entity
-
+@Getter
+@Table(name = "team")
 public class Team {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "team_seq")
+    @SequenceGenerator(name = "team_seq", sequenceName = "team_sequence", allocationSize = 1)
     private Long id;
+
     private String nome;
     private String descrizione;
+
+    @Column(name = "data_creazione")
     private LocalDateTime dataCreazione;
-    private int amministratore;
-    // da aggiungere sul Class Diagram di progetto iterazione1
-    private List<MembroTeam> membri;
+
+    // ID dell'amministratore del team (riferimento a Utente)
+    @Column(name = "amministratore_id")
+    private Long amministratoreId;
+
+    /**
+     * Relazione uno-a-molti con TeamHackathon.
+     * Cascade ALL: le operazioni sul team si propagano alle associazioni.
+     */
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamHackathon> hackathonIscritti;
 
-    public Team(String nome, String descrizione, int amministratore) {
+    /**
+     * Relazione uno-a-molti con MembroTeam.
+     * Cascade ALL: le operazioni sul team si propagano ai membri.
+     */
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MembroTeam> membri;
+
+    /**
+     * Costruttore vuoto richiesto da JPA.
+     */
+    public Team() {}
+
+    /**
+     * Costruttore per creare un nuovo team.
+     * Imposta automaticamente la data di creazione a now().
+     *
+     * @param nome Nome del team
+     * @param descrizione Descrizione del team
+     * @param amministratoreId ID dell'utente che crea il team
+     */
+    public Team(String nome, String descrizione, Long amministratoreId) {
         this.nome = nome;
         this.descrizione = descrizione;
         this.dataCreazione = LocalDateTime.now();
-        this.amministratore = amministratore;
-        this.membri = new ArrayList<>();
-        this.hackathonIscritti = new ArrayList<>();
+        this.amministratoreId = amministratoreId;
     }
 
-    // Metodi dal diagramma di progetto
-    public boolean iscritto(Hackathon hackathon) {
-        if (hackathon == null) return false;
-        for (TeamHackathon th : hackathonIscritti) {
-            if (th.getHackathon() != null && th.getHackathon().equals(hackathon)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    // ==================== SETTER ====================
 
     public void setNome(String nome) {
         this.nome = nome;
@@ -57,24 +79,26 @@ public class Team {
         this.dataCreazione = dataCreazione;
     }
 
-    public void setAmministratore(int amministratore) {
-        this.amministratore = amministratore;
+    public void setAmministratoreId(Long amministratoreId) {
+        this.amministratoreId = amministratoreId;
     }
 
-    public List<MembroTeam> getMembriList() {
-        return membri;
+    public void setHackathonIscritti(List<TeamHackathon> hackathonIscritti) {
+        this.hackathonIscritti = hackathonIscritti;
     }
 
-    public List<TeamHackathon> getHackathonIscritti() {
-        return hackathonIscritti;
+    public void setMembri(List<MembroTeam> membri) {
+        this.membri = membri;
     }
+
+    // ==================== METODI DI UTILITÀ ====================
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Team team = (Team) o;
-        return id == team.id;
+        return Objects.equals(id, team.id);
     }
 
     @Override
@@ -87,10 +111,7 @@ public class Team {
         return "Team{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
-                ", descrizione='" + descrizione + '\'' +
-                ", dataCreazione=" + dataCreazione +
-                ", amministratore=" + amministratore +
-                ", numeroMembri=" + membri.size() +
+                ", numeroMembri=" + (membri != null ? membri.size() : 0) +
                 '}';
     }
 }

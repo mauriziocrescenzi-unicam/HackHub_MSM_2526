@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/HackHub.iml" filepath="$PROJECT_DIR$/.idea/HackHub.iml" />
-      <module fileurl="file://$PROJECT_DIR$/HackHub_MSM/HackHub_MSM.iml" filepath="$PROJECT_DIR$/HackHub_MSM/HackHub_MSM.iml" />
     </modules>
   </component>
 </project>

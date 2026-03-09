@@ -8,37 +8,40 @@ import java.util.Objects;
  * Classe che rappresenta la chiave primaria composta per l'entità MembroTeam.
  * La chiave è formata dall'ID dell'Utente e dall'ID del Team.
  * Deve essere @Embeddable per essere incorporata nell'entità principale.
+ *
  */
+@Getter
 @Embeddable
 public class MembroTeamId implements Serializable {
 
     private Long utenteId;
     private Long teamId;
 
+
     public MembroTeamId() {}
 
+    /**
+     * Costruttore con parametri.
+     *
+     * @param utenteId ID dell'utente
+     * @param teamId ID del team
+     */
     public MembroTeamId(Long utenteId, Long teamId) {
         this.utenteId = utenteId;
         this.teamId = teamId;
     }
 
-    // Getters generati automaticamente da Lombok @Getter sulla classe (se configurato)
-    // o specifici se necessari
-    public Long getUtenteId() { 
-        return utenteId; 
+    // ==================== SETTER ====================
+
+    public void setUtenteId(Long utenteId) {
+        this.utenteId = utenteId;
     }
 
-    public void setUtenteId(Long utenteId) { 
-        this.utenteId = utenteId; 
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
     }
-    
-    public Long getTeamId() { 
-        return teamId; 
-    }
-    
-    public void setTeamId(Long teamId) { 
-        this.teamId = teamId; 
-    }
+
+    // ==================== METODI DI UTILITÀ ====================
 
     /**
      * Verifica l'uguaglianza tra due chiavi composte.
@@ -50,7 +53,7 @@ public class MembroTeamId implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         MembroTeamId that = (MembroTeamId) o;
         return Objects.equals(utenteId, that.utenteId) &&
-               Objects.equals(teamId, that.teamId);
+                Objects.equals(teamId, that.teamId);
     }
 
     /**
