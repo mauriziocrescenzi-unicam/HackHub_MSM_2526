@@ -1,0 +1,26 @@
+Modificare la creazione del hackathon utilizzando il pattern build
+-class diagram
+-sequence
+
+Controllo sequence iscirvere team prima parte sulla visualizzazione delle informazioni
+
+caso d'uso abbandono team, eliminare utente
+
+come gestire TeamHackathon
+
+controllo amministratore cosa fa
+
+controllo se tutti i metodi sono presenti nel class
+
+gestire ID account con le varie tabelle (ora ogni id è univoco)
+
+1. gestione degli ID si potrebbe fare con UUID? (capire come gestirli);
+2. mettere equals, hashcode e toString su Hackathon in modo da poterli utilizzare per i confronti;
+3. su entità come Team, MembroTeam, ... sono necessari gli ID? Come li gestiamo?;
+4. Come gestire il "ruolo" in MembroTeam (una stringa? una Enum? di default Membro e Amministratore solo per chi lo crea?);
+5. in Hackathon mettere getHackathon;
+6. cosa ci va esattamente dentro TeamHackathon?
+
+Rispetto al Class Diagram di progetto, dentro Team ho inserito anche equals, hashcode e toString; 
+getHackathonIscritti (solo se ci si può iscrivere contemporaneamente a più hackathon);
+getID (da vedere come gestiamo gli ID).
