@@ -9,7 +9,8 @@
         <class>it.unicam.cs.model.Organizzatore</class>
         <class>it.unicam.cs.model.Utente</class>
         <class>it.unicam.cs.model.Account</class>
-         <class>it.unicam.cs.model.Team</class>
+        <class>it.unicam.cs.model.Team</class>
+        <class>it.unicam.cs.model.TeamHackathon</class>
         <class>it.unicam.cs.model.MembroTeam</class>
         <class>it.unicam.cs.model.MembroTeamId</class>
 
