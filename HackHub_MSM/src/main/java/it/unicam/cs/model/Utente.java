@@ -1,9 +1,6 @@
 package it.unicam.cs.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Getter;
 
 @Getter
@@ -14,7 +11,5 @@ public class Utente extends Account {
         super(email, nome, cognome);
     }
 
-    public Utente() {
-
-    }
+    public Utente() {}
 }

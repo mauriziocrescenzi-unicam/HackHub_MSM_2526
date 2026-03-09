@@ -53,6 +53,17 @@ public class MembroTeamController {
         return false;
     }
 
+    /**
+     * Restituisce il MembroTeam associato all'utente dato il suo id.
+     */
+    public MembroTeam getMembroByUtente(int idUtente) {
+        for (MembroTeam membro : membriTeam) {
+            if (membro.getIdUtente() == idUtente)
+                return membro;
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "MembroTeamController{" +
