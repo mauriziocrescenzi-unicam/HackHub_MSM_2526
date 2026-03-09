@@ -1,112 +1,75 @@
 package it.unicam.cs.model;
 
+import jakarta.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
-public class MembroTeam {
-    private int id;
-    private int idTeam;
-    private int idUtente;
-    private String ruolo;
-    private LocalDateTime dataAdesione;
-    private Team team;
+@Getter
+@Entity
+@Table(name = "membro_team")
+public class MembroTeam implements Serializable {
+
+    @EmbeddedId
+    private MembroTeamId id;
+
+    @ManyToOne
+    @MapsId("utenteId") // Collega questo campo al campo utenteId nella chiave composta
+    @JoinColumn(name = "utente_id")
     private Utente utente;
 
-    public MembroTeam(int id, int idTeam, int idUtente, String ruolo) {
-        this.id = id;
-        this.idTeam = idTeam;
-        this.idUtente = idUtente;
-        this.ruolo = ruolo;
-        this.dataAdesione = LocalDateTime.now();
-    }
+    @ManyToOne
+    @MapsId("teamId") // Collega questo campo al campo teamId nella chiave composta
+    @JoinColumn(name = "team_id")
+    private Team team;
 
-    public MembroTeam(int id, Team team, Utente utente, String ruolo) {
-        this.id = id;
-        this.team = team;
+    private String ruolo;
+    
+    @Column(name = "data_adesione")
+    private LocalDateTime dataAdesione;
+
+    public MembroTeam() {}
+
+    public MembroTeam(Utente utente, Team team, String ruolo) {
         this.utente = utente;
-        if (team != null) {
-            this.idTeam = team.getId();
-        }
-        if (utente != null) {
-            this.idUtente = utente.getId();
-        }
+        this.team = team;
         this.ruolo = ruolo;
         this.dataAdesione = LocalDateTime.now();
+        // Inizializza la chiave composta con gli ID delle entità
+        this.id = new MembroTeamId(utente.getId(), team.getId());
     }
 
     // Getters e Setters
-    public int getId() {
-        return id;
-    }
-
-    public int getIdTeam() {
-        return idTeam;
-    }
-
-    public int getIdUtente() {
-        return idUtente;
-    }
-
-    public String getRuolo() {
-        return ruolo;
-    }
-
-    public void setRuolo(String ruolo) {
-        this.ruolo = ruolo;
-    }
-
-    public LocalDateTime getDataAdesione() {
-        return dataAdesione;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
-        if (team != null) {
-            this.idTeam = team.getId();
-        }
-    }
-
-    public Utente getUtente() {
-        return utente;
-    }
-
-    public void setUtente(Utente utente) {
+    public MembroTeamId getId() { return id; }
+    public void setId(MembroTeamId id) { this.id = id; }
+    
+    public Utente getUtente() { return utente; }
+    public void setUtente(Utente utente) { 
         this.utente = utente;
-        if (utente != null) {
-            this.idUtente = utente.getId();
-        }
+        if (utente != null && id != null) id.setUtenteId(utente.getId());
+    }
+    
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { 
+        this.team = team;
+        if (team != null && id != null) id.setTeamId(team.getId());
     }
 
-    // Metodo dal diagramma
-    public void iscrivereTeam() {
-        // Logica per iscrizione team (può essere implementata in TeamController)
-    }
+    public String getRuolo() { return ruolo; }
+    public void setRuolo(String ruolo) { this.ruolo = ruolo; }
+
+    public LocalDateTime getDataAdesione() { return dataAdesione; }
+    public void setDataAdesione(LocalDateTime dataAdesione) { this.dataAdesione = dataAdesione; }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MembroTeam that = (MembroTeam) o;
-        return id == that.id;
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "MembroTeam{" +
-                "id=" + id +
-                ", idTeam=" + idTeam +
-                ", idUtente=" + idUtente +
-                ", ruolo='" + ruolo + '\'' +
-                ", dataAdesione=" + dataAdesione +
-                '}';
     }
 }

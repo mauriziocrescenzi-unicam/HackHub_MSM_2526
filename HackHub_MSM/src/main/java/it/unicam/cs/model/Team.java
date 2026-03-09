@@ -5,17 +5,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Getter
+@Entity
+
 public class Team {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
     private String nome;
     private String descrizione;
     private LocalDateTime dataCreazione;
     private int amministratore;
+    // da aggiungere sul Class Diagram di progetto iterazione1
     private List<MembroTeam> membri;
     private List<TeamHackathon> hackathonIscritti;
 
-    public Team(int id, String nome, String descrizione, int amministratore) {
-        this.id = id;
+    public Team(String nome, String descrizione, int amministratore) {
         this.nome = nome;
         this.descrizione = descrizione;
         this.dataCreazione = LocalDateTime.now();
@@ -35,45 +45,20 @@ public class Team {
         return false;
     }
 
-    public int getMembri() {
-        return membri.size();
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    public String getDescrizione() {
-        return descrizione;
     }
 
     public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
     }
 
-    public LocalDateTime getDataCreazione() {
-        return dataCreazione;
-    }
-
     public void setDataCreazione(LocalDateTime dataCreazione) {
         this.dataCreazione = dataCreazione;
     }
 
-    public int getAmministratore() {
-        return amministratore;
-    }
-
     public void setAmministratore(int amministratore) {
         this.amministratore = amministratore;
-    }
-
-    // Metodi aggiuntivi per gestione interna
-    public int getId() {
-        return id;
     }
 
     public List<MembroTeam> getMembriList() {
@@ -83,18 +68,6 @@ public class Team {
     public List<TeamHackathon> getHackathonIscritti() {
         return hackathonIscritti;
     }
-
-    /* public void aggiungiMembro(MembroTeam membro) {
-        if (membro != null && !this.membri.contains(membro)) {
-            this.membri.add(membro);
-        }
-    }
-
-    public void aggiungiHackathon(TeamHackathon teamHackathon) {
-        if (teamHackathon != null && !this.hackathonIscritti.contains(teamHackathon)) {
-            this.hackathonIscritti.add(teamHackathon);
-        }
-    } */
 
     @Override
     public boolean equals(Object o) {
