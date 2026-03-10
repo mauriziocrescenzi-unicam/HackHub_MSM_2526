@@ -45,7 +45,7 @@ public class InvitoController {
                 .stream().findFirst().orElse(null);
 
         if (hackathon == null ||
-                hackathonController.getStatoHackathon(hackathon) != StatoHackathon.IN_INISCRIZIONE)
+                hackathonController.getStatoHackathon(hackathon) != StatoHackathon.IN_ISCRIZIONE)
             throw new IllegalArgumentException("Hackathon non in stato di iscrizione.");
         if (!utenteController.isPresent(destinatario))
             throw new IllegalArgumentException("Utente non esistente.");
@@ -66,7 +66,7 @@ public class InvitoController {
         MembroTeam membro = membroTeamController.getMembro(utente);
         if (membro == null)
             throw new IllegalArgumentException("L'utente non è membro di nessun team.");
-        return teamController.getTeamById(membro.getIdTeam());
+        return teamController.getTeamById(membro.getTeam().getId());
     }
 
     /**
