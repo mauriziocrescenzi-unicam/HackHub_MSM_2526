@@ -10,14 +10,16 @@ import java.util.stream.Collectors;
  */
 public class InvitoController {
 
+    private static InvitoController instance;
+
     private final StandardPersistence<Invito> persistence;
     private final TeamController teamController;
     private final UtenteController utenteController;
     private final MembroTeamController membroTeamController;
     private final HackathonController hackathonController;
 
-    public InvitoController(TeamController teamController, UtenteController utenteController,
-                            HackathonController hackathonController) {
+    private InvitoController(TeamController teamController, UtenteController utenteController,
+                             HackathonController hackathonController) {
         this.persistence = new StandardPersistence<>(Invito.class);
         this.teamController = teamController;
         this.utenteController = utenteController;
@@ -25,6 +27,17 @@ public class InvitoController {
         this.hackathonController = hackathonController;
     }
 
+    public static InvitoController getInstance(TeamController teamController,
+                                               UtenteController utenteController,
+                                               HackathonController hackathonController) {
+        if (instance == null)
+            instance = new InvitoController(teamController, utenteController, hackathonController);
+        return instance;
+    }
+
+    /**
+     * Invia un invito da un mittente a un destinatario
+     */
     public Invito inviareInvito(Utente mittente, Utente destinatario) {
 
         Team teamMittente = getTeamByUtente(mittente);
@@ -40,23 +53,24 @@ public class InvitoController {
             throw new IllegalArgumentException("Utente occupato.");
         if (checkDuplicateInviti(mittente.getId().intValue(), destinatario.getId().intValue()))
             throw new IllegalArgumentException("Invito esistente.");
+
         Invito nuovoInvito = new Invito(mittente.getId().intValue(), destinatario.getId().intValue());
         persistence.create(nuovoInvito);
         return nuovoInvito;
     }
 
     /**
-     * Ricava il team di un utente tramite MembroTeamController.getMembroByUtente.
+     * Restituisce il team di cui l'utente è membro
      */
     private Team getTeamByUtente(Utente utente) {
-        MembroTeam membro = membroTeamController.getMembroByUtente(utente.getId().intValue());
+        MembroTeam membro = membroTeamController.getMembro(utente);
         if (membro == null)
             throw new IllegalArgumentException("L'utente non è membro di nessun team.");
         return teamController.getTeamById(membro.getIdTeam());
     }
 
     /**
-     * Restituisce tutti gli inviti IN_ATTESA ricevuti dall'utente dal DB.
+     * Restituisce la lista degli inviti in attesa per un dato utente destinatario
      */
     public List<Invito> getInviti(Utente utente) {
         if (utente == null) throw new IllegalArgumentException();
@@ -67,7 +81,7 @@ public class InvitoController {
     }
 
     /**
-     * Verifica se esiste già un invito IN_ATTESA tra mittente e destinatario sul DB.
+     *  Controlla se esiste già un invito in attesa tra il mittente e il destinatario.
      */
     public boolean checkDuplicateInviti(int idUtenteMittente, int idUtenteDestinatario) {
         return persistence.getAll().stream()
@@ -76,10 +90,12 @@ public class InvitoController {
                         && i.getStato() == StatoInvito.IN_ATTESA);
     }
 
+    /**
+     * Valuta la risposta dell'utente all'invito, accettando o rifiutando
+     */
     public void valutareInvito(Invito invito, Utente utenteRichiedente, boolean risposta) {
         if (invito == null || utenteRichiedente == null)
             throw new IllegalArgumentException();
-
         if (invito.getIdUtenteDestinatario() != utenteRichiedente.getId().intValue())
             throw new IllegalArgumentException("L'invito non è destinato a questo utente.");
 
@@ -88,7 +104,9 @@ public class InvitoController {
         else
             rifiutaInvito(invito);
     }
-
+    /**
+     *  Accetta l'invito, aggiunge l'utente al team e aggiorna il database.
+     */
     private void accettaInvito(Invito invito, Utente destinatario) {
         if (utenteController.isMembroTeam(destinatario))
             throw new IllegalArgumentException("Utente già membro di un team.");
@@ -110,6 +128,9 @@ public class InvitoController {
         persistence.update(invito);
     }
 
+    /**
+     *  Rifiuta l'invito e aggiorna il database.
+     */
     private void rifiutaInvito(Invito invito) {
         invito.rifiutare();
         persistence.update(invito);
