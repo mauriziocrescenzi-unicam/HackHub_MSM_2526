@@ -1,6 +1,8 @@
 package it.unicam.cs.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
