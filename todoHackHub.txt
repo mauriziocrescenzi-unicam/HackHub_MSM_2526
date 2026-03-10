@@ -2,22 +2,30 @@ Modificare la creazione del hackathon utilizzando il pattern build
 -class diagram
 -sequence
 
+Sequence CreaTeam --> manca da aggiungere l'utente al Team
+
 Controllo sequence iscirvere team prima parte sulla visualizzazione delle informazioni
 
 caso d'uso abbandono team, eliminare utente
 
-come gestire TeamHackathon
-
-controllo amministratore cosa fa
-
-controllo se tutti i metodi sono presenti nel class
 
 gestire ID account con le varie tabelle (ora ogni id è univoco)
 
-Rispetto al Class Diagram di progetto, dentro Team ho inserito anche equals, hashcode e toString; 
-getHackathonIscritti (solo se ci si può iscrivere contemporaneamente a più hackathon);
-getID (da vedere come gestiamo gli ID).
+Aggiornare Class Diagram di progetto iterazione 1 con eventuali attributi/metodi/altro aggiunti nel codice
 
 MembroTeamController --> getMembro() --> cambiare getAll().
 
 aggiungere scadenza sottomissioni su Hackathon.
+
+eliminare ruolo amministratore per Membro del Team un po' ovunque
+
+Divisione UC
+Maurizio
+-
+-
+Matteo
+-
+-
+Simone
+-
+-
