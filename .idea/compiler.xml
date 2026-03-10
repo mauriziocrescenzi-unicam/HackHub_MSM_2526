@@ -7,11 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="HackHub_MSM" />
+        <module name="HackHub_MSM (2)" />
+        <module name="HackHub_MSM (1)" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="HackHub_MSM (1)" target="21" />
-    </bytecodeTargetLevel>
   </component>
 </project>
