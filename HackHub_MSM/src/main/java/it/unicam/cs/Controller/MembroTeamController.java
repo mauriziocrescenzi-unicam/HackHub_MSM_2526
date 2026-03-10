@@ -92,6 +92,17 @@ public class MembroTeamController {
     }
 
     /**
+     * Restituisce il MembroTeam dell'utente
+     */
+    public MembroTeam getMembro(Utente utente) {
+        for (MembroTeam membro : membriTeam) {
+            if (membro.getIdUtente() == utente.getId())
+                return membro;
+        }
+        return null;
+    }
+
+    /**
      * Restituisce la lista dei membri di un team specifico.
      *
      * @param team Team di cui recuperare i membri
