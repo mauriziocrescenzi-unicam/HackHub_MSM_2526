@@ -147,7 +147,7 @@ public class MembroTeamController {
             return false;
         }
 
-        // Crea la relazione MembroTeam 
+        // Crea la relazione MembroTeam
         MembroTeam nuovoMembro = new MembroTeam(utente, team);
 
         // Persisti la relazione
