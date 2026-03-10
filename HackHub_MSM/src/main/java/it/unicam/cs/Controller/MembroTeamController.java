@@ -94,9 +94,9 @@ public class MembroTeamController {
     /**
      * Restituisce il MembroTeam dell'utente
      */
-    public MembroTeam getMembro(Utente utente) {
-        for (MembroTeam membro : membriTeam) {
-            if (membro.getIdUtente() == utente.getId())
+    public MembroTeam getMembro(Utente utente) {//TODO cambio get all
+        for (MembroTeam membro : membroTeamPersistence.getAll()) {
+            if (membro.getId().getUtenteId().equals(utente.getId()))
                 return membro;
         }
         return null;
@@ -140,8 +140,8 @@ public class MembroTeamController {
         }
 
         // Recupera le entità dal database
-        Utente utente = utentePersistence.getById(idUtente);
-        Team team = teamPersistence.getById(idTeam);
+        Utente utente = utentePersistence.findById(idUtente);
+        Team team = teamPersistence.findById(idTeam);
 
         if (utente == null || team == null) {
             return false;
@@ -151,7 +151,7 @@ public class MembroTeamController {
         MembroTeam nuovoMembro = new MembroTeam(utente, team, "MEMBRO");
 
         // Persisti la relazione
-        membroTeamPersistence.save(nuovoMembro);
+        membroTeamPersistence.create(nuovoMembro);
 
         return true;
     }

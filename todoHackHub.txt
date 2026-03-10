@@ -24,3 +24,5 @@ gestire ID account con le varie tabelle (ora ogni id è univoco)
 Rispetto al Class Diagram di progetto, dentro Team ho inserito anche equals, hashcode e toString; 
 getHackathonIscritti (solo se ci si può iscrivere contemporaneamente a più hackathon);
 getID (da vedere come gestiamo gli ID).
+
+MembroTeamController --> getMembro() --> cambiare getAll().
