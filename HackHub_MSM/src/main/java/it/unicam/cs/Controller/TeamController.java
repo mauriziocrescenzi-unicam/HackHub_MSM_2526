@@ -67,7 +67,7 @@ public class TeamController {
 
         // Crea e persisti il team
         Team nuovoTeam = new Team(nome, descrizione, idUtenteCreatore);
-        teamPersistence.save(nuovoTeam);
+        teamPersistence.create(nuovoTeam);
 
         // Aggiungi il creatore come primo membro (amministratore)
         membroTeamController.addMembro(idUtenteCreatore, nuovoTeam.getId());
@@ -132,12 +132,12 @@ public class TeamController {
         }
 
         // Verifica scadenza iscrizioni
-        if (hackathon.getDataScadenzaIscrizioni().isBefore(LocalDateTime.now())) {
+        if (hackathon.getScadenzaIscrizione().isBefore(LocalDateTime.now())) {
             return false;
         }
 
         // Verifica requisiti dimensione team
-        int maxMembri = hackathon.getDimensioneMassimaTeam();
+        int maxMembri = hackathon.getDimensioneMassimoTeam();
         if (membroTeamController.getMembri(team).size() > maxMembri) {
             return false;
         }
@@ -149,7 +149,7 @@ public class TeamController {
 
         // Crea e persisti l'associazione TeamHackathon
         TeamHackathon teamHackathon = new TeamHackathon(team, hackathon);
-        teamHackathonPersistence.save(teamHackathon);
+        teamHackathonPersistence.create(teamHackathon);
 
         return true;
     }
@@ -188,7 +188,7 @@ public class TeamController {
      * @return Il team trovato, o null se non esiste
      */
     public Team getTeamById(Long idTeam) {
-        return teamPersistence.getById(idTeam);
+        return teamPersistence.findById(idTeam);
     }
 
     /**
