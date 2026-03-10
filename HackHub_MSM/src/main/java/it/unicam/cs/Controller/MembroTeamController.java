@@ -147,8 +147,8 @@ public class MembroTeamController {
             return false;
         }
 
-        // Crea la relazione MembroTeam con ruolo default "MEMBRO"
-        MembroTeam nuovoMembro = new MembroTeam(utente, team, "MEMBRO");
+        // Crea la relazione MembroTeam 
+        MembroTeam nuovoMembro = new MembroTeam(utente, team);
 
         // Persisti la relazione
         membroTeamPersistence.create(nuovoMembro);

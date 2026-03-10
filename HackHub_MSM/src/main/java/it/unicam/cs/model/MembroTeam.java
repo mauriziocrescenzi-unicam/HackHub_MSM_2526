@@ -32,8 +32,6 @@ public class MembroTeam implements Serializable {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    private String ruolo;
-
     @Column(name = "data_adesione")
     private LocalDateTime dataAdesione;
 
@@ -48,12 +46,10 @@ public class MembroTeam implements Serializable {
      *
      * @param utente Utente da associare
      * @param team Team a cui associare l'utente
-     * @param ruolo Ruolo dell'utente nel team (es. "MEMBRO", "AMMINISTRATORE")
      */
-    public MembroTeam(Utente utente, Team team, String ruolo) {
+    public MembroTeam(Utente utente, Team team) {
         this.utente = utente;
         this.team = team;
-        this.ruolo = ruolo;
         this.dataAdesione = LocalDateTime.now();
         this.id = new MembroTeamId(utente.getId(), team.getId());
     }
@@ -82,10 +78,6 @@ public class MembroTeam implements Serializable {
         }
     }
 
-    public void setRuolo(String ruolo) {
-        this.ruolo = ruolo;
-    }
-
     public void setDataAdesione(LocalDateTime dataAdesione) {
         this.dataAdesione = dataAdesione;
     }
@@ -108,7 +100,6 @@ public class MembroTeam implements Serializable {
     @Override
     public String toString() {
         return "MembroTeam{" +
-                "ruolo='" + ruolo + '\'' +
                 ", dataAdesione=" + dataAdesione +
                 '}';
     }
