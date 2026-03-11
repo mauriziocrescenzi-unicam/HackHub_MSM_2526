@@ -19,13 +19,8 @@ aggiungere scadenza sottomissioni su Hackathon.
 
 eliminare ruolo amministratore per Membro del Team un po' ovunque
 
-Divisione UC
-Maurizio
--
--
-Matteo
--
--
-Simone
--
--
+Dubbi emersi dai flow of events del caso d'uso gestire segnalazione:
+- assegnare provvedimento potrebbe essere un nuovo caso d'uso collegabile con include a gestire segnalazione?
+
+Dubbi emersi dai flow of events del caso d'uso modificare hackathon:
+- modifica dell'hackathon possibile solo quando è ancora in stato "in iscrizione"?
