@@ -28,3 +28,13 @@ a. il punteggio inserito non è valido
    a.3. il caso d'uso termina
 
 per l'iterazione 3, aggiungere il caso d'uso "disiscrizione team"
+
+getHackathonDisponibili manca
+
+check caso d'uso aggiungere mentori parte di selezione mentore e metodo per prendere la lista dei mentori 
+idem segnalareTeam
+concatena i mentori o li cambia?
+
+hackathon relativi all'organizzatore bisogna farlo vedere nel sequence
+
+isIscrittoHackathon se torna un Hackathon forse è piu comodo
