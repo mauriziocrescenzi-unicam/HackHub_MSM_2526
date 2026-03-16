@@ -1,5 +1,4 @@
 Modificare la creazione del hackathon utilizzando il pattern build
--class diagram
 -sequence
 
 Sequence CreaTeam --> manca da aggiungere l'utente al Team
@@ -19,6 +18,24 @@ aggiungere scadenza sottomissioni su Hackathon.
 
 eliminare ruolo amministratore per Membro del Team un po' ovunque
 
+
+
+per l'iterazione 3, aggiungere il caso d'uso "disiscrizione team"
+
+getHackathonDisponibili manca
+
+check caso d'uso aggiungere mentori parte di selezione mentore e metodo per prendere la lista dei mentori 
+idem segnalareTeam
+
+hackathon relativi all'organizzatore bisogna farlo vedere nel sequence
+
+isIscrittoHackathon se torna un Hackathon forse è piu comodo
+
+
+
+
+
+------------tutor---------------
 - l'hackathon termina quando viene proclamato un vincitore
 - chiedere alla tutor se quando si riporta un caso d'uso nel flusso del flow of event si deve scrivere che il caso d'uso termina oppure no
 es.
@@ -27,14 +44,7 @@ a. il punteggio inserito non è valido
    a.2. SYSTEM riporta il caso d'uso all'inserimento della valutazione
    a.3. il caso d'uso termina
 
-per l'iterazione 3, aggiungere il caso d'uso "disiscrizione team"
+quando ho una lista di team l'utente ne seleziona per i valori basta la boundary o devo andare fino al team? come use case segnalare team
 
-getHackathonDisponibili manca
+per set multipli tipo hackathon (nome, date, descrizione …) posso farne solo uno con setInfo
 
-check caso d'uso aggiungere mentori parte di selezione mentore e metodo per prendere la lista dei mentori 
-idem segnalareTeam
-concatena i mentori o li cambia?
-
-hackathon relativi all'organizzatore bisogna farlo vedere nel sequence
-
-isIscrittoHackathon se torna un Hackathon forse è piu comodo
