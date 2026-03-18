@@ -31,7 +31,13 @@ hackathon relativi all'organizzatore bisogna farlo vedere nel sequence
 
 isIscrittoHackathon se torna un Hackathon forse è piu comodo
 
+CAMBIARE IN TUTTI I SEQUENCE IL NOME DA CONTROLLER A SERVICE
+rimuovere i tipi di ritorno dai costruttori
 
+
+sottomissioni 4 matteo
+segnalazione 2 +organizzatore 2 simone
+team 2 + uniformare vpp mauri
 
 
 
