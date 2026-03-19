@@ -37,6 +37,11 @@ rimuovere i tipi di ritorno dai costruttori
 
 sottomissioni 4 matteo
 segnalazione 2 +organizzatore 2 simone
+        - modifica hackathon il setInfo lo mettiamo nel service
+        - invece di aggiungereMentori aggiorna forse è più chiaro
+        - getTeam nel service sbagliato forse nel hackathon
+        - verificaSegnalazione ha più campi
+        -gestireSegnalazione come lo dovrei implementare
 team 2 + uniformare vpp mauri
 
 
