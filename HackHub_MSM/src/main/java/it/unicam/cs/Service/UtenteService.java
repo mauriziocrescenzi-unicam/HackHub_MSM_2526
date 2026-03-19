@@ -12,14 +12,14 @@ public class UtenteService {
     private final StandardPersistence<Utente> persistence;
     private final MembroTeamService membroTeamService;
 
-    private UtenteService(MembroTeamService membroTeamService) {
+    private UtenteService() {
         this.persistence = new StandardPersistence<>(Utente.class);
-        this.membroTeamService = membroTeamService;
+        this.membroTeamService = MembroTeamService.getInstance();
     }
 
-    public static UtenteService getInstance(MembroTeamService membroTeamService) {
+    public static UtenteService getInstance() {
         if (instance == null)
-            instance = new UtenteService(membroTeamService);
+            instance = new UtenteService();
         return instance;
     }
 

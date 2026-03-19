@@ -18,20 +18,17 @@ public class InvitoService {
     private final MembroTeamService membroTeamService;
     private final HackathonService hackathonService;
 
-    private InvitoService(TeamService teamService, UtenteService utenteService,
-                          HackathonService hackathonService) {
-        this.persistence = new StandardPersistence<>(Invito.class);
-        this.teamService = teamService;
-        this.utenteService = utenteService;
-        this.membroTeamService = teamService.getMembroTeamController();
-        this.hackathonService = hackathonService;
+    private InvitoService() {
+        persistence = new StandardPersistence<>(Invito.class);
+        teamService = TeamService.getInstance();
+        utenteService = UtenteService.getInstance();
+        membroTeamService = MembroTeamService.getInstance();
+        hackathonService = HackathonService.getInstance();
     }
 
-    public static InvitoService getInstance(TeamService teamService,
-                                            UtenteService utenteService,
-                                            HackathonService hackathonService) {
+    public static InvitoService getInstance() {
         if (instance == null)
-            instance = new InvitoService(teamService, utenteService, hackathonService);
+            instance = new InvitoService();
         return instance;
     }
 
