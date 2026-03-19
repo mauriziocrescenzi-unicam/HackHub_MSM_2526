@@ -48,4 +48,8 @@ public class HackathonService {
     public Hackathon getHackathonByID(long idHackathon) {
         return persistence.findById(idHackathon);
     }
+
+    public StatoHackathon getStatoHackathon(Hackathon hackathon) {
+        return hackathon.getStato();
+    }
 }
