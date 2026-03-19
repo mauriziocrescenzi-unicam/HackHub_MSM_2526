@@ -13,7 +13,7 @@ import java.util.random.RandomGenerator;
 public class Hackathon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long ID;
+    private long id;
     private String nome;
     private String regolamento;
     private LocalDateTime scadenzaIscrizione;
@@ -39,7 +39,7 @@ public class Hackathon {
     private List<Mentore> mentori;
 
     public Hackathon() {
-        ID= RandomGenerator.getDefault().nextInt();
+        id = RandomGenerator.getDefault().nextInt();
     }
 
     public void setNome( String nome) {

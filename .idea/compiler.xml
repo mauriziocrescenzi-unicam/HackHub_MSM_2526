@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="HackHub_MSM (2)" />
         <module name="HackHub_MSM (1)" />
+        <module name="HackHub_MSM" />
       </profile>
     </annotationProcessing>
   </component>
