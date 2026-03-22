@@ -20,6 +20,7 @@ public class MembroTeamService {
     private final StandardPersistence<MembroTeam> membroTeamPersistence;
     private final StandardPersistence<Utente> utentePersistence;
     private final StandardPersistence<Team> teamPersistence;
+    private final SottomissioneService sottomissioneService;
 
     /**
      * Costruttore privato per il pattern Singleton.
@@ -29,6 +30,7 @@ public class MembroTeamService {
         this.membroTeamPersistence = new StandardPersistence<>(MembroTeam.class);
         this.utentePersistence = new StandardPersistence<>(Utente.class);
         this.teamPersistence = new StandardPersistence<>(Team.class);
+        this.sottomissioneService = SottomissioneService.getInstance();
     }
 
     /**
@@ -186,5 +188,19 @@ public class MembroTeamService {
      */
     public int countMembriTotali() {
         return getAllMembri().size();
+    }
+
+    /**
+     * Invia una nuova sottomissione per il team in un hackathon.
+     */
+    public boolean inviaSottomissione(String nome, String link, Long idTeam, Long idHackathon) {
+        return sottomissioneService.inviaSottomissione(nome, link, idTeam, idHackathon);
+    }
+
+    /**
+     * Aggiorna la sottomissione esistente per il team in un hackathon.
+     */
+    public boolean aggiornaSottomissione(String nome, String link, Long idTeam, Long idHackathon) {
+        return sottomissioneService.aggiornaSottomissione(nome, link, idTeam, idHackathon);
     }
 }

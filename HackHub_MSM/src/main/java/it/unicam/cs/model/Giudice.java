@@ -1,14 +1,14 @@
 package it.unicam.cs.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Getter;
 
+/**
+ * Entità che rappresenta un Giudice nel sistema HackHub.
+ */
 @Getter
 @Entity
-public class Giudice extends Account {
+public class Giudice extends MembroDelloStaff {
 
     public Giudice() {
         super();

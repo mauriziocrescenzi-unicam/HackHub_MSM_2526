@@ -21,8 +21,8 @@ public class HackathonService {
         this.builder = builder;
     }
     public boolean creaHackathon(String nome, String regolamento, LocalDateTime scadenzaIscrizione, LocalDateTime dataInizio,
-                              LocalDateTime dataFine, String luogo, double premioInDenaro, int dimensioneMassimoTeam,
-                              StatoHackathon stato, Organizzatore organizzatore, Giudice giudice, List<Mentore> mentori){
+                                 LocalDateTime dataFine, String luogo, double premioInDenaro, int dimensioneMassimoTeam,
+                                 StatoHackathon stato, Organizzatore organizzatore, Giudice giudice, List<Mentore> mentori){
         if(!verificaRequisiti(scadenzaIscrizione,dataInizio,dataFine)) return false;
         builder.reset();
         builder.setInfo(nome,regolamento,scadenzaIscrizione,dataInizio,dataFine,luogo,premioInDenaro,dimensioneMassimoTeam,stato,organizzatore);
