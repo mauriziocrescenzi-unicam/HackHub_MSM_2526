@@ -2,6 +2,7 @@ package it.unicam.cs.Service;
 
 import it.unicam.cs.model.MembroTeam;
 import it.unicam.cs.model.Team;
+import it.unicam.cs.model.TeamHackathon;
 import it.unicam.cs.model.Utente;
 import it.unicam.cs.persistence.StandardPersistence;
 import java.util.ArrayList;
@@ -189,6 +190,54 @@ public class MembroTeamService {
     public int countMembriTotali() {
         return getAllMembri().size();
     }
+
+    /**
+     * Gestisce l'abbandono di un membro da un team.
+     * Verifica che il membro esista nel team prima di procedere con la rimozione.
+     * Questo metodo è progettato per essere chiamato quando un membro decide
+     * volontariamente di lasciare il team.
+     *
+     * @param idMembro ID del membro che abbandona il team
+     * @param idTeam ID del team da abbandonare
+     * @return true se l'abbandono è avvenuto con successo, false se il membro
+     *         non è stato trovato nel team o si è verificato un errore
+     */
+    public boolean abbandonaTeam(Long idMembro, Long idTeam) {
+        if (idMembro == null || idTeam == null) {
+            return false;
+        }
+
+        // Trova il membro nel team
+        MembroTeam membroDaRimuovere = membroTeamPersistence.getAll().stream()
+                .filter(m -> m.getUtente().getId().equals(idMembro) &&
+                        m.getTeam().getId().equals(idTeam))
+                .findFirst()
+                .orElse(null);
+
+        if (membroDaRimuovere == null) {
+            return false; // Membro non trovato nel team
+        }
+
+        return rimuoviMembro(membroDaRimuovere);
+    }
+
+    /**
+     * Elimina un membro specifico da un team.
+     * Metodo utilizzato per la rimozione forzata di un membro
+     * Segue la stessa logica di abbandonaTeam ma con semantica diversa.
+     *
+     * @param idMembro ID del membro da eliminare
+     * @param idTeam ID del team da cui rimuovere il membro
+     * @return true se l'eliminazione è avvenuta con successo, false altrimenti
+     */
+    public boolean eliminaMembro(Long idMembro, Long idTeam) {
+        // Riutilizza la logica di abbandonaTeam
+        return abbandonaTeam(idMembro, idTeam);
+    }
+
+    //--------------------------------------------------------------
+    // Sottomissioni
+    //--------------------------------------------------------------
 
     /**
      * Invia una nuova sottomissione per il team in un hackathon.

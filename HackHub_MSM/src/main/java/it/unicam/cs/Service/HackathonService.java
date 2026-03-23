@@ -52,4 +52,44 @@ public class HackathonService {
     public StatoHackathon getStatoHackathon(Hackathon hackathon) {
         return hackathon.getStato();
     }
+
+    /**
+     * Verifica se almeno un hackathon nella lista si trova in uno degli stati specificati.
+     * <p>
+     * Questo metodo controlla se esiste almeno un hackathon non null nella lista fornita
+     * il cui stato corrente corrisponde a uno degli stati passati come parametri.
+     * È utilizzato per validare le operazioni consentite solo in determinati stati
+     * del ciclo di vita dell'hackathon (es. iscrizioni possibili solo se "IN_ISCRIZIONE").
+     * </p>
+     *
+     * @param listaHackathon Lista di hackathon da verificare. Può contenere valori null
+     *                       che verranno ignorati durante la verifica.
+     * @param stati Array di stati ammessi da verificare (es. {@link StatoHackathon#IN_ISCRIZIONE},
+     *              {@link StatoHackathon#CONCLUSO}). Almeno uno di questi stati deve essere
+     *              presente per ottenere un risultato positivo.
+     * @return {@code true} se almeno un hackathon nella lista è in uno degli stati specificati,
+     *         {@code false} se:
+     *         <ul>
+     *           <li>La lista è null o vuota</li>
+     *           <li>L'array di stati è null o vuoto</li>
+     *           <li>Nessun hackathon nella lista corrisponde agli stati specificati</li>
+     *         </ul>
+     */
+    public boolean checkStato(List<Hackathon> listaHackathon, StatoHackathon... stati) {
+        if (listaHackathon == null || listaHackathon.isEmpty() || stati == null || stati.length == 0) {
+            return false;
+        }
+
+        for (Hackathon h : listaHackathon) {
+            if (h == null) continue;
+
+            StatoHackathon statoAttuale = h.getStato();
+            for (StatoHackathon stato : stati) {
+                if (statoAttuale == stato) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
