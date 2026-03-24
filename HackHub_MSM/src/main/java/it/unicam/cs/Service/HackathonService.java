@@ -5,6 +5,8 @@ import it.unicam.cs.persistence.StandardPersistence;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class HackathonService {
     private static HackathonService service;
@@ -16,7 +18,7 @@ public class HackathonService {
         if(service == null) service = new HackathonService(new HackathonBuilder());
         return service;
     }
-    HackathonService(Builder builder) {
+    private HackathonService(Builder builder) {
         this.persistence = new StandardPersistence<>(Hackathon.class);
         this.builder = builder;
     }
@@ -80,16 +82,9 @@ public class HackathonService {
             return false;
         }
 
-        for (Hackathon h : listaHackathon) {
-            if (h == null) continue;
-
-            StatoHackathon statoAttuale = h.getStato();
-            for (StatoHackathon stato : stati) {
-                if (statoAttuale == stato) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        Set<StatoHackathon> statiSet = Set.of(stati);
+        return listaHackathon.stream()
+                .filter(Objects::nonNull)
+                .anyMatch(h -> statiSet.contains(h.getStato()));
     }
 }
