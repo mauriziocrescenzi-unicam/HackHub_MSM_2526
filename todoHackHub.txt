@@ -1,49 +1,18 @@
 Modificare la creazione del hackathon utilizzando il pattern build
 -sequence
 
-Sequence CreaTeam --> manca da aggiungere l'utente al Team
-
 Controllo sequence iscirvere team prima parte sulla visualizzazione delle informazioni
-
-caso d'uso abbandono team, eliminare utente
-
 
 gestire ID account con le varie tabelle (ora ogni id è univoco)
 
-Aggiornare Class Diagram di progetto iterazione 1 con eventuali attributi/metodi/altro aggiunti nel codice
-
 MembroTeamController --> getMembro() --> cambiare getAll().
 
-aggiungere scadenza sottomissioni su Hackathon.
 
-eliminare ruolo amministratore per Membro del Team un po' ovunque
-
-
-
-per l'iterazione 3, aggiungere il caso d'uso "disiscrizione team"
-
-getHackathonDisponibili manca
-
-check caso d'uso aggiungere mentori parte di selezione mentore e metodo per prendere la lista dei mentori 
-idem segnalareTeam
-
-hackathon relativi all'organizzatore bisogna farlo vedere nel sequence
-
-isIscrittoHackathon se torna un Hackathon forse è piu comodo
-
-CAMBIARE IN TUTTI I SEQUENCE IL NOME DA CONTROLLER A SERVICE
 rimuovere i tipi di ritorno dai costruttori
 
-
-sottomissioni 4 matteo
-segnalazione 2 +organizzatore 2 simone
-        - modifica hackathon il setInfo lo mettiamo nel service
-        - invece di aggiungereMentori aggiorna forse è più chiaro
-        - getTeam nel service sbagliato forse nel hackathon
-        - verificaSegnalazione ha più campi
-        -gestireSegnalazione come lo dovrei implementare
-team 2 + uniformare vpp mauri
-
+aggiungere setInfo
+Uniformare nome Membro dello staff (codice e Use Case)e MembroStaff (su class diagram)
+Modificare javaDoc, soprattutto HackathonService.checkStato
 
 
 ------------tutor---------------
