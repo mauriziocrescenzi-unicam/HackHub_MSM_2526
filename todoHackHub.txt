@@ -28,3 +28,32 @@ quando ho una lista di team l'utente ne seleziona per i valori basta la boundary
 
 per set multipli tipo hackathon (nome, date, descrizione …) posso farne solo uno con setInfo
 
+bozza mail:
+
+Buongiorno,
+
+Siamo studenti del corso di informatica e ICD.
+Stiamo lavorando al progetto di Ingegneria del Software e, sapendo che il servizio di tutorato è terminato, le scriviamo per sapere se può gentilmente chiarirci alcuni dubbi in merito al progetto; in particolare:
+
+1. Terminazione del flusso nei flow of events
+Quando in un'estensione si riporta il sistema a un passo precedente del flusso principale (es. "SYSTEM riporta il caso d'uso all'inserimento della valutazione"), è corretto aggiungere il passo "il caso d'uso termina" al termine dell'estensione, oppure si considera implicita la ripresa del flusso principale dal passo indicato?
+
+Esempio concreto:
+> a. il punteggio inserito non è valido
+>    a.1. SYSTEM notifica che il punteggio deve essere un valore compreso tra 0 e 10
+>    a.2. SYSTEM riporta il caso d'uso all'inserimento della valutazione
+>    a.3. il caso d'uso termina ← questo passo va inserito o omesso?
+
+2. Granularità nella selezione da una lista
+Quando un attore deve selezionare un elemento da una lista (es. selezione di un team da una lista di team), per ottenerne le informazioni del team (es. nome, membri, …) è sufficiente modellare l'interazione a livello di Boundary, quindi un messaggio dalla Boundary all'attore che restituisce le informazioni, oppure è necessario mandare dei messaggi (getter) verso l'istanza specifica (es. istanza del team selezionato), tramite Service, per ottenere le informazioni e restituirle all'utente?
+
+3. Setter multipli per entità con molti attributi
+Per entità con numerosi attributi (es. Hackathon con nome, date, descrizione, ecc.), è accettabile definire un unico metodo `setInfo(...)` che raggruppi tutti i parametri, oppure è preferibile modellare un setter distinto per ciascun attributo (es. setNome, SetData, ...)?
+
+La ringraziamo anticipatamente per la disponibilità.
+
+Cordiali saluti,
+Maurizio Crescenzi,
+Simone Pigliapoco,
+Matteo Pretini.
+
