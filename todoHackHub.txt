@@ -16,17 +16,7 @@ Modificare javaDoc, soprattutto HackathonService.checkStato
 
 
 ------------tutor---------------
-- l'hackathon termina quando viene proclamato un vincitore
-- chiedere alla tutor se quando si riporta un caso d'uso nel flusso del flow of event si deve scrivere che il caso d'uso termina oppure no
-es.
-a. il punteggio inserito non è valido
-   a.1. SYSTEM notifica che il punteggio deve essere un valore compreso tra 0 e 10
-   a.2. SYSTEM riporta il caso d'uso all'inserimento della valutazione
-   a.3. il caso d'uso termina
-
-quando ho una lista di team l'utente ne seleziona per i valori basta la boundary o devo andare fino al team? come use case segnalare team
-
-per set multipli tipo hackathon (nome, date, descrizione …) posso farne solo uno con setInfo
+chiedere come gestire i casi d'uso con include o extend e nel caso di include come riportarlo sui sequence (proclama vincitore --include--> erogazione premio)
 
 bozza mail:
 
