@@ -1,7 +1,12 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.HackathonRepository;
+import it.unicam.cs.repository.TeamHackathonRepository;
+import it.unicam.cs.repository.TeamRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,39 +18,24 @@ import java.util.stream.Collectors;
  * Contiene tutta la logica di business per operazioni sui team.
  *
  */
+@Service
+@Transactional
 public class TeamService {
 
-    private static TeamService service;
-    private final StandardPersistence<Team> teamPersistence;
-    private final StandardPersistence<TeamHackathon> teamHackathonPersistence;
-    private final StandardPersistence<Hackathon> hackathonPersistence;
+    private final TeamRepository repository;
+    private final HackathonRepository hackathonRepository;
+    private final TeamHackathonRepository teamHackathonRepository;
     private final MembroTeamService membroTeamService;
     private final HackathonService hackathonService;
 
-    /**
-     * Costruttore privato per il pattern Singleton.
-     * Inizializza i layer di persistenza per le entità gestite.
-     */
-    private TeamService() {
-        this.teamPersistence = new StandardPersistence<>(Team.class);
-        this.teamHackathonPersistence = new StandardPersistence<>(TeamHackathon.class);
-        this.membroTeamService = MembroTeamService.getInstance();
-        this.hackathonService = HackathonService.getInstance();
-        this.hackathonPersistence = new StandardPersistence<>(Hackathon.class);
+    public TeamService(TeamRepository repository, HackathonRepository hackathonRepository, TeamHackathonRepository teamHackathonRepository, MembroTeamService membroTeamService, HackathonService hackathonService) {
+        this.repository = repository;
+        this.hackathonRepository = hackathonRepository;
+        this.teamHackathonRepository = teamHackathonRepository;
+        this.membroTeamService = membroTeamService;
+        this.hackathonService = hackathonService;
     }
 
-    /**
-     * Restituisce l'istanza Singleton del TeamController.
-     * Crea una nuova istanza se non esiste ancora.
-     *
-     * @return Istanza Singleton di TeamController
-     */
-    public static TeamService getInstance() {
-        if (service == null) {
-            service = new TeamService();
-        }
-        return service;
-    }
 
     /**
      * Crea un nuovo team nel sistema.
@@ -69,7 +59,7 @@ public class TeamService {
 
         // Crea e persisti il team
         Team nuovoTeam = new Team(nome, descrizione, idUtenteCreatore);
-        teamPersistence.create(nuovoTeam);
+        repository.save(nuovoTeam);
 
         // Aggiungi il creatore come primo membro (amministratore)
         membroTeamService.addMembro(idUtenteCreatore, nuovoTeam.getId());
@@ -151,7 +141,7 @@ public class TeamService {
 
         // Crea e persisti l'associazione TeamHackathon
         TeamHackathon teamHackathon = new TeamHackathon(team, hackathon);
-        teamHackathonPersistence.create(teamHackathon);
+        teamHackathonRepository.save(teamHackathon);
 
         return true;
     }
@@ -180,7 +170,7 @@ public class TeamService {
      * @return Lista di tutti i team
      */
     public List<Team> getListaTeam() {
-        return teamPersistence.getAll();
+        return repository.findAll();
     }
 
     /**
@@ -190,7 +180,7 @@ public class TeamService {
      * @return Il team trovato, o null se non esiste
      */
     public Team getTeamById(Long idTeam) {
-        return teamPersistence.findById(idTeam);
+        return repository.findById(idTeam).orElse(null);
     }
 
     /**
@@ -200,7 +190,7 @@ public class TeamService {
      */
     public List<Team> getTeam(Hackathon hackathon) {
         if (hackathon == null) throw new NullPointerException("Hackathon non valido");
-        return teamHackathonPersistence.getAll().stream()
+        return teamHackathonRepository.findAll().stream()
                 .filter(th -> th.getHackathon().equals(hackathon))
                 .map(TeamHackathon::getTeam)
                 .toList();
@@ -209,7 +199,7 @@ public class TeamService {
     public boolean checkIscrizioneHackathon(Long idTeam, long idHackathon) {
         if(idHackathon <0) throw new NullPointerException("Hackathon non valido");
         if(idTeam <0) throw new NullPointerException("Team non valido");
-        return teamHackathonPersistence.getAll().stream()
+        return teamHackathonRepository.findAll().stream()
                 .anyMatch(th -> th.getTeam().getId().equals(idTeam)
                         && th.getHackathon().getId() ==idHackathon);
 
@@ -218,7 +208,7 @@ public class TeamService {
         if(idTeam < 0) throw new IllegalArgumentException("Team non valido");
         if(idHackathon < 0) throw new IllegalArgumentException("Hackathon non valido");
 
-        TeamHackathon teamHackathon = teamHackathonPersistence.getAll().stream()
+        TeamHackathon teamHackathon = teamHackathonRepository.findAll().stream()
                 .filter(th -> th.getTeam().getId().equals(idTeam)
                         && th.getHackathon().getId() == idHackathon)
                 .findFirst()
@@ -228,7 +218,7 @@ public class TeamService {
             return false; // Iscrizione non trovata
         }
 
-        teamHackathonPersistence.delete(teamHackathon);
+        teamHackathonRepository.delete(teamHackathon);
         return true;
     }
 
@@ -252,7 +242,7 @@ public class TeamService {
         }
 
         // Verifica che il team esista
-        Team team = teamPersistence.findById(idTeam);
+        Team team = repository.findById(idTeam).orElse(null);
         if (team == null) {
             return false; // Team non trovato
         }
@@ -264,15 +254,15 @@ public class TeamService {
         }
 
         // Rimuovi il team da tutti gli hackathon associati
-        List<TeamHackathon> associazioni = teamHackathonPersistence.getAll();
+        List<TeamHackathon> associazioni = teamHackathonRepository.findAll();
         for (TeamHackathon th : associazioni) {
             if (th.getTeam().getId().equals(idTeam)) {
-                teamHackathonPersistence.delete(th);
+                teamHackathonRepository.delete(th);
             }
         }
 
         // Elimina il team
-        teamPersistence.delete(team);
+        repository.deleteById(idTeam);
         return true;
     }
 }

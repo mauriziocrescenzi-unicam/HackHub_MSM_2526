@@ -1,36 +1,35 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.InvitoRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Gestisce la logica di invio, accettazione e rifiuto degli inviti a partecipare a un team.
  */
+@Service
+@Transactional
 public class InvitoService {
 
-    private static InvitoService instance;
-
-    private final StandardPersistence<Invito> persistence;
+    private final InvitoRepository repository;
     private final TeamService teamService;
     private final UtenteService utenteService;
     private final MembroTeamService membroTeamService;
     private final HackathonService hackathonService;
 
-    private InvitoService() {
-        persistence = new StandardPersistence<>(Invito.class);
-        teamService = TeamService.getInstance();
-        utenteService = UtenteService.getInstance();
-        membroTeamService = MembroTeamService.getInstance();
-        hackathonService = HackathonService.getInstance();
+    public InvitoService(InvitoRepository repository, TeamService teamService, UtenteService utenteService,
+                          MembroTeamService membroTeamService, HackathonService hackathonService) {
+        this.repository = repository;
+        this.teamService = teamService;
+        this.utenteService = utenteService;
+        this.membroTeamService = membroTeamService;
+        this.hackathonService = hackathonService;
     }
 
-    public static InvitoService getInstance() {
-        if (instance == null)
-            instance = new InvitoService();
-        return instance;
-    }
 
     /**
      * Invia un invito da un mittente a un destinatario
@@ -52,7 +51,7 @@ public class InvitoService {
             throw new IllegalArgumentException("Invito esistente.");
 
         Invito nuovoInvito = new Invito(mittente.getId().intValue(), destinatario.getId().intValue());
-        persistence.create(nuovoInvito);
+        repository.save(nuovoInvito);
         return nuovoInvito;
     }
 
@@ -71,7 +70,7 @@ public class InvitoService {
      */
     public List<Invito> getInviti(Utente utente) {
         if (utente == null) throw new IllegalArgumentException();
-        return persistence.getAll().stream()
+        return repository.findAll().stream()
                 .filter(i -> i.getIdUtenteDestinatario() == utente.getId().intValue()
                         && i.getStato() == StatoInvito.IN_ATTESA)
                 .collect(Collectors.toList());
@@ -81,7 +80,7 @@ public class InvitoService {
      *  Controlla se esiste già un invito in attesa tra il mittente e il destinatario.
      */
     public boolean checkDuplicateInviti(int idUtenteMittente, int idUtenteDestinatario) {
-        return persistence.getAll().stream()
+        return repository.findAll().stream()
                 .anyMatch(i -> i.getIdUtenteMittente() == idUtenteMittente
                         && i.getIdUtenteDestinatario() == idUtenteDestinatario
                         && i.getStato() == StatoInvito.IN_ATTESA);
@@ -122,7 +121,7 @@ public class InvitoService {
 
         membroTeamService.addMembro(destinatario.getId(), teamMittente.getId());
         invito.accettare();
-        persistence.update(invito);
+        repository.save(invito);
     }
 
     /**
@@ -130,6 +129,6 @@ public class InvitoService {
      */
     private void rifiutaInvito(Invito invito) {
         invito.rifiutare();
-        persistence.update(invito);
+        repository.save(invito);
     }
 }

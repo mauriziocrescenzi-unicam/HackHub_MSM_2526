@@ -1,7 +1,9 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.SottomissioneRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,24 +14,20 @@ import java.util.List;
  * Implementa il pattern Singleton.
  * Gestisce i casi d'uso: inviare, aggiornare, valutare e accedere alle sottomissioni.
  */
+@Service
+@Transactional
 public class SottomissioneService {
 
-    private static SottomissioneService instance;
-    private final StandardPersistence<Sottomissione> persistence;
+    private final SottomissioneRepository repository;
     private final HackathonService hackathonService;
     private final TeamService teamService;
 
-    private SottomissioneService() {
-        this.persistence = new StandardPersistence<>(Sottomissione.class);
-        this.hackathonService = HackathonService.getInstance();
-        this.teamService = TeamService.getInstance();
+    public SottomissioneService(SottomissioneRepository repository, HackathonService hackathonService, TeamService teamService) {
+        this.repository = repository;
+        this.hackathonService = hackathonService;
+        this.teamService = teamService;
     }
 
-    public static SottomissioneService getInstance() {
-        if (instance == null)
-            instance = new SottomissioneService();
-        return instance;
-    }
 
     /**
      * Invia una nuova sottomissione per un team in un hackathon.
@@ -56,7 +54,7 @@ public class SottomissioneService {
         if (!verificaSottomissione(nome, link)) return false;
         //  Crea la sottomissione
         Sottomissione nuova = new Sottomissione(nome, link, idTeam, idHackathon);
-        persistence.create(nuova);
+        repository.save(nuova);
         return true;
     }
 
@@ -87,7 +85,7 @@ public class SottomissioneService {
         Sottomissione esistente = getSottomissioneByTeamHackathon(idTeam, idHackathon);
         if (esistente == null) return false;
         esistente.setInfo(nome, link);
-        persistence.update(esistente);
+        repository.save(esistente);
         return true;
     }
 
@@ -106,7 +104,7 @@ public class SottomissioneService {
         if (!checkValutazione(voto, giudizio)) return false;
         //  Imposta la valutazione
         sottomissione.setValutazione(voto, giudizio);
-        persistence.update(sottomissione);
+        repository.save(sottomissione);
         return true;
     }
 
@@ -121,7 +119,7 @@ public class SottomissioneService {
      */
     public List<Sottomissione> getSottomissioni(Hackathon hackathon) {
         if (hackathon == null) throw new IllegalArgumentException("Hackathon non valido.");
-        List<Sottomissione> tutte = persistence.getAll();
+        List<Sottomissione> tutte = repository.findAll();
         List<Sottomissione> risultato = new ArrayList<>();
         for (Sottomissione s : tutte) {
             if (s.getIdHackathon().equals(hackathon.getId())) {
@@ -141,7 +139,7 @@ public class SottomissioneService {
      * @return true se esiste già una sottomissione, false altrimenti
      */
     public boolean isPresente(Long idTeam, Long idHackathon) {
-        List<Sottomissione> tutte = persistence.getAll();
+        List<Sottomissione> tutte = repository.findAll();
         for (Sottomissione s : tutte) {
             if (s.getIdTeam().equals(idTeam) && s.getIdHackathon().equals(idHackathon)) {
                 return true;
@@ -200,7 +198,7 @@ public class SottomissioneService {
      * @return La sottomissione trovata, o null se non esiste
      */
     public Sottomissione getSottomissioneByTeamHackathon(Long idTeam, Long idHackathon) {
-        List<Sottomissione> tutte = persistence.getAll();
+        List<Sottomissione> tutte = repository.findAll();
         for (Sottomissione s : tutte) {
             if (s.getIdTeam().equals(idTeam) && s.getIdHackathon().equals(idHackathon)) {
                 return s;
@@ -216,6 +214,6 @@ public class SottomissioneService {
      */
     public Sottomissione getSottomissioneById(Long id) {
         if (id == null) throw new IllegalArgumentException("Id non valido.");
-        return persistence.findById(id);
+        return repository.findById(id).orElse(null);
     }
 }

@@ -1,7 +1,9 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.GiudiceRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,32 +13,29 @@ import java.util.List;
  * Implementa il pattern Singleton.
  * Gestisce il caso d'uso: valutare sottomissioni.
  */
+@Service
+@Transactional
 public class GiudiceService {
 
     private static GiudiceService service;
 
-    private final StandardPersistence<Giudice> persistence;
+    private final GiudiceRepository repository;
     private final MembroDelloStaffService membroStaffService;
     private final SottomissioneService sottomissioneService;
 
-    private GiudiceService() {
-        this.persistence = new StandardPersistence<>(Giudice.class);
-        this.membroStaffService = MembroDelloStaffService.getInstance();
-        this.sottomissioneService = SottomissioneService.getInstance();
-    }
-
-    public static GiudiceService getInstance() {
-        if (service == null) service = new GiudiceService();
-        return service;
+    public GiudiceService(GiudiceRepository repository, MembroDelloStaffService membroStaffService, SottomissioneService sottomissioneService) {
+        this.repository = repository;
+        this.membroStaffService = membroStaffService;
+        this.sottomissioneService = sottomissioneService;
     }
 
     public List<Giudice> getListaGiudici() {
-        return persistence.getAll();
+        return repository.findAll();
     }
 
     public boolean verificaGiudice(Giudice giudice) {
         if (giudice == null) return false;
-        return persistence.existsById(giudice.getId());
+        return repository.findById(giudice.getId()).isPresent();
     }
 
     /**
@@ -46,7 +45,7 @@ public class GiudiceService {
         if (stato == null) throw new IllegalArgumentException("Stato non valido.");
         if (idGiudice == null || idGiudice <= 0) throw new IllegalArgumentException("Giudice non valido.");
 
-        Giudice giudice = persistence.findById(idGiudice);
+        Giudice giudice = repository.findById(idGiudice).orElse(null);
         if (giudice == null) throw new IllegalArgumentException("Giudice non trovato.");
 
         List<Hackathon> assegnati = membroStaffService.getListaHackathon(giudice);

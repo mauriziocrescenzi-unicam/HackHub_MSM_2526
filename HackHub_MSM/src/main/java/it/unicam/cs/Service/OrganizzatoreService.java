@@ -1,23 +1,26 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.HackathonRepository;
+import it.unicam.cs.repository.OrganizzatoreRepository;
+import it.unicam.cs.repository.SegnalazioneRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Service
+@Transactional
 public class OrganizzatoreService {
-    private static OrganizzatoreService service;
-    StandardPersistence<Hackathon> hackathonPersistence;
-    StandardPersistence<Segnalazione> segnalazionePersistence;
-    private OrganizzatoreService(){
-        hackathonPersistence = new StandardPersistence<>(Hackathon.class);
-        segnalazionePersistence = new StandardPersistence<>(Segnalazione.class);
+    private final OrganizzatoreRepository repository;
+    private final HackathonRepository hackathonRepository;
+    private final SegnalazioneRepository segnalazioneRepository;
+    public OrganizzatoreService(OrganizzatoreRepository repository, HackathonRepository hackathonRepository, SegnalazioneRepository segnalazioneRepository) {
+        this.repository = repository;
+        this.hackathonRepository = hackathonRepository;
+        this.segnalazioneRepository = segnalazioneRepository;
     }
-    public static OrganizzatoreService getInstance(){
-        if(service == null)
-            service = new OrganizzatoreService();
-        return service;
-    }
+
 
     /**
      * Restituisce la lista degli hackathon di un determinato organizzatore in base allo stato
@@ -28,7 +31,7 @@ public class OrganizzatoreService {
     public List<Hackathon> getListaHackathons(StatoHackathon stato,long idOrganizzatore){
             if(stato == null) throw new NullPointerException("Stato dell'hackathon non valido");
             if(idOrganizzatore < 0) throw new IllegalArgumentException("Id dell'organizzatore non valido");
-            return hackathonPersistence.getAll().stream()
+            return hackathonRepository.findAll().stream()
                     .filter(h -> h.getOrganizzatore().getId() == idOrganizzatore && h.getStato() == stato)
                     .toList();
     }
@@ -44,7 +47,7 @@ public class OrganizzatoreService {
         if (organizzatore == null)throw new NullPointerException("Organizzatore non valido");
         if (hackathon==null || hackathon.isEmpty()) throw new IllegalArgumentException("Hackathon non valido");
         if (stato==null) throw new NullPointerException("Stato non valido");
-        return segnalazionePersistence.getAll().stream().filter(s -> hackathon.contains(s.getHackathon())
+        return segnalazioneRepository.findAll().stream().filter(s -> hackathon.contains(s.getHackathon())
                 && s.getHackathon().getOrganizzatore().equals(organizzatore) && s.getStato() == stato).toList();
 
 

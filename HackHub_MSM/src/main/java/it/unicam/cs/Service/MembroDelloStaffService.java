@@ -1,7 +1,9 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.HackathonRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,20 +12,15 @@ import java.util.List;
  * Service responsabile della gestione dei membri dello staff nel sistema HackHub.
  * Implementa il pattern Singleton.
  */
+@Service
+@Transactional
 public class MembroDelloStaffService {
 
-    private static MembroDelloStaffService instance;
     private final SottomissioneService sottomissioneService;
-    private final StandardPersistence<Hackathon> hackathonPersistence;
-    private MembroDelloStaffService() {
-        this.hackathonPersistence = new StandardPersistence<>(Hackathon.class);
-        this.sottomissioneService = SottomissioneService.getInstance();
-    }
-
-    public static MembroDelloStaffService getInstance() {
-        if (instance == null)
-            instance = new MembroDelloStaffService();
-        return instance;
+    private  final HackathonRepository hackathonRepository;
+    public MembroDelloStaffService(SottomissioneService sottomissioneService,HackathonRepository hackathonRepository) {
+        this.sottomissioneService = sottomissioneService;
+        this.hackathonRepository = hackathonRepository;
     }
 
     /**
@@ -34,7 +31,7 @@ public class MembroDelloStaffService {
      */
     public List<Hackathon> getListaHackathon(MembroDelloStaff membro) {
         if (membro == null) throw new IllegalArgumentException("Membro dello staff non valido.");
-        List<Hackathon> tutti = hackathonPersistence.getAll();
+        List<Hackathon> tutti = hackathonRepository.findAll();
         List<Hackathon> risultato = new ArrayList<>();
 
         for (Hackathon h : tutti) {

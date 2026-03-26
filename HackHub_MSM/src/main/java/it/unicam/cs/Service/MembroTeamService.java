@@ -1,10 +1,10 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
-import it.unicam.cs.model.MembroTeam;
-import it.unicam.cs.model.Team;
-import it.unicam.cs.model.TeamHackathon;
-import it.unicam.cs.model.Utente;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.model.*;
+import it.unicam.cs.repository.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,36 +15,18 @@ import java.util.stream.Collectors;
  * Contiene tutta la logica di business per operazioni sui membri dei team.
  *
  */
+@Service
+@Transactional
 public class MembroTeamService {
 
-    private static MembroTeamService service;
-    private final StandardPersistence<MembroTeam> membroTeamPersistence;
-    private final StandardPersistence<Utente> utentePersistence;
-    private final StandardPersistence<Team> teamPersistence;
-    private final SottomissioneService sottomissioneService;
+    private final MembroTeamRepository repository;
+    private final UtenteRepository utenteRepository;
+    private final TeamRepository teamRepository;
 
-    /**
-     * Costruttore privato per il pattern Singleton.
-     * Inizializza i layer di persistenza per le entità gestite.
-     */
-    private MembroTeamService() {
-        this.membroTeamPersistence = new StandardPersistence<>(MembroTeam.class);
-        this.utentePersistence = new StandardPersistence<>(Utente.class);
-        this.teamPersistence = new StandardPersistence<>(Team.class);
-        this.sottomissioneService = SottomissioneService.getInstance();
-    }
-
-    /**
-     * Restituisce l'istanza Singleton del MembroTeamController.
-     * Crea una nuova istanza se non esiste ancora.
-     *
-     * @return Istanza Singleton di MembroTeamController
-     */
-    public static MembroTeamService getInstance() {
-        if (service == null) {
-            service = new MembroTeamService();
-        }
-        return service;
+    public MembroTeamService(MembroTeamRepository repository, UtenteRepository utenteRepository, TeamRepository teamRepository) {
+        this.repository = repository;
+        this.utenteRepository = utenteRepository;
+        this.teamRepository = teamRepository;
     }
 
     /**
@@ -73,7 +55,7 @@ public class MembroTeamService {
         }
 
         // Cerca nel database se esiste un MembroTeam per questo utente
-        List<MembroTeam> tuttiMembri = membroTeamPersistence.getAll();
+        List<MembroTeam> tuttiMembri = repository.findAll();
         for (MembroTeam m : tuttiMembri) {
             if (m.getUtente().getId().equals(idUtente)) {
                 return true;
@@ -97,7 +79,7 @@ public class MembroTeamService {
      * Restituisce il MembroTeam dell'utente
      */
     public MembroTeam getMembro(Utente utente) {//TODO cambio get all
-        for (MembroTeam membro : membroTeamPersistence.getAll()) {
+        for (MembroTeam membro : repository.findAll()) {
             if (membro.getId().getUtenteId().equals(utente.getId()))
                 return membro;
         }
@@ -116,7 +98,7 @@ public class MembroTeamService {
         }
 
         // Filtra i membri per il team specificato
-        List<MembroTeam> tuttiMembri = membroTeamPersistence.getAll();
+        List<MembroTeam> tuttiMembri = repository.findAll();
         return tuttiMembri.stream()
                 .filter(m -> m.getTeam().getId().equals(idTeam))
                 .collect(Collectors.toList());
@@ -142,18 +124,14 @@ public class MembroTeamService {
         }
 
         // Recupera le entità dal database
-        Utente utente = utentePersistence.findById(idUtente);
-        Team team = teamPersistence.findById(idTeam);
-
-        if (utente == null || team == null) {
-            return false;
-        }
+        Utente utente = utenteRepository.getReferenceById( idUtente);
+        Team team = teamRepository.getReferenceById(idTeam);
 
         // Crea la relazione MembroTeam
         MembroTeam nuovoMembro = new MembroTeam(utente, team);
 
         // Persisti la relazione
-        membroTeamPersistence.create(nuovoMembro);
+        repository.save(nuovoMembro);
 
         return true;
     }
@@ -169,7 +147,7 @@ public class MembroTeamService {
             return false;
         }
 
-        membroTeamPersistence.delete(membro);
+        repository.delete(membro);
         return true;
     }
 
@@ -179,7 +157,7 @@ public class MembroTeamService {
      * @return Lista di tutti i membri
      */
     public List<MembroTeam> getAllMembri() {
-        return membroTeamPersistence.getAll();
+        return repository.findAll();
     }
 
     /**
@@ -208,7 +186,7 @@ public class MembroTeamService {
         }
 
         // Trova il membro nel team
-        MembroTeam membroDaRimuovere = membroTeamPersistence.getAll().stream()
+        MembroTeam membroDaRimuovere = repository.findAll().stream()
                 .filter(m -> m.getUtente().getId().equals(idMembro) &&
                         m.getTeam().getId().equals(idTeam))
                 .findFirst()
@@ -235,21 +213,5 @@ public class MembroTeamService {
         return abbandonaTeam(idMembro, idTeam);
     }
 
-    //--------------------------------------------------------------
-    // Sottomissioni
-    //--------------------------------------------------------------
 
-    /**
-     * Invia una nuova sottomissione per il team in un hackathon.
-     */
-    public boolean inviaSottomissione(String nome, String link, Long idTeam, Long idHackathon) {
-        return sottomissioneService.inviaSottomissione(nome, link, idTeam, idHackathon);
-    }
-
-    /**
-     * Aggiorna la sottomissione esistente per il team in un hackathon.
-     */
-    public boolean aggiornaSottomissione(String nome, String link, Long idTeam, Long idHackathon) {
-        return sottomissioneService.aggiornaSottomissione(nome, link, idTeam, idHackathon);
-    }
 }

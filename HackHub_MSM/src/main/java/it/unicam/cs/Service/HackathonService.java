@@ -1,38 +1,54 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.GiudiceRepository;
+import it.unicam.cs.repository.HackathonRepository;
+import it.unicam.cs.repository.MentoreRepository;
+import it.unicam.cs.repository.OrganizzatoreRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+@Service
+@Transactional
 public class HackathonService {
-    private static HackathonService service;
-    private final GiudiceService giudiceService = GiudiceService.getInstance();
-    private final Builder builder;
-    private final StandardPersistence<Hackathon> persistence;
+    private final HackathonRepository repository;
+    private final OrganizzatoreRepository organizzatoreRepository;
+    private final GiudiceRepository giudiceRepository;
+    private final MentoreRepository mentoreRepository;
 
-    public static HackathonService getInstance(){
-        if(service == null) service = new HackathonService(new HackathonBuilder());
-        return service;
-    }
-    private HackathonService(Builder builder) {
-        this.persistence = new StandardPersistence<>(Hackathon.class);
-        this.builder = builder;
+
+    public HackathonService(HackathonRepository repository, OrganizzatoreRepository organizzatoreRepository, GiudiceRepository giudiceRepository, MentoreRepository mentoreRepository) {
+        this.repository = repository;
+        this.organizzatoreRepository = organizzatoreRepository;
+        this.giudiceRepository = giudiceRepository;
+        this.mentoreRepository = mentoreRepository;
     }
     public boolean creaHackathon(String nome, String regolamento, LocalDateTime scadenzaIscrizione, LocalDateTime dataInizio,
                                  LocalDateTime dataFine, String luogo, double premioInDenaro, int dimensioneMassimoTeam,
-                                 StatoHackathon stato, Organizzatore organizzatore, Giudice giudice, List<Mentore> mentori){
+                                 StatoHackathon stato, Long idorganizzatore, Long idgiudice, List<Long> idmentori){
         if(!verificaRequisiti(scadenzaIscrizione,dataInizio,dataFine)) return false;
+        Builder builder = new HackathonBuilder();
         builder.reset();
-        builder.setInfo(nome,regolamento,scadenzaIscrizione,dataInizio,dataFine,luogo,premioInDenaro,dimensioneMassimoTeam,stato,organizzatore);
+        Organizzatore organizzatore = organizzatoreRepository.findById(idorganizzatore)
+                .orElse(null);
+        if(organizzatore == null) return false;
+        Giudice giudice = giudiceRepository.findById(idgiudice)
+                .orElse(null);
+        if(giudice == null) return false;
+        List<Mentore> mentori = mentoreRepository.findAllById(idmentori);
+        if(mentori.isEmpty()) return false;
+        builder.setInfo(nome,regolamento,scadenzaIscrizione,dataInizio,dataFine,luogo,premioInDenaro,
+                dimensioneMassimoTeam,stato,organizzatore);
         builder.setGiudice(giudice);
         builder.setMentori(mentori);
         Hackathon hackathon = builder.getResult();
-        persistence.create(hackathon);
-        return hackathon != null;
+        repository.save(hackathon);
+        return true;
     }
 
     /**
@@ -48,7 +64,7 @@ public class HackathonService {
 
 
     public Hackathon getHackathonByID(long idHackathon) {
-        return persistence.findById(idHackathon);
+        return repository.findById(idHackathon).orElse(null);
     }
 
     public StatoHackathon getStatoHackathon(Hackathon hackathon) {

@@ -1,27 +1,26 @@
-package it.unicam.cs.Service;
+package it.unicam.cs.service;
 
 import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.model.Mentore;
 import it.unicam.cs.model.StatoHackathon;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.HackathonRepository;
+import it.unicam.cs.repository.MentoreRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 
+@Service
+@Transactional
 public class MentoreService {
-    private static MentoreService service;
-    private final StandardPersistence<Mentore> persistence;
-    private final StandardPersistence<Hackathon> hackathonPersistence;
-    private MentoreService(){
-        persistence = new StandardPersistence<>(Mentore.class);
-        hackathonPersistence = new StandardPersistence<>(Hackathon.class);
+    private final MentoreRepository repository;
+    private final HackathonRepository hackathonRepository;
+    public MentoreService(MentoreRepository repository, HackathonRepository hackathonRepository) {
+        this.repository = repository;
+        this.hackathonRepository = hackathonRepository;
     }
 
-    public static MentoreService getInstance(){
-        if(service == null)
-            service = new MentoreService();
-        return service;
-    }
 
     public static boolean assegnaMentore(Hackathon hackathon, List<Mentore> mentori){
         if(hackathon ==null || mentori.isEmpty()) throw new NullPointerException();
@@ -41,7 +40,7 @@ public class MentoreService {
         return true;
     }
     public List<Mentore> getListaMentori(){
-        return persistence.getAll();
+        return repository.findAll();
     }
 
     /**
@@ -55,7 +54,7 @@ public class MentoreService {
         if (mentori == null) throw new NullPointerException("La lista dei mentori non può essere nulla");
         verificaMentore(mentori);
         hackathon.setMentori(mentori);
-        hackathonPersistence.update(hackathon);
+        repository.saveAll(mentori);
         return true;
     }
 
@@ -68,12 +67,12 @@ public class MentoreService {
     public List<Hackathon> getListaHackathons(StatoHackathon stato, long idMentore){
         if(stato == null) throw new NullPointerException("Stato dell'hackathon non valido");
         if(idMentore < 0) throw new IllegalArgumentException("Id  del mentore non valido");
-        return hackathonPersistence.getAll().stream()
+        return hackathonRepository.findAll().stream()
                 .filter(h -> h.getOrganizzatore().getId() == idMentore && h.getStato() == stato)
                 .toList();
     }
 
     public Mentore getMentoreById(long idMentore) {
-        return persistence.findById(idMentore);
+        return repository.findById(idMentore).orElse(null);
     }
 }
