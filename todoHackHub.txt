@@ -12,6 +12,7 @@ rimuovere i tipi di ritorno dai costruttori
 
 aggiungere setInfo
 Uniformare nome Membro dello staff (codice e Use Case)e MembroStaff (su class diagram)
+Uniformare le boundary con gli attori nei sequence(vedere come è giusto fare per polini)
 Modificare javaDoc, soprattutto HackathonService.checkStato
 
 
@@ -21,6 +22,8 @@ chiedere come gestire i casi d'uso con include o extend e nel caso di include co
 bozza mail:
 
 Buongiorno,
+
+
 
 Siamo studenti del corso di informatica e ICD.
 Stiamo lavorando al progetto di Ingegneria del Software e, sapendo che il servizio di tutorato è terminato, le scriviamo per sapere se può gentilmente chiarirci alcuni dubbi in merito al progetto; in particolare:
