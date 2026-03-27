@@ -27,13 +27,15 @@ public class TeamService {
     private final TeamHackathonRepository teamHackathonRepository;
     private final MembroTeamService membroTeamService;
     private final HackathonService hackathonService;
+    private final UtenteService utenteService;
 
-    public TeamService(TeamRepository repository, HackathonRepository hackathonRepository, TeamHackathonRepository teamHackathonRepository, MembroTeamService membroTeamService, HackathonService hackathonService) {
+    public TeamService(TeamRepository repository, HackathonRepository hackathonRepository, TeamHackathonRepository teamHackathonRepository, MembroTeamService membroTeamService, HackathonService hackathonService,UtenteService utenteService) {
         this.repository = repository;
         this.hackathonRepository = hackathonRepository;
         this.teamHackathonRepository = teamHackathonRepository;
         this.membroTeamService = membroTeamService;
         this.hackathonService = hackathonService;
+        this.utenteService = utenteService;
     }
 
 
@@ -51,6 +53,7 @@ public class TeamService {
         if (nome == null || nome.trim().isEmpty()) {
             return false;
         }
+        if(utenteService.findById(idUtenteCreatore) == null) return false;
 
         // Verifica che l'utente non sia già membro di un team
         if (!membroTeamService.verificaDisponibilitaMembro(idUtenteCreatore)) {

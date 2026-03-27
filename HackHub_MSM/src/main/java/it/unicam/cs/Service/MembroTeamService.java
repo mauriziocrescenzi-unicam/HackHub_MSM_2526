@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,10 +23,12 @@ public class MembroTeamService {
     private final MembroTeamRepository repository;
     private final UtenteRepository utenteRepository;
     private final TeamRepository teamRepository;
+    private final TeamHackathonRepository teamHackathonRepository;
 
-    public MembroTeamService(MembroTeamRepository repository, UtenteRepository utenteRepository, TeamRepository teamRepository) {
+    public MembroTeamService(MembroTeamRepository repository, UtenteRepository utenteRepository, TeamRepository teamRepository, TeamHackathonRepository teamHackathonRepository) {
         this.repository = repository;
         this.utenteRepository = utenteRepository;
+        this.teamHackathonRepository = teamHackathonRepository;
         this.teamRepository = teamRepository;
     }
 
@@ -213,5 +216,16 @@ public class MembroTeamService {
         return abbandonaTeam(idMembro, idTeam);
     }
 
+    public List<Hackathon> getListahackathon(StatoHackathon stato,Long idMembroTeam){
+        if (stato == null) throw new IllegalArgumentException("Stato non valido.");
+        if (idMembroTeam == null || idMembroTeam <= 0) throw new IllegalArgumentException("MembroTeam non valido.");
+
+        MembroTeam membroTeam = repository.findById(idMembroTeam).orElse(null);
+        if (membroTeam == null) throw new IllegalArgumentException("MembroTeam non trovato.");
+        //prendo la lista di teamhackathon riguardate a il team del membroTeam
+        List<TeamHackathon> teamHackathonList= teamHackathonRepository.findAll().stream().filter(th ->
+                th.getHackathon().getStato() == stato && Objects.equals(th.getTeam().getId(), membroTeam.getTeam().getId())).toList();
+        return teamHackathonList.stream().map(TeamHackathon::getHackathon).toList();
+    }
 
 }

@@ -103,4 +103,18 @@ public class HackathonService {
                 .filter(Objects::nonNull)
                 .anyMatch(h -> statiSet.contains(h.getStato()));
     }
+    public boolean modificaHackathon(Hackathon hackathon,String nome,String regolamento,LocalDateTime scadenzaIscrizione,LocalDateTime dataInizio,LocalDateTime dataFine,String luogo,double premioInDenaro){
+        if(hackathon == null) return false;
+        if(!verificaRequisiti(scadenzaIscrizione,dataInizio,dataFine)) return false;
+        hackathon.setNome(nome);
+        hackathon.setRegolamento(regolamento);
+        hackathon.setScadenzaIscrizione(scadenzaIscrizione);
+        hackathon.setDataInizio(dataInizio);
+        hackathon.setDataFine(dataFine);
+        hackathon.setLuogo(luogo);
+        hackathon.setPremioInDenaro(premioInDenaro);
+        repository.save(hackathon);
+        return true;
+
+    }
 }

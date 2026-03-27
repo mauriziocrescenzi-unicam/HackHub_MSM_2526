@@ -21,9 +21,14 @@ public class TeamController {
     @PostMapping
     public ResponseEntity<String> createTeam(@RequestBody Map<String, Object> teamData) {
         String nome = (String) teamData.get("nome");
-        String descrizione= (String) teamData.get("descrizione");
-        Long utenteId = ((Number) teamData.get("utenteId")).longValue();
-        teamService.creaTeam(nome, descrizione, utenteId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Team creato con successo");
+        Object utenteIdRaw = teamData.get("utenteId");
+        if (nome == null || nome.trim().isEmpty() || utenteIdRaw == null) {
+            return ResponseEntity.badRequest().body("Dati non validi");
+        }
+        String descrizione = (String) teamData.get("descrizione");
+        Long utenteId = ((Number) utenteIdRaw).longValue();
+        if(teamService.creaTeam(nome, descrizione, utenteId))
+            return ResponseEntity.status(HttpStatus.CREATED).body("Team creato con successo");
+        return ResponseEntity.badRequest().body("Dati non validi");
     }
 }
