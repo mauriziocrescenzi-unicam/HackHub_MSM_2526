@@ -1,12 +1,17 @@
 package it.unicam.cs.controller;
 
 import it.unicam.cs.dto.HackathonCreazioneDTO;
+import it.unicam.cs.dto.HackathonModificaDTO;
+import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.service.HackathonService;
+import it.unicam.cs.service.MentoreService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -14,7 +19,11 @@ import java.util.Map;
 public class HackathonController {
 
     private final HackathonService hackathonService;
-    public HackathonController(HackathonService hackathonService) {this.hackathonService = hackathonService;}
+    private final MentoreService mentoreService;
+    public HackathonController(HackathonService hackathonService, MentoreService mentoreService) {
+        this.hackathonService = hackathonService;
+        this.mentoreService = mentoreService;
+    }
 
     @PostMapping
     public ResponseEntity<String> createHackathon(@RequestBody HackathonCreazioneDTO createDTO){
@@ -36,18 +45,31 @@ public class HackathonController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Hackathon creato con successo");
     }
     @PutMapping("/{id}")
-    public ResponseEntity<String> modificaHackathon(@RequestBody Map<String, Object> hackathonData){
-        long idHackathon = ((Number) hackathonData.get("id")).longValue();
-        LocalDateTime scadenzaIscrizione= (LocalDateTime) hackathonData.get("scadenzaIscrizione");
-        LocalDateTime dataInizio= (LocalDateTime) hackathonData.get("dataInizio");
-        LocalDateTime dataFine= (LocalDateTime) hackathonData.get("dataFine");
-        double premioInDenaro= (double) hackathonData.get("premioInDenaro");
-        if(hackathonService.modificaHackathon(hackathonService.getHackathonByID(idHackathon),(String) hackathonData.get("nome"),
-                (String) hackathonData.get("regolamento"),scadenzaIscrizione,dataInizio,dataFine,
-                (String) hackathonData.get("luogo"),premioInDenaro))
-            return ResponseEntity.status(HttpStatus.OK).body("Hackathon modificato con successo");
-        return ResponseEntity.badRequest().body("Dati non validi");
+    public ResponseEntity<String> modificaHackathon(@PathVariable long id, @RequestBody HackathonModificaDTO hackathonData){
+        Hackathon hackathon = hackathonService.getHackathonByID(id);
+        if (hackathon == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
 
+        if (!hackathonService.modificaHackathon(hackathon, hackathonData.nome(), hackathonData.regolamento(),
+                hackathonData.scadenzaIscrizione(), hackathonData.dataInizio(), hackathonData.dataFine(),
+                hackathonData.luogo(), hackathonData.premioInDenaro()))
+            return ResponseEntity.badRequest().body("Dati non validi");
+
+        return ResponseEntity.ok("Hackathon modificato con successo");
+
+    }
+    @PutMapping("/{id}/mentori")
+    public ResponseEntity<String> aggiungereMentori(@PathVariable long id, @RequestBody Map<String, Object> body){
+        Hackathon hackathon = hackathonService.getHackathonByID(id);
+        if (hackathon == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
+
+        List<?> raw = (List<?>) body.get("mentoriIds");
+        List<Long> mentoriIds = raw.stream()
+                .map(n -> ((Number) n).longValue())
+                .toList();
+        if(mentoreService.aggiungiMentori(mentoriIds,hackathon)) return ResponseEntity.ok("Hackathon modificato con successo");
+        return ResponseEntity.badRequest().body("Dati non validi");
     }
 
 }

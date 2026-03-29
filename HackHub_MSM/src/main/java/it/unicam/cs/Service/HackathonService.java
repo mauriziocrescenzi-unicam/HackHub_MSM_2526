@@ -57,9 +57,8 @@ public class HackathonService {
     public boolean verificaRequisiti( LocalDateTime scadenzaIscrizione, LocalDateTime dataInizio, LocalDateTime dataFine){
         if(scadenzaIscrizione.isBefore(LocalDateTime.now()) || dataInizio.isBefore(LocalDateTime.now())
                 || dataFine.isBefore(LocalDateTime.now())) return false;
-        if (scadenzaIscrizione.isAfter(dataInizio)) return false;
-        if (dataInizio.isAfter(dataFine)) return false;
-        return true;
+        if (!scadenzaIscrizione.isBefore(dataInizio)) return false;
+        return !dataInizio.isAfter(dataFine);
     }
 
 
