@@ -36,6 +36,10 @@ public class Hackathon {
     )
     private List<Mentore> mentori;
 
+    @ManyToOne
+    @JoinColumn(name = "team_vincitore_id")
+    private Team teamVincitore;
+
     public Hackathon() {
 
     }
@@ -98,5 +102,27 @@ public class Hackathon {
     public void setMentori(List<Mentore> mentori) {
         if (mentori ==null ||mentori.isEmpty()) throw new IllegalArgumentException();
         this.mentori = mentori;
+    }
+
+    /**
+     * Imposta il team vincitore dell'hackathon.
+     *
+     * @param teamVincitore Team vincitore da impostare, o null per rimuovere il vincitore
+     * @throws IllegalArgumentException se il team è null e l'hackathon è già concluso
+     */
+    public void setVincitore(Team teamVincitore) {
+        // Se l'hackathon è concluso, deve avere un vincitore
+        if (this.stato == StatoHackathon.CONCLUSO && teamVincitore == null) {
+            throw new IllegalArgumentException("Un hackathon concluso deve avere un team vincitore");
+        }
+
+        // Se si imposta un vincitore, l'hackathon dovrebbe essere in valutazione o concluso
+        if (teamVincitore != null &&
+                this.stato != StatoHackathon.IN_VALUTAZIONE &&
+                this.stato != StatoHackathon.CONCLUSO) {
+            throw new IllegalArgumentException("Può impostare un vincitore solo per hackathon in valutazione o conclusi");
+        }
+
+        this.teamVincitore = teamVincitore;
     }
 }
