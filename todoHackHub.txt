@@ -15,7 +15,21 @@ Uniformare nome Membro dello staff (codice e Use Case)e MembroStaff (su class di
 Uniformare le boundary con gli attori nei sequence(vedere come è giusto fare per polini)
 Modificare javaDoc, soprattutto HackathonService.checkStato
 ModificaHackathon forse il controllo dell'hackathon se è in iscrizione dopo?
+CASO D'USO: cancellazione hackathon
 
+Sistemare metodi TeamHackathon
+Simone
+    Hackathon
+    Organizzatore
+    Segnalazione
+Matteo
+    Team
+    Invito
+    Mentore
+Maurizio
+    MembroTeam
+    Giudice
+    MembroStaff
 ------------tutor---------------
 chiedere come gestire i casi d'uso con include o extend e nel caso di include come riportarlo sui sequence (proclama vincitore --include--> erogazione premio)
 

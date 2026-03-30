@@ -9,10 +9,7 @@ import it.unicam.cs.repository.MentoreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional
@@ -71,8 +68,7 @@ public class MentoreService {
         //aggiungo i mentori al hackathon
         Set<Mentore> mentoriEsistenti = new HashSet<>(hackathon.getMentori());
         mentoriEsistenti.addAll(mentoriDaAggiungere);
-        hackathon.setMentori(mentoriEsistenti.stream().toList());
-        hackathon.setMentori(mentoriEsistenti.stream().toList());
+        hackathon.setMentori(new ArrayList<>(mentoriEsistenti));
         hackathonRepository.save(hackathon);
         return true;
     }

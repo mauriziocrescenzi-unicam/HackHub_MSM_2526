@@ -1,6 +1,8 @@
 package it.unicam.cs.service;
 
+import it.unicam.cs.dto.ClassificaTeamDTO;
 import it.unicam.cs.model.*;
+import it.unicam.cs.repository.HackathonRepository;
 import it.unicam.cs.repository.SottomissioneRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +23,13 @@ public class SottomissioneService {
     private final SottomissioneRepository repository;
     private final HackathonService hackathonService;
     private final TeamService teamService;
+    private final HackathonRepository hackathonRepository;
 
-    public SottomissioneService(SottomissioneRepository repository, HackathonService hackathonService, TeamService teamService) {
+    public SottomissioneService(SottomissioneRepository repository, HackathonService hackathonService, TeamService teamService, HackathonRepository hackathonRepository) {
         this.repository = repository;
         this.hackathonService = hackathonService;
         this.teamService = teamService;
+        this.hackathonRepository = hackathonRepository;
     }
 
 
@@ -215,5 +219,89 @@ public class SottomissioneService {
     public Sottomissione getSottomissioneById(Long id) {
         if (id == null) throw new IllegalArgumentException("Id non valido.");
         return repository.findById(id).orElse(null);
+    }
+
+    /**
+     * Calcola la classifica dei team per un determinato hackathon.
+     * La classifica è ordinata per punteggio decrescente (dal primo all'ultimo posto).
+     * <p>
+     * Questo metodo recupera tutte le sottomissioni valutate per l'hackathon
+     * e le ordina in base al voto ricevuto.
+     * </p>
+     *
+     * @param hackathon Hackathon per cui calcolare la classifica
+     * @return Lista di {@link ClassificaTeamDTO} ordinata per punteggio decrescente,
+     *         o lista vuota se non ci sono sottomissioni valutate
+     */
+    public List<ClassificaTeamDTO> getClassifica(Hackathon hackathon) {
+        if (hackathon == null) {
+            return new ArrayList<>();
+        }
+        // Recupera tutte le sottomissioni dell'hackathon
+        List<Sottomissione> sottomissioni = getSottomissioni(hackathon);
+
+        List<ClassificaTeamDTO> classifica = new ArrayList<>();
+
+        for (Sottomissione s : sottomissioni) {
+            // Include solo sottomissioni valutate
+            if (isSottomissioneValutata(s)) {
+                Team team = teamService.getTeamById(s.getIdTeam());
+                if (team != null) {
+                    classifica.add(new ClassificaTeamDTO(
+                            team,
+                            s.getVoto(),
+                            s.getGiudizio()
+                    ));
+                }
+            }
+        }
+
+        // Ordina per punteggio decrescente
+        classifica.sort((c1, c2) -> Double.compare(c2.getPunteggio(), c1.getPunteggio()));
+
+        // Assegna le posizioni
+        for (int i = 0; i < classifica.size(); i++) {
+            classifica.get(i).setPosizione(i + 1);
+        }
+
+        return classifica;
+    }
+
+    /**
+     * Proclama il team vincitore di un hackathon.
+     * <p>
+     * Verifica che:
+     * - L'hackathon esista
+     * - L'hackathon sia in stato IN_VALUTAZIONE
+     * - Tutte le sottomissioni siano state valutate
+     * - Il team proclamato sia effettivamente primo in classifica
+     * </p>
+     *
+     * @param hackathon Hackathon per cui proclamare il vincitore
+     * @param teamVincitore Team da proclamare vincitore
+     * @return true se la proclamazione è riuscita, false altrimenti
+     */
+    public boolean proclamaTeamVincitore(Hackathon hackathon, Team teamVincitore) {
+        if (hackathon == null || teamVincitore == null) {
+            return false;
+        }
+        if (hackathonService.checkStato(List.of(hackathon), StatoHackathon.IN_VALUTAZIONE)) {
+            return false;
+        }
+
+        // Verifica che tutte le sottomissioni siano state valutate
+        List<Sottomissione> sottomissioni = getSottomissioni(hackathon);
+
+        for (Sottomissione s : sottomissioni) {
+            if (!isSottomissioneValutata(s)) {
+                return false; // Non tutte le sottomissioni sono valutate
+            }
+        }
+
+        hackathon.setVincitore(teamVincitore);
+        hackathon.setStato(StatoHackathon.CONCLUSO);
+        hackathonRepository.save(hackathon);
+
+        return true;
     }
 }

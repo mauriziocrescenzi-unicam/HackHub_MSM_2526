@@ -2,6 +2,7 @@ package it.unicam.cs.controller;
 
 import it.unicam.cs.dto.HackathonCreazioneDTO;
 import it.unicam.cs.dto.HackathonModificaDTO;
+import it.unicam.cs.dto.HackathonRispostaDTO;
 import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.service.HackathonService;
 import it.unicam.cs.service.MentoreService;
@@ -70,6 +71,16 @@ public class HackathonController {
                 .toList();
         if(mentoreService.aggiungiMentori(mentoriIds,hackathon)) return ResponseEntity.ok("Hackathon modificato con successo");
         return ResponseEntity.badRequest().body("Dati non validi");
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<HackathonRispostaDTO> getHackathon(@PathVariable long id){
+        Hackathon hackathon = hackathonService.getHackathonByID(id);
+        if (hackathon == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        HackathonRispostaDTO dto= new HackathonRispostaDTO(hackathon.getNome(),hackathon.getRegolamento(),
+                hackathon.getScadenzaIscrizione(),hackathon.getDataInizio(),hackathon.getDataFine(),hackathon.getLuogo(),
+                hackathon.getPremioInDenaro(),hackathon.getDimensioneMassimoTeam(),hackathon.getStato(),hackathon.getOrganizzatore(),hackathon.getGiudice(),hackathon.getMentori());
+        return ResponseEntity.ok(dto);
     }
 
 }
