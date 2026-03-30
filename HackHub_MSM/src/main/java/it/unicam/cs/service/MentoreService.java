@@ -21,10 +21,12 @@ public class MentoreService {
     private final HackathonRepository hackathonRepository;
     private final RichiestaSupportoService richiestaSupportoService;
 
-    public MentoreService(MentoreRepository repository, HackathonRepository hackathonRepository) {
+    public MentoreService(MentoreRepository repository,
+                          HackathonRepository hackathonRepository,
+                          RichiestaSupportoService richiestaSupportoService) {
         this.repository = repository;
         this.hackathonRepository = hackathonRepository;
-        this.richiestaSupportoService = RichiestaSupportoService.getInstance();
+        this.richiestaSupportoService = richiestaSupportoService;
     }
 
 
@@ -35,6 +37,7 @@ public class MentoreService {
         hackathonRepository.save(hackathon);
         return true;
     }
+
     public static boolean verificaMentore(List<Mentore> mentori){
         if (mentori == null || mentori.isEmpty())
             throw new IllegalArgumentException("La lista dei mentori non può essere nulla o vuota");
@@ -98,5 +101,29 @@ public class MentoreService {
 
     public RichiestaSupporto getRichiestaSupporto(Long idRichiesta) {
         return richiestaSupportoService.getRichiestaSupporto(idRichiesta);
+    }
+
+    /**
+     * Verifica se una richiesta è già stata risolta.
+     * Corrisponde a isRichiestaSupportoRisolta() nel sequence diagram.
+     *
+     * @param richiestaSupporto La richiesta da verificare
+     * @return true se già risolta, false altrimenti
+     */
+    public boolean isRichiestaSupportoRisolta(RichiestaSupporto richiestaSupporto) {
+        return richiestaSupportoService.isRichiestaSupportoRisolta(richiestaSupporto);
+    }
+    /**
+     * Risponde a una richiesta di supporto.
+     * Corrisponde a rispostaRichiestaSupporto(risposta) nel sequence diagram.
+     * Delega la logica (checkRisposta + setRisposta) al RichiestaSupportoService.
+     *
+     * @param richiestaSupporto   La richiesta a cui rispondere
+     * @param descrizioneRisposta Testo della risposta
+     * @return true se la risposta è valida e salvata, false altrimenti
+     */
+    public boolean rispostaRichiestaSupporto(RichiestaSupporto richiestaSupporto,
+                                             String descrizioneRisposta) {
+        return richiestaSupportoService.rispostaRichiestaSupporto(richiestaSupporto, descrizioneRisposta);
     }
 }

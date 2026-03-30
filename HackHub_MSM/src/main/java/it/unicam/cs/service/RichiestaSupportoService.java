@@ -3,7 +3,10 @@ package it.unicam.cs.service;
 import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.model.RichiestaSupporto;
 import it.unicam.cs.model.Team;
-import it.unicam.cs.persistence.StandardPersistence;
+import it.unicam.cs.repository.RichiestaSupportoRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,77 +19,71 @@ import java.util.List;
  * Gestisce tutte le operazioni relative alle richieste di supporto.
  * </p>
  */
+@Service
+@Transactional
 public class RichiestaSupportoService {
 
-    private static RichiestaSupportoService service;
-    private final StandardPersistence<RichiestaSupporto> richiestaSupportoPersistence;
+    private final RichiestaSupportoRepository richiestaSupportoRepository;
 
-    /**
-     * Costruttore privato per il pattern Singleton.
-     * Inizializza il layer di persistenza per l'entità RichiestaSupporto.
-     */
-    private RichiestaSupportoService() {
-        this.richiestaSupportoPersistence = new StandardPersistence<>(RichiestaSupporto.class);
+    public RichiestaSupportoService(RichiestaSupportoRepository richiestaSupportoRepository) {
+        this.richiestaSupportoRepository = richiestaSupportoRepository;
     }
 
-    /**
-     * Restituisce l'istanza Singleton del RichiestaSupportoService.
-     * Crea una nuova istanza se non esiste ancora.
-     *
-     * @return Istanza Singleton di RichiestaSupportoService
-     */
-    public static RichiestaSupportoService getInstance() {
-        if (service == null) {
-            service = new RichiestaSupportoService();
-        }
-        return service;
-    }
-
+    // USE CASE: Invio Richiesta di Supporto (MembroTeam)
     /**
      * Invia una nuova richiesta di supporto da parte di un team.
+     * Corrisponde alla chiamata inviaRichiestaSupporto() nel sequence diagram.
      *
-     * @param teamRichiedente Team che richiede supporto
+     * @param idTeamRichiedente ID del team che richiede supporto
      * @param descrizioneRichiesta Descrizione del supporto richiesto
      * @param dataInvio Data e ora di invio della richiesta
-     * @return La richiesta di supporto creata, o null se la creazione fallisce
+     * @param hackathon Hackathon nel cui contesto viene inviata la richiesta
+     * @return La richiesta di supporto creata, o null se la validazione fallisce
      */
-    public RichiestaSupporto inviaRichiestaSupporto(Team teamRichiedente, String descrizioneRichiesta, LocalDateTime dataInvio) {
-        if (!verificaRichiestaSupporto(teamRichiedente, descrizioneRichiesta, dataInvio)) {
+    public RichiestaSupporto inviaRichiestaSupporto(Long idTeamRichiedente,
+                                                    String descrizioneRichiesta,
+                                                    LocalDateTime dataInvio,
+                                                    Hackathon hackathon) {
+        if (!verificaRichiestaSupporto(idTeamRichiedente, descrizioneRichiesta, dataInvio, hackathon)) {
             return null;
         }
 
-        RichiestaSupporto richiesta = new RichiestaSupporto(descrizioneRichiesta);
-        richiesta.setDataInvio(dataInvio);
+        RichiestaSupporto richiesta = new RichiestaSupporto(
+                descrizioneRichiesta,
+                idTeamRichiedente,
+                dataInvio,
+                hackathon
+        );
 
-        // Nota: nel modello attuale non ci sono riferimenti a Team/Mentore/Hackathon
-        // Se necessario, questi andrebbero aggiunti all'entità RichiestaSupporto
-
-        richiestaSupportoPersistence.create(richiesta);
-        return richiesta;
+        return richiestaSupportoRepository.save(richiesta);
     }
 
     /**
      * Verifica la validità di una richiesta di supporto prima dell'invio.
+     * Corrisponde a verificaRichiestaSupporto() nel sequence diagram.
      *
-     * @param teamRichiedente Team che richiede supporto
+     * @param idTeamRichiedente ID del team richiedente
      * @param descrizioneRichiesta Descrizione del supporto richiesto
-     * @param dataInvio Data e ora di invio della richiesta
+     * @param dataInvio Data e ora di invio
+     * @param hackathon Hackathon di riferimento
      * @return true se la richiesta è valida, false altrimenti
      */
-    public boolean verificaRichiestaSupporto(Team teamRichiedente, String descrizioneRichiesta, LocalDateTime dataInvio) {
-        if (teamRichiedente == null) {
+    public boolean verificaRichiestaSupporto(Long idTeamRichiedente,
+                                             String descrizioneRichiesta,
+                                             LocalDateTime dataInvio,
+                                             Hackathon hackathon) {
+        if (idTeamRichiedente == null || idTeamRichiedente <= 0) {
             return false;
         }
         if (descrizioneRichiesta == null || descrizioneRichiesta.trim().isEmpty()) {
             return false;
         }
-        if (dataInvio == null) {
+        if (dataInvio == null || dataInvio.isAfter(LocalDateTime.now())) {
             return false;
         }
-        if (dataInvio.isAfter(LocalDateTime.now())) {
+        if (hackathon == null) {
             return false;
         }
-
         return true;
     }
 
@@ -101,28 +98,20 @@ public class RichiestaSupportoService {
             return new ArrayList<>();
         }
 
-        return richiestaSupportoPersistence.getAll();
+        return richiestaSupportoRepository.findByHackathon(hackathonSelezionato);
     }
 
     /**
-     * Restituisce una specifica richiesta di supporto.
+     * Restituisce una specifica richiesta di supporto tramite il suo ID.
      *
-     * @param richiestaSupportoSelezionata La richiesta da recuperare
+     * @param idRichiesta ID della richiesta da recuperare
      * @return La richiesta trovata, o null se non esiste
      */
-    public RichiestaSupporto getRichiestaSupporto(Long richiestaSupportoSelezionata) {
-        if (richiestaSupportoSelezionata == null) {
+    public RichiestaSupporto getRichiestaSupporto(Long idRichiesta) {
+        if (idRichiesta == null) {
             return null;
         }
-
-        // Cerca la richiesta nel database
-        List<RichiestaSupporto> tutteRichieste = richiestaSupportoPersistence.getAll();
-        for (RichiestaSupporto r : tutteRichieste) {
-            if (r.equals(richiestaSupportoSelezionata)) {
-                return r;
-            }
-        }
-        return null;
+        return richiestaSupportoRepository.findById(idRichiesta).orElse(null);
     }
 
     /**
@@ -142,23 +131,24 @@ public class RichiestaSupportoService {
     }
 
     /**
-     * Risponde a una richiesta di supporto con una descrizione.
+     * Risponde a una richiesta di supporto.
+     * Corrisponde a rispostaRichiestaSupporto(risposta) nel sequence diagram.
+     * Internamente esegue checkRisposta() e setRisposta() sull'oggetto.
      *
      * @param richiestaSupporto La richiesta a cui rispondere
-     * @param descrizioneRisposta Descrizione della risposta
+     * @param descrizioneRisposta Testo della risposta
      * @return true se la risposta è stata salvata con successo, false altrimenti
      */
-    public boolean rispostaRichiestaSupporto(RichiestaSupporto richiestaSupporto, String descrizioneRisposta) {
+    public boolean rispostaRichiestaSupporto(RichiestaSupporto richiestaSupporto,
+                                             String descrizioneRisposta) {
         if (richiestaSupporto == null) {
             return false;
         }
-
         if (!checkRisposta(descrizioneRisposta)) {
             return false;
         }
-
         richiestaSupporto.setDescrizioneRisposta(descrizioneRisposta);
-        richiestaSupportoPersistence.update(richiestaSupporto);
+        richiestaSupportoRepository.save(richiestaSupporto);
         return true;
     }
 
@@ -169,7 +159,6 @@ public class RichiestaSupportoService {
      * @return true se la descrizione è valida, false altrimenti
      */
     public boolean checkRisposta(String descrizioneRisposta) {
-        // Verifica che la descrizione non sia nulla o vuota
         if (descrizioneRisposta == null || descrizioneRisposta.trim().isEmpty()) {
             return false;
         }

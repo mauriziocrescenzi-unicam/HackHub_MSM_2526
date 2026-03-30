@@ -5,6 +5,7 @@ import it.unicam.cs.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,12 +25,21 @@ public class MembroTeamService {
     private final UtenteRepository utenteRepository;
     private final TeamRepository teamRepository;
     private final TeamHackathonRepository teamHackathonRepository;
+    private final HackathonService hackathonService;
+    private final RichiestaSupportoService richiestaSupportoService;
 
-    public MembroTeamService(MembroTeamRepository repository, UtenteRepository utenteRepository, TeamRepository teamRepository, TeamHackathonRepository teamHackathonRepository) {
+    public MembroTeamService(MembroTeamRepository repository,
+                             UtenteRepository utenteRepository,
+                             TeamRepository teamRepository,
+                             TeamHackathonRepository teamHackathonRepository,
+                             HackathonService hackathonService,
+                             RichiestaSupportoService richiestaSupportoService) {
         this.repository = repository;
         this.utenteRepository = utenteRepository;
-        this.teamHackathonRepository = teamHackathonRepository;
         this.teamRepository = teamRepository;
+        this.teamHackathonRepository = teamHackathonRepository;
+        this.hackathonService = hackathonService;
+        this.richiestaSupportoService = richiestaSupportoService;
     }
 
     /**
@@ -226,6 +236,86 @@ public class MembroTeamService {
         List<TeamHackathon> teamHackathonList= teamHackathonRepository.findAll().stream().filter(th ->
                 th.getHackathon().getStato() == stato && Objects.equals(th.getTeam().getId(), membroTeam.getTeam().getId())).toList();
         return teamHackathonList.stream().map(TeamHackathon::getHackathon).toList();
+    }
+
+    /**
+     * Verifica se il team del membro è iscritto ad almeno un hackathon.
+     * Corrisponde a isIscrittoHackathon(teamMittente) nel sequence diagram.
+     *
+     * @param idMembroTeam ID del membro del team
+     * @return Lista degli hackathon a cui il team è iscritto, lista vuota se nessuno
+     */
+    public List<Hackathon> isIscrittoHackathon(Long idMembroTeam) {
+        if (idMembroTeam == null || idMembroTeam <= 0) {
+            return new ArrayList<>();
+        }
+        MembroTeam membroTeam = repository.findById(idMembroTeam).orElse(null);
+        if (membroTeam == null) {
+            return new ArrayList<>();
+        }
+        return teamHackathonRepository.findAll().stream()
+                .filter(th -> Objects.equals(th.getTeam().getId(), membroTeam.getTeam().getId()))
+                .map(TeamHackathon::getHackathon)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Verifica se almeno uno degli hackathon del team è nello stato richiesto.
+     * Corrisponde a checkStato(listaHackathon, "in corso") nel sequence diagram.
+     *
+     * @param listaHackathon Lista di hackathon da verificare
+     * @param stato          Stato richiesto
+     * @return true se almeno un hackathon è nello stato richiesto, false altrimenti
+     */
+    public boolean checkStato(List<Hackathon> listaHackathon, StatoHackathon stato) {
+        if (listaHackathon == null || listaHackathon.isEmpty() || stato == null) {
+            return false;
+        }
+        for (Hackathon h : listaHackathon) {
+            if (h.getStato() == stato) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Invia una richiesta di supporto per un hackathon specifico.
+     * Corrisponde a inviaRichiestaSupporto(teamRichiedente, descrizioneRichiesta, data)
+     * nel sequence diagram. Delega la verifica e la creazione al RichiestaSupportoService.
+     *
+     * @param idMembroTeam         ID del membro del team che invia la richiesta
+     * @param descrizioneRichiesta Descrizione del supporto richiesto
+     * @param dataInvio            Data e ora di invio
+     * @param idHackathon          ID dell'hackathon di riferimento
+     * @return true se la richiesta è stata inviata con successo, false altrimenti
+     */
+    public boolean inviaRichiestaSupporto(Long idMembroTeam,
+                                          String descrizioneRichiesta,
+                                          LocalDateTime dataInvio,
+                                          Long idHackathon) {
+        if (idMembroTeam == null || idHackathon == null) return false;
+
+        MembroTeam membroTeam = repository.findById(idMembroTeam).orElse(null);
+        if (membroTeam == null) return false;
+
+        Long idTeam = membroTeam.getTeam().getId();
+
+        Hackathon hackathon = null;
+        List<TeamHackathon> lista = teamHackathonRepository.findAll();
+        for (TeamHackathon th : lista) {
+            if (Objects.equals(th.getTeam().getId(), idTeam) &&
+                    Objects.equals(th.getHackathon().getId(), idHackathon)) {
+                hackathon = th.getHackathon();
+                break;
+            }
+        }
+        if (hackathon == null) return false;
+
+        RichiestaSupporto richiesta = richiestaSupportoService.inviaRichiestaSupporto(
+                idTeam, descrizioneRichiesta, dataInvio, hackathon);
+
+        return richiesta != null;
     }
 
 }

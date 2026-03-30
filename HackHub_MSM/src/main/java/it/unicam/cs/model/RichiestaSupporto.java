@@ -9,11 +9,6 @@ import java.time.LocalDateTime;
 /**
  * Entità che rappresenta una richiesta di supporto da parte di un team
  * verso un mentore durante un hackathon.
- * <p>
- * Ogni richiesta contiene la descrizione del supporto richiesto,
- * la data di invio e, eventualmente, la descrizione della risposta
- * fornita dal mentore.
- * </p>
  */
 @Entity
 @Table(name = "richiesta_supporto")
@@ -34,17 +29,29 @@ public class RichiestaSupporto implements Serializable {
     @Column(name = "descrizione_risposta", length = 500)
     private String descrizioneRisposta;
 
+    @Column(name = "id_team", nullable = false)
+    private Long idTeam;
+
+    @ManyToOne
+    @JoinColumn(name = "hackathon_id", nullable = false)
+    private Hackathon hackathon;
+
     public RichiestaSupporto() {}
 
     /**
      * Costruttore per creare una nuova richiesta di supporto.
-     * Inizializza automaticamente la data di invio alla data corrente.
      *
      * @param descrizioneRichiesta Descrizione del supporto richiesto
+     * @param idTeam               ID del team richiedente
+     * @param dataInvio            Data e ora di invio
+     * @param hackathon            Hackathon di riferimento
      */
-    public RichiestaSupporto(String descrizioneRichiesta) {
+    public RichiestaSupporto(String descrizioneRichiesta, Long idTeam,
+                             LocalDateTime dataInvio, Hackathon hackathon) {
         this.descrizioneRichiesta = descrizioneRichiesta;
-        this.dataInvio = LocalDateTime.now();
+        this.idTeam = idTeam;
+        this.dataInvio = dataInvio;
+        this.hackathon = hackathon;
     }
 
     @Override
