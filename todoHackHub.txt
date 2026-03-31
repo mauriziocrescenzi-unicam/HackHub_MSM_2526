@@ -17,6 +17,11 @@ Modificare javaDoc, soprattutto HackathonService.checkStato
 ModificaHackathon forse il controllo dell'hackathon se è in iscrizione dopo?
 CASO D'USO: cancellazione hackathon
 
+Modificare caso d'uso iscrivere Team, cambiare il service TeamService con TeamHackathonSercive (e anche il controller), vedere anche altri UC che usano i metodi dentro TeamHackathon
+
+correggere tutti i metodi isQualcosa che restituiscono boolean invece di una lista
+
+
 Sistemare metodi TeamHackathon
 Simone 10
     Hackathon

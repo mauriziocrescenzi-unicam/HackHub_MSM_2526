@@ -2,6 +2,7 @@ package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
 import it.unicam.cs.repository.GiudiceRepository;
+import it.unicam.cs.repository.HackathonRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +21,14 @@ public class GiudiceService {
     private static GiudiceService service;
 
     private final GiudiceRepository repository;
-    private final MembroDelloStaffService membroStaffService;
+    private final HackathonRepository hackathonRepository;
     private final SottomissioneService sottomissioneService;
 
-    public GiudiceService(GiudiceRepository repository, MembroDelloStaffService membroStaffService, SottomissioneService sottomissioneService) {
+    public GiudiceService(GiudiceRepository repository,
+                          HackathonService hackathonService,
+                          SottomissioneService sottomissioneService, HackathonRepository hackathonRepository) {
         this.repository = repository;
-        this.membroStaffService = membroStaffService;
+        this.hackathonRepository = hackathonRepository;
         this.sottomissioneService = sottomissioneService;
     }
 
@@ -48,14 +51,12 @@ public class GiudiceService {
         Giudice giudice = repository.findById(idGiudice).orElse(null);
         if (giudice == null) throw new IllegalArgumentException("Giudice non trovato.");
 
-        List<Hackathon> assegnati = membroStaffService.getListaHackathon(giudice);
-        List<Hackathon> risultato = new ArrayList<>();
-        for (Hackathon h : assegnati) {
-            if (h.getStato() == stato) {
-                risultato.add(h);
-            }
-        }
-        return risultato;
+        // Recupera tutti gli hackathon e filtra per giudice assegnato e stato
+        return hackathonRepository.findAll().stream()
+                .filter(h -> h.getGiudice() != null)
+                .filter(h -> h.getGiudice().getId().equals(idGiudice))
+                .filter(h -> h.getStato() == stato)
+                .toList();
     }
 
     /**
