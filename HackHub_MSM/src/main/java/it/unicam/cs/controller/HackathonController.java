@@ -3,18 +3,12 @@ package it.unicam.cs.controller;
 import it.unicam.cs.dto.HackathonCreazioneDTO;
 import it.unicam.cs.dto.HackathonModificaDTO;
 import it.unicam.cs.dto.HackathonRispostaDTO;
-import it.unicam.cs.dto.SegnalazioneRispostaDTO;
 import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.Segnalazione;
 import it.unicam.cs.service.HackathonService;
 import it.unicam.cs.service.MentoreService;
-import it.unicam.cs.service.SegnalazioneService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +64,7 @@ public class HackathonController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
 
         List<?> raw = (List<?>) body.get("mentoriIds");
+        if (raw == null) return ResponseEntity.badRequest().body("Dati non validi");
         List<Long> mentoriIds = raw.stream()
                 .map(n -> ((Number) n).longValue())
                 .toList();

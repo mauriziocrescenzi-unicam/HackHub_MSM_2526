@@ -287,7 +287,7 @@ public class SottomissioneService {
         if (hackathon == null || teamVincitore == null) {
             return false;
         }
-        if (hackathonService.checkStato(List.of(hackathon), StatoHackathon.IN_VALUTAZIONE)) {
+        if (!hackathonService.checkStato(List.of(hackathon), StatoHackathon.IN_VALUTAZIONE)) {
             return false;
         }
 

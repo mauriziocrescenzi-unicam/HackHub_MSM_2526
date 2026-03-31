@@ -40,13 +40,14 @@ public class OrganizzatoreController {
         if (organizzatore==null)return ResponseEntity.notFound().build();
         if (body.get("stato")==null) return ResponseEntity.badRequest().body(null);
         //controllo che i dati siano validi
-        List<Long> ids = body.get("ids") == null ? List.of() :
-                ((List<?>) body.get("ids")).stream()
+        List<Long> ids = body.get("hackathonIds") == null ? List.of() :
+                ((List<?>) body.get("hackathonIds")).stream()
                 .filter(Objects::nonNull)
                 .map(Object::toString)
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
         StatoSegnalazione statoSegnalazione= StatoSegnalazione.fromString(body.get("stato").toString());
+        if(statoSegnalazione==null) return ResponseEntity.badRequest().body(null);
         if(ids.isEmpty()) return ResponseEntity.badRequest().body(null);
         //trasformo i dati in hackathon
         List<Hackathon> hackathons = ids.stream()

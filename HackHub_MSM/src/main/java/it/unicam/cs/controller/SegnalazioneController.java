@@ -37,7 +37,7 @@ public class SegnalazioneController {
         if(segnalazione==null) return ResponseEntity.notFound().build();
         if(segnalazioneService.accettaSegnalazione(segnalazione))
             return ResponseEntity.ok("Segnalazione accettata con successo");
-        return ResponseEntity.badRequest().body("Dati non validi");
+        return ResponseEntity.badRequest().body("Team non piu presente nel hackathon");
     }
 
 

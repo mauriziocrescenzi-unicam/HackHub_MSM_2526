@@ -53,7 +53,7 @@ public class SegnalazioneService {
      */
     public boolean segnalaTeam(long idTeam,long idHackathon, long idMentore, String motivazione){
         if (idTeam < 0) throw new IllegalArgumentException("Team non valido");
-        if (motivazione.isEmpty()) throw new IllegalArgumentException("Motivazione non valida");
+        if (motivazione.isEmpty()||motivazione.isBlank()) throw new IllegalArgumentException("Motivazione non valida");
         if(idHackathon < 0) throw new IllegalArgumentException("Id hackathon non valido");
         if(idMentore < 0) throw new IllegalArgumentException("Id mentore non valido");
 
