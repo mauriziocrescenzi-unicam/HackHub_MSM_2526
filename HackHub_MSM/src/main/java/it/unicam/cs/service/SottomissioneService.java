@@ -23,12 +23,14 @@ public class SottomissioneService {
     private final SottomissioneRepository repository;
     private final HackathonService hackathonService;
     private final TeamService teamService;
+    private final TeamHackathonService teamHackathonService;
     private final HackathonRepository hackathonRepository;
 
-    public SottomissioneService(SottomissioneRepository repository, HackathonService hackathonService, TeamService teamService, HackathonRepository hackathonRepository) {
+    public SottomissioneService(SottomissioneRepository repository, HackathonService hackathonService, TeamService teamService, TeamHackathonService teamHackathonService, HackathonRepository hackathonRepository) {
         this.repository = repository;
         this.hackathonService = hackathonService;
         this.teamService = teamService;
+        this.teamHackathonService = teamHackathonService;
         this.hackathonRepository = hackathonRepository;
     }
 
@@ -47,7 +49,7 @@ public class SottomissioneService {
         if (hackathon == null) return false;
 
         //  Team deve essere iscritto all'hackathon
-        if (!teamService.checkIscrizioneHackathon(idTeam, idHackathon)) return false;
+        if (!teamHackathonService.checkIscrizioneHackathon(idTeam, idHackathon)) return false;
         //  Hackathon deve essere IN_CORSO
         if (hackathon.getStato() != StatoHackathon.IN_CORSO) return false;
         //  Non deve esistere già una sottomissione
@@ -76,7 +78,7 @@ public class SottomissioneService {
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         if (hackathon == null) return false;
         //  Team deve essere iscritto all'hackathon
-        if (!teamService.checkIscrizioneHackathon(idTeam, idHackathon)) return false;
+        if (!teamHackathonService.checkIscrizioneHackathon(idTeam, idHackathon)) return false;
         //  Hackathon deve essere IN_CORSO
         if (hackathon.getStato() != StatoHackathon.IN_CORSO) return false;
         //  Deve esistere già una sottomissione

@@ -14,12 +14,14 @@ public class SegnalazioneService {
     private final TeamService teamService;
     private final HackathonService hackathonService;
     private final MentoreService mentoreService;
+    private final TeamHackathonService teamHackathonService;
 
-    public SegnalazioneService(SegnalazioneRepository repository, TeamService teamService, HackathonService hackathonService, MentoreService mentoreService) {
+    public SegnalazioneService(SegnalazioneRepository repository, TeamService teamService, HackathonService hackathonService, MentoreService mentoreService, TeamHackathonService teamHackathonService) {
         this.repository = repository;
         this.teamService = teamService;
         this.hackathonService = hackathonService;
         this.mentoreService = mentoreService;
+        this.teamHackathonService = teamHackathonService;
     }
 
 
@@ -77,8 +79,8 @@ public class SegnalazioneService {
      */
     public boolean accettaSegnalazione(Segnalazione segnalazione){
         if (segnalazione==null) throw new NullPointerException("Segnalazione non valida");
-        if(teamService.checkIscrizioneHackathon(segnalazione.getTeam().getId(),segnalazione.getHackathon().getId())){
-            teamService.rimuoviTeam(segnalazione.getTeam().getId(),segnalazione.getHackathon().getId());
+        if(teamHackathonService.checkIscrizioneHackathon(segnalazione.getTeam().getId(),segnalazione.getHackathon().getId())){
+            teamHackathonService.rimuoviTeam(segnalazione.getTeam().getId(),segnalazione.getHackathon().getId());
             segnalazione.setStato(StatoSegnalazione.GESTITA);
             repository.save(segnalazione);
             return true;

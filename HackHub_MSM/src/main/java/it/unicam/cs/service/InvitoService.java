@@ -16,14 +16,16 @@ import java.util.stream.Collectors;
 public class InvitoService {
 
     private final InvitoRepository repository;
+    private final TeamHackathonService teamHackathonService;
     private final TeamService teamService;
     private final UtenteService utenteService;
     private final MembroTeamService membroTeamService;
     private final HackathonService hackathonService;
 
-    public InvitoService(InvitoRepository repository, TeamService teamService, UtenteService utenteService,
+    public InvitoService(InvitoRepository repository, TeamHackathonService teamHackathonService, TeamService teamService, UtenteService utenteService,
                           MembroTeamService membroTeamService, HackathonService hackathonService) {
         this.repository = repository;
+        this.teamHackathonService = teamHackathonService;
         this.teamService = teamService;
         this.utenteService = utenteService;
         this.membroTeamService = membroTeamService;
@@ -37,7 +39,7 @@ public class InvitoService {
     public Invito inviareInvito(Utente mittente, Utente destinatario) {
 
         Team teamMittente = getTeamByUtente(mittente);
-        Hackathon hackathon = teamService.getHackathon(teamMittente)
+        Hackathon hackathon = teamHackathonService.getHackathon(teamMittente)
                 .stream().findFirst().orElse(null);
 
         if (hackathon == null ||
@@ -109,7 +111,7 @@ public class InvitoService {
 
         Utente mittente = utenteService.findById((long) invito.getIdUtenteMittente());
         Team teamMittente = getTeamByUtente(mittente);
-        Hackathon hackathon = teamService.getHackathon(teamMittente)
+        Hackathon hackathon = teamHackathonService.getHackathon(teamMittente)
                 .stream().findFirst().orElse(null);
 
         int maxMembri = (hackathon != null)
