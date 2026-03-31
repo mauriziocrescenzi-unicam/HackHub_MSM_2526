@@ -1,9 +1,6 @@
 package it.unicam.cs.dto;
 
-import it.unicam.cs.model.Giudice;
-import it.unicam.cs.model.Mentore;
-import it.unicam.cs.model.Organizzatore;
-import it.unicam.cs.model.StatoHackathon;
+import it.unicam.cs.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
@@ -22,4 +19,11 @@ public record HackathonRispostaDTO(
         @NotNull Organizzatore organizzatore,
         @NotNull Giudice giudice,
         @NotNull List<Mentore> mentori
-) {}
+) {
+    public static HackathonRispostaDTO fromHackathon(Hackathon hackathon) {
+        return new HackathonRispostaDTO(hackathon.getNome(),hackathon.getRegolamento(),hackathon.getScadenzaIscrizione(),
+                hackathon.getDataInizio(),hackathon.getDataFine(),hackathon.getLuogo(),hackathon.getPremioInDenaro(),
+                hackathon.getDimensioneMassimoTeam(),hackathon.getStato(),hackathon.getOrganizzatore(),hackathon.getGiudice(),
+                hackathon.getMentori());
+    }
+}

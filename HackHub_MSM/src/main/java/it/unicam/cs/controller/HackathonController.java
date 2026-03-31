@@ -3,9 +3,12 @@ package it.unicam.cs.controller;
 import it.unicam.cs.dto.HackathonCreazioneDTO;
 import it.unicam.cs.dto.HackathonModificaDTO;
 import it.unicam.cs.dto.HackathonRispostaDTO;
+import it.unicam.cs.dto.SegnalazioneRispostaDTO;
 import it.unicam.cs.model.Hackathon;
+import it.unicam.cs.model.Segnalazione;
 import it.unicam.cs.service.HackathonService;
 import it.unicam.cs.service.MentoreService;
+import it.unicam.cs.service.SegnalazioneService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,7 @@ public class HackathonController {
 
     private final HackathonService hackathonService;
     private final MentoreService mentoreService;
+
     public HackathonController(HackathonService hackathonService, MentoreService mentoreService) {
         this.hackathonService = hackathonService;
         this.mentoreService = mentoreService;
@@ -77,9 +81,7 @@ public class HackathonController {
         Hackathon hackathon = hackathonService.getHackathonByID(id);
         if (hackathon == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        HackathonRispostaDTO dto= new HackathonRispostaDTO(hackathon.getNome(),hackathon.getRegolamento(),
-                hackathon.getScadenzaIscrizione(),hackathon.getDataInizio(),hackathon.getDataFine(),hackathon.getLuogo(),
-                hackathon.getPremioInDenaro(),hackathon.getDimensioneMassimoTeam(),hackathon.getStato(),hackathon.getOrganizzatore(),hackathon.getGiudice(),hackathon.getMentori());
+        HackathonRispostaDTO dto= HackathonRispostaDTO.fromHackathon(hackathon);
         return ResponseEntity.ok(dto);
     }
 

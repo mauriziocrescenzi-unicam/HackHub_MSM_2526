@@ -52,4 +52,7 @@ public class OrganizzatoreService {
 
 
     }
+    public Organizzatore getOrganizzatoreById(long idOrganizzatore) {
+        return repository.findById(idOrganizzatore).orElse(null);
+    }
 }

@@ -18,10 +18,12 @@ ModificaHackathon forse il controllo dell'hackathon se è in iscrizione dopo?
 CASO D'USO: cancellazione hackathon
 
 Sistemare metodi TeamHackathon
-Simone
+Simone 10
     Hackathon
     Organizzatore
     Segnalazione
+    sottomissione
+    teamHackathon
 Matteo
     Team
     Invito

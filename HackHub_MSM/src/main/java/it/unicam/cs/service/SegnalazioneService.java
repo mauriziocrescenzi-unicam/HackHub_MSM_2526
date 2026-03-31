@@ -26,41 +26,43 @@ public class SegnalazioneService {
     /**
      * Verifica se la segnalazione è già stata effettuata
      * @param team team da segnalare
-     * @param idHackathon id dell'hackathon relativo alla segnalazione
-     * @param idMentore id del mentore che ha segnalato
+     * @param hackathon hackathon relativo alla segnalazione
+     * @param mentore mentore che ha segnalato
      * @param motivazione motivazione della segnalazione
      * @return true se la segnalazione va bene
      */
-    public boolean verificaSegnalazione(Team team,long idHackathon, long idMentore, String motivazione){
+    public boolean verificaSegnalazione(Team team,Hackathon hackathon, Mentore mentore, String motivazione){
         if (team == null) throw new IllegalArgumentException("Team non valido");
         if (motivazione.isEmpty()) throw new IllegalArgumentException("Motivazione non valida");
         //controllo che non ci sia già una segnalazione
         return repository.findAll().stream()
                 .anyMatch(s -> s.getTeam().equals(team)
-                        && s.getHackathon().getId() == idHackathon
-                        && s.getMentore().getId().equals(idMentore));
+                        && s.getHackathon().equals(hackathon)
+                        && s.getMentore().equals(mentore));
     }
 
     /**
      * Segnala un team
-     * @param team team da segnalare
+     * @param idTeam id del team da segnalare
      * @param idHackathon id dell'hackathon relativo alla segnalazione
      * @param idMentore id del mentore che ha segnalato
      * @param motivazione motivazione della segnalazione
      * @return true se la segnalazione è andata a buon fine, false altrimenti
      */
-    public boolean segnalaTeam(Team team,long idHackathon, long idMentore, String motivazione){
-        if (team == null) throw new IllegalArgumentException("Team non valido");
+    public boolean segnalaTeam(long idTeam,long idHackathon, long idMentore, String motivazione){
+        if (idTeam < 0) throw new IllegalArgumentException("Team non valido");
         if (motivazione.isEmpty()) throw new IllegalArgumentException("Motivazione non valida");
         if(idHackathon < 0) throw new IllegalArgumentException("Id hackathon non valido");
         if(idMentore < 0) throw new IllegalArgumentException("Id mentore non valido");
 
+        Team team=teamService.getTeamById(idTeam);
         // Recupera hackathon e mentore dalle rispettive persistence
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         Mentore mentore = mentoreService.getMentoreById(idMentore);
-        if (hackathon == null || mentore == null) {
+        if (team == null ||hackathon==null|| mentore == null) {
             return false;
         }
+        if (verificaSegnalazione(team,hackathon,mentore,motivazione)) return false;
         Segnalazione segnalazione = new Segnalazione(StatoSegnalazione.DA_GESTIRE,LocalDateTime.now(),motivazione,
                 team, mentore, hackathon);
         repository.save(segnalazione);
@@ -98,4 +100,6 @@ public class SegnalazioneService {
         repository.save(segnalazione);
         return true;
     }
+
+    public Segnalazione getSegnalazioneById(long id){return repository.findById(id).orElse(null);}
 }
