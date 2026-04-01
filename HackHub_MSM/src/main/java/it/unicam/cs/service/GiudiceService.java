@@ -79,4 +79,11 @@ public class GiudiceService {
     public boolean valutaSottomissione(Sottomissione sottomissione, int voto, String giudizio) {
         return sottomissioneService.valutaSottomissione(sottomissione, voto, giudizio);
     }
+
+    public Giudice getGiudiceById(Long idGiudice) {
+        if (idGiudice == null || idGiudice <= 0) {
+            return null;
+        }
+        return repository.findById(idGiudice).orElse(null);
+    }
 }
