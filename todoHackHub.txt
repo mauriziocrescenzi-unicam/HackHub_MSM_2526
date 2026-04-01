@@ -21,6 +21,9 @@ Modificare caso d'uso iscrivere Team, cambiare il service TeamService con TeamHa
 
 correggere tutti i metodi isQualcosa che restituiscono boolean invece di una lista
 
+da togliere amministratoreId sul DB
+rendere classificaDTO un record 
+
 
 Sistemare metodi TeamHackathon
 Simone 10
