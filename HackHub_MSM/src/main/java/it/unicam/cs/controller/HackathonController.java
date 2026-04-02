@@ -4,8 +4,11 @@ import it.unicam.cs.dto.HackathonCreazioneDTO;
 import it.unicam.cs.dto.HackathonModificaDTO;
 import it.unicam.cs.dto.HackathonRispostaDTO;
 import it.unicam.cs.model.Hackathon;
+import it.unicam.cs.model.Team;
 import it.unicam.cs.service.HackathonService;
 import it.unicam.cs.service.MentoreService;
+import it.unicam.cs.service.TeamHackathonService;
+import it.unicam.cs.service.TeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +21,14 @@ public class HackathonController {
 
     private final HackathonService hackathonService;
     private final MentoreService mentoreService;
+    private final TeamHackathonService teamHackathonService;
+    private final TeamService teamService;
 
-    public HackathonController(HackathonService hackathonService, MentoreService mentoreService) {
+    public HackathonController(HackathonService hackathonService, MentoreService mentoreService, TeamHackathonService teamHackathonService, TeamService teamService) {
         this.hackathonService = hackathonService;
         this.mentoreService = mentoreService;
+        this.teamHackathonService = teamHackathonService;
+        this.teamService = teamService;
     }
 
     @PostMapping
@@ -78,6 +85,28 @@ public class HackathonController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         HackathonRispostaDTO dto= HackathonRispostaDTO.fromHackathon(hackathon);
         return ResponseEntity.ok(dto);
+    }
+
+    //TODO testing e modifica metodi alla base uno riceve 2 entita uno due long
+    @PutMapping("{id}/iscriviTeam")
+    public ResponseEntity<String> iscrivereTeam(@PathVariable long id,@RequestBody Map<String,Object> body){
+        Hackathon hackathon = hackathonService.getHackathonByID(id);
+        if (hackathon == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
+        if(body.get("teamId")==null) return ResponseEntity.badRequest().body("Dati non validi");
+        long teamId= ((Number) body.get("teamId")).longValue();
+        Team team = teamService.getTeamById(teamId);
+        if(teamHackathonService.iscrivereTeam(hackathon,team)) return ResponseEntity.ok("Team iscritto al hackathon");
+        return ResponseEntity.badRequest().body("Dati non validi");
+    }
+    @PutMapping("/{id}/disiscrivereTeam")
+    public ResponseEntity<String> disiscrivereTeam(@PathVariable long id,@RequestBody Map<String,Object> body){
+        if (id <0)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
+        if(body.get("teamId")==null) return ResponseEntity.badRequest().body("Dati non validi");
+        long teamId= ((Number) body.get("teamId")).longValue();
+        if(teamHackathonService.disiscrivereTeam(teamId,id)) return ResponseEntity.ok("Team iscritto al hackathon");
+        return ResponseEntity.badRequest().body("Dati non validi");
     }
 
 }
