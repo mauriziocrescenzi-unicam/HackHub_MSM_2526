@@ -3,10 +3,7 @@ package it.unicam.cs.service;
 import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.model.Team;
 import it.unicam.cs.model.TeamHackathon;
-import it.unicam.cs.repository.HackathonRepository;
-import it.unicam.cs.repository.MembroTeamRepository;
 import it.unicam.cs.repository.TeamHackathonRepository;
-import it.unicam.cs.repository.TeamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -133,7 +130,7 @@ public class TeamHackathonService {
      * @param idHackathon
      * @return
      */
-    public boolean disiscriviTeam(Long idTeam,Long idHackathon){
+    public boolean disiscrivereTeam(Long idTeam, Long idHackathon){
         if (idHackathon == null || idHackathon <= 0) throw new IllegalArgumentException("Hackathon non valido.");
         if (idTeam == null || idTeam <= 0) throw new IllegalArgumentException("Team non valido.");
 
