@@ -7,15 +7,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="HackHub_MSM (2)" />
         <module name="HackHub_MSM (1)" />
         <module name="HackHub_MSM" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="HackHub_MSM (2)" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="HackHub_MSM" options="-parameters" />
+      <module name="HackHub_MSM (1)" options="-parameters" />
     </option>
   </component>
 </project>
