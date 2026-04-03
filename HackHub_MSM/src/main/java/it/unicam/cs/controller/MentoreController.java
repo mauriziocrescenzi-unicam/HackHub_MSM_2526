@@ -2,11 +2,8 @@ package it.unicam.cs.controller;
 
 import it.unicam.cs.dto.HackathonRispostaDTO;
 import it.unicam.cs.dto.RichiestaSupportoRispostaDTO;
-import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.RichiestaSupporto;
-import it.unicam.cs.model.StatoHackathon;
-import it.unicam.cs.service.HackathonService;
-import it.unicam.cs.service.MentoreService;
+import it.unicam.cs.model.*;
+import it.unicam.cs.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +17,20 @@ public class MentoreController {
 
     private final MentoreService mentoreService;
     private final HackathonService hackathonService;
+    private final TeamService teamService;
+    private final SegnalazioneService segnalazioneService;
 
-    public MentoreController(MentoreService mentoreService, HackathonService hackathonService) {
+    public MentoreController(MentoreService mentoreService,
+                             HackathonService hackathonService,
+                             TeamService teamService,
+                             SegnalazioneService segnalazioneService) {
         this.mentoreService = mentoreService;
         this.hackathonService = hackathonService;
+        this.teamService = teamService;
+        this.segnalazioneService = segnalazioneService;
     }
 
+    // UC: Visualizzare lista hackathon del mentore
     @PutMapping("/{id}")
     public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(
             @PathVariable long id,
@@ -44,6 +49,7 @@ public class MentoreController {
         return ResponseEntity.ok(risposta);
     }
 
+    // UC: Visualizzare richieste di supporto
     @GetMapping("/{id}/hackathons/{idHackathon}/richieste")
     public ResponseEntity<List<RichiestaSupportoRispostaDTO>> getRichiesteSupporto(
             @PathVariable long id,
@@ -66,6 +72,7 @@ public class MentoreController {
         return ResponseEntity.ok(risposta);
     }
 
+    // UC: Rispondere a una richiesta di supporto
     @PutMapping("/{id}/richieste/{idRichiesta}")
     public ResponseEntity<String> rispostaRichiestaSupporto(
             @PathVariable long id,
@@ -84,5 +91,28 @@ public class MentoreController {
         if (!mentoreService.rispostaRichiestaSupporto(richiesta, risposta))
             return ResponseEntity.badRequest().body("Dati non validi");
         return ResponseEntity.ok("Risposta inviata con successo");
+    }
+
+    // UC: Segnalare un team
+    @PostMapping("/{id}/hackathons/{idHackathon}/segnalazioni")
+    public ResponseEntity<String> segnalaTeam(
+            @PathVariable long id,
+            @PathVariable long idHackathon,
+            @RequestBody Map<String, Object> body) {
+        if (mentoreService.getMentoreById(id) == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
+        if (body.get("idTeam") == null || body.get("motivazione") == null)
+            return ResponseEntity.badRequest().body("Dati non validi");
+        long idTeam = ((Number) body.get("idTeam")).longValue();
+        String motivazione = body.get("motivazione").toString();
+        if (motivazione.isBlank())
+            return ResponseEntity.badRequest().body("Motivazione non valida");
+        try {
+            if (!segnalazioneService.segnalaTeam(idTeam, idHackathon, id, motivazione))
+                return ResponseEntity.badRequest().body("Segnalazione non riuscita");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body("Segnalazione inviata con successo");
     }
 }
