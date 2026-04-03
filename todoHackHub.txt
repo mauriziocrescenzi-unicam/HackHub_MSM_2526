@@ -24,6 +24,9 @@ correggere tutti i metodi isQualcosa che restituiscono boolean invece di una lis
 da togliere amministratoreId sul DB
 rendere classificaDTO un record 
 
+metodi come checkStato, isIscrittoHackathon, getDataFine, isPresente, ...sono da mappare?
+Correggere getMembri, inviaSottomissione e isPresente su MembroTeamController
+
 
 Sistemare metodi TeamHackathon
 Simone 10

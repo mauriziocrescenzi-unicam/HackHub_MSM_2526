@@ -232,51 +232,10 @@ public class MembroTeamService {
 
         MembroTeam membroTeam = repository.findById(idMembroTeam).orElse(null);
         if (membroTeam == null) throw new IllegalArgumentException("MembroTeam non trovato.");
-        //prendo la lista di teamhackathon riguardate a il team del membroTeam
+        //prendo la lista di teamhackathon riguardate il team del membroTeam
         List<TeamHackathon> teamHackathonList= teamHackathonRepository.findAll().stream().filter(th ->
                 th.getHackathon().getStato() == stato && Objects.equals(th.getTeam().getId(), membroTeam.getTeam().getId())).toList();
         return teamHackathonList.stream().map(TeamHackathon::getHackathon).toList();
-    }
-
-    /**
-     * Verifica se il team del membro è iscritto ad almeno un hackathon.
-     * Corrisponde a isIscrittoHackathon(teamMittente) nel sequence diagram.
-     *
-     * @param idMembroTeam ID del membro del team
-     * @return Lista degli hackathon a cui il team è iscritto, lista vuota se nessuno
-     */
-    public List<Hackathon> isIscrittoHackathon(Long idMembroTeam) {
-        if (idMembroTeam == null || idMembroTeam <= 0) {
-            return new ArrayList<>();
-        }
-        MembroTeam membroTeam = repository.findById(idMembroTeam).orElse(null);
-        if (membroTeam == null) {
-            return new ArrayList<>();
-        }
-        return teamHackathonRepository.findAll().stream()
-                .filter(th -> Objects.equals(th.getTeam().getId(), membroTeam.getTeam().getId()))
-                .map(TeamHackathon::getHackathon)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Verifica se almeno uno degli hackathon del team è nello stato richiesto.
-     * Corrisponde a checkStato(listaHackathon, "in corso") nel sequence diagram.
-     *
-     * @param listaHackathon Lista di hackathon da verificare
-     * @param stato          Stato richiesto
-     * @return true se almeno un hackathon è nello stato richiesto, false altrimenti
-     */
-    public boolean checkStato(List<Hackathon> listaHackathon, StatoHackathon stato) {
-        if (listaHackathon == null || listaHackathon.isEmpty() || stato == null) {
-            return false;
-        }
-        for (Hackathon h : listaHackathon) {
-            if (h.getStato() == stato) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

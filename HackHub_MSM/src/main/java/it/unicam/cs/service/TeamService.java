@@ -2,6 +2,7 @@ package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
 import it.unicam.cs.repository.HackathonRepository;
+import it.unicam.cs.repository.MembroTeamRepository;
 import it.unicam.cs.repository.TeamHackathonRepository;
 import it.unicam.cs.repository.TeamRepository;
 import org.springframework.stereotype.Service;
@@ -26,14 +27,16 @@ public class TeamService {
     private final HackathonRepository hackathonRepository;
     private final TeamHackathonRepository teamHackathonRepository;
     private final MembroTeamService membroTeamService;
+    private final MembroTeamRepository membroTeamRepository;
     private final HackathonService hackathonService;
     private final UtenteService utenteService;
 
-    public TeamService(TeamRepository repository, HackathonRepository hackathonRepository, TeamHackathonRepository teamHackathonRepository, MembroTeamService membroTeamService, HackathonService hackathonService,UtenteService utenteService) {
+    public TeamService(TeamRepository repository, HackathonRepository hackathonRepository, TeamHackathonRepository teamHackathonRepository, MembroTeamService membroTeamService, MembroTeamRepository membroTeamRepository, HackathonService hackathonService,UtenteService utenteService) {
         this.repository = repository;
         this.hackathonRepository = hackathonRepository;
         this.teamHackathonRepository = teamHackathonRepository;
         this.membroTeamService = membroTeamService;
+        this.membroTeamRepository = membroTeamRepository;
         this.hackathonService = hackathonService;
         this.utenteService = utenteService;
     }
@@ -267,5 +270,16 @@ public class TeamService {
         // Elimina il team
         repository.deleteById(idTeam);
         return true;
+    }
+
+    public Team getTeamByMembroId(long idMembro) {
+        if (idMembro <= 0) {
+            return null;
+        }
+        MembroTeam membroTeam = membroTeamRepository.findByUtenteId(idMembro);
+        if (membroTeam == null) {
+            return null; // Membro non appartiene a nessun team
+        }
+        return membroTeam.getTeam();
     }
 }
