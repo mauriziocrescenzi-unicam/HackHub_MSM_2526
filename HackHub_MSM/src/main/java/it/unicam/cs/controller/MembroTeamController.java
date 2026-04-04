@@ -1,6 +1,8 @@
 package it.unicam.cs.controller;
 
 import it.unicam.cs.dto.HackathonRispostaDTO;
+import it.unicam.cs.dto.MembroTeamRispostaDTO;
+import it.unicam.cs.dto.SottomissioneCreazioneDTO;
 import it.unicam.cs.model.*;
 import it.unicam.cs.service.*;
 import org.springframework.http.HttpStatus;
@@ -39,15 +41,10 @@ public class MembroTeamController {
     /**
      * GET /membro-team/{idMembro}/hackathons/iscritto
      * Restituisce la lista degli hackathon a cui il team del membro è iscritto.
-     * Corrisponde a isIscrittoHackathon(team) nel sequence diagram.
-     *
-     * @param idMembro ID del membro del team
-     * @return Lista degli hackathon a cui il team è iscritto
+     * Usa DTO per non esporre entità JPA.
      */
     @GetMapping("/{idMembro}/hackathons/iscritto")
     public ResponseEntity<List<HackathonRispostaDTO>> isIscrittoHackathon(@PathVariable long idMembro) {
-
-        // Recupera il team del membro
         Team team = teamService.getTeamByMembroId(idMembro);
         if (team == null) {
             return ResponseEntity.notFound().build();
@@ -110,7 +107,7 @@ public class MembroTeamController {
 
         Team team = teamService.getTeamByMembroId(idMembro);
         if (team == null) {
-            return ResponseEntity.notFound().body(null);
+            return ResponseEntity.notFound().build();
         }
         boolean presente = sottomissioneService.isPresente(team.getId(), idHackathon);
         return ResponseEntity.ok(presente);
@@ -119,34 +116,25 @@ public class MembroTeamController {
     /**
      * POST /membro-team/{idMembro}/hackathons/{idHackathon}/sottomissione
      * Invia una nuova sottomissione per un team in un hackathon.
-     * Corrisponde a inviaSottomissione(nome, link, idTeam, idHackathon) nel sequence diagram.
-     *
-     * @param idMembro ID del membro del team
-     * @param idHackathon ID dell'hackathon
-     * @param body Corpo della richiesta con nome e link (es. {"nome": "...", "link": "..."})
-     * @return Messaggio di successo o errore
+     * Usa DTO per l'input invece di Map.
      */
     @PostMapping("/{idMembro}/hackathons/{idHackathon}/sottomissione")
-    public ResponseEntity<String> inviaSottomissione(@PathVariable long idMembro, @PathVariable long idHackathon, @RequestBody Map<String, Object> body) {
-        if (body.get("nome") == null || body.get("link") == null) {
-            return ResponseEntity.badRequest().body("Nome e link richiesti");
-        }
-        // non devo usare DTO? da chiedere a qwen
-        String nome = body.get("nome").toString();
-        String link = body.get("link").toString();
-
+    public ResponseEntity<String> inviaSottomissione(@PathVariable long idMembro,
+                                                     @PathVariable long idHackathon,
+                                                     @RequestBody SottomissioneCreazioneDTO dto) {
         Team team = teamService.getTeamByMembroId(idMembro);
         if (team == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Team non trovato");
         }
-
+        // Verifica coerenza tra path variables e DTO (opzionale ma consigliato)
+        if (dto.idHackathon() != idHackathon) {
+            return ResponseEntity.badRequest().body("Incoerenza negli ID hackathon");
+        }
         boolean inviato = sottomissioneService.inviaSottomissione(
-                nome, link, team.getId(), idHackathon);
-
+                dto.nome(), dto.link(), team.getId(), idHackathon);
         if (!inviato) {
             return ResponseEntity.badRequest().body("Sottomissione non inviata");
         }
-
         return ResponseEntity.status(HttpStatus.CREATED).body("Sottomissione inviata con successo");
     }
 
@@ -155,19 +143,18 @@ public class MembroTeamController {
     /**
      * GET /membro-team/team/{idTeam}/membri
      * Restituisce la lista dei membri di un team specifico.
-     * Corrisponde a getMembri(idTeam) nel sequence diagram.
-     *
-     * @param idTeam ID del team
-     * @return Lista dei membri del team
+     * Usa DTO per non esporre entità JPA.
      */
     @GetMapping("/team/{idTeam}/membri")
-    //DTO per come è fatto un membro
-    public ResponseEntity<List<MembroTeam>> getMembri(@PathVariable long idTeam) {
+    public ResponseEntity<List<MembroTeamRispostaDTO>> getMembri(@PathVariable long idTeam) {
         List<MembroTeam> membri = membroTeamService.getMembri(idTeam);
         if (membri.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(membri);
+        List<MembroTeamRispostaDTO> risposta = membri.stream()
+                .map(MembroTeamRispostaDTO::fromMembroTeam)
+                .toList();
+        return ResponseEntity.ok(risposta);
     }
 
     /**
