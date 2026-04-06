@@ -55,27 +55,21 @@ public class TeamHackathonService {
         if (team == null || hackathon == null) {
             return false;
         }
-
-        if (!isIscrittoHackathon(team).isEmpty()) {
+        if (checkIscrizioneHackathon(team.getId(), hackathon.getId())) {
             return false;
         }
-
         if (hackathon.getScadenzaIscrizione().isBefore(LocalDateTime.now())) {
             return false;
         }
-
         int maxMembri = hackathon.getDimensioneMassimoTeam();
         if (membroTeamService.getMembri(team.getId()).size() > maxMembri) {
             return false;
         }
-
         if (membroTeamService.getMembri(team.getId()).isEmpty()) {
             return false;
         }
-
         TeamHackathon teamHackathon = new TeamHackathon(team, hackathon);
         repository.save(teamHackathon);
-
         return true;
     }
 
@@ -98,12 +92,12 @@ public class TeamHackathonService {
     }
 
     public boolean checkIscrizioneHackathon(Long idTeam, long idHackathon) {
-        if(idHackathon <0) throw new NullPointerException("Hackathon non valido");
-        if(idTeam <0) throw new NullPointerException("Team non valido");
-        return repository.findAll().stream()
-                .anyMatch(th -> th.getTeam().getId().equals(idTeam)
-                        && th.getHackathon().getId() ==idHackathon);
-
+        // Validazione input
+        if (idTeam == null || idTeam <= 0 || idHackathon <= 0) {
+            return false;
+        }
+        // Query ottimizzata: restituisce boolean senza caricare entità
+        return repository.existsByTeamIdAndHackathonId(idTeam, idHackathon);
     }
 
     public boolean rimuoviTeam(long idTeam, long idHackathon){

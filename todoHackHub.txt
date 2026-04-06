@@ -26,7 +26,8 @@ rendere classificaDTO un record
 
 metodi come checkStato, isIscrittoHackathon, getDataFine, isPresente, ...sono da mappare?
 
-da rivedere eliminaMembro, è fatto male, deve essere una put, non una delete
+da rivedere eliminaMembro se va bene come delete oppure da cambiare
+da rivedere getSottomissione di MembroStaff per capire se va bene (controllo hackathon nel service)
 
 
 Sistemare metodi TeamHackathon

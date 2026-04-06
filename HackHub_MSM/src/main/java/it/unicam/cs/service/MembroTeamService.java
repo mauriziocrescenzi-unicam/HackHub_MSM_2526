@@ -225,7 +225,6 @@ public class MembroTeamService {
         // Riutilizza la logica di abbandonaTeam
         return abbandonaTeam(idMembro, idTeam);
     }
-
     public List<Hackathon> getListahackathon(StatoHackathon stato,Long idMembroTeam){
         if (stato == null) throw new IllegalArgumentException("Stato non valido.");
         if (idMembroTeam == null || idMembroTeam <= 0) throw new IllegalArgumentException("MembroTeam non valido.");
