@@ -53,9 +53,28 @@ public class MembroDelloStaffService {
 
     /**
      * Restituisce una sottomissione specifica per ID.
+     * @param idMembro ID del membro dello staff
+     * @param idSottomissione ID della sottomissione da recuperare
+     * @return La sottomissione se autorizzato, null altrimenti
      */
-    public Sottomissione getSottomissione(Long idSottomissione) {
-        if (idSottomissione == null) throw new IllegalArgumentException("Id non valido.");
-        return sottomissioneService.getSottomissioneById(idSottomissione);
+    public Sottomissione getSottomissione(Long idMembro, Long idSottomissione) {
+        if (idMembro == null || idSottomissione == null || idMembro <= 0 || idSottomissione <= 0) {
+            throw new IllegalArgumentException("ID non valido.");
+        }
+        List<Hackathon> hackathonAutorizzati = getListaHackathon(idMembro);
+        if (hackathonAutorizzati.isEmpty()) {
+            return null;
+        }
+        List<Long> idHackathonAutorizzati = hackathonAutorizzati.stream()
+                .map(Hackathon::getId)
+                .toList();
+        Sottomissione sottomissione = sottomissioneService.getSottomissioneById(idSottomissione);
+        if (sottomissione == null) {
+            return null;
+        }
+        if (!idHackathonAutorizzati.contains(sottomissione.getIdHackathon())) {
+            return null; // Non autorizzato
+        }
+        return sottomissione;
     }
 }

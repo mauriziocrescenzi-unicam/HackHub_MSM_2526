@@ -25,7 +25,8 @@ da togliere amministratoreId sul DB
 rendere classificaDTO un record 
 
 metodi come checkStato, isIscrittoHackathon, getDataFine, isPresente, ...sono da mappare?
-Correggere getMembri, inviaSottomissione e isPresente su MembroTeamController
+
+da rivedere eliminaMembro, è fatto male, deve essere una put, non una delete
 
 
 Sistemare metodi TeamHackathon

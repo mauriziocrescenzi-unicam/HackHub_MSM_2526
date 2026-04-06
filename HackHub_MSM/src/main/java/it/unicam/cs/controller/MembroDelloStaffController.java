@@ -63,11 +63,12 @@ public class MembroDelloStaffController {
         return ResponseEntity.ok(risposta);
     }
 
-    @GetMapping("/sottomissioni/{idSottomissione}")
-    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione(
-            @PathVariable long idSottomissione) {
-        Sottomissione sottomissione = membroStaffService.getSottomissione(idSottomissione);
+    @GetMapping("/{idMembro}/sottomissioni/{idSottomissione}")
+    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione(@PathVariable long idMembro, @PathVariable long idSottomissione) {
+        Sottomissione sottomissione = membroStaffService.getSottomissione(idMembro, idSottomissione);
         if (sottomissione == null) {
+            // Può significare: sottomissione non trovata OPPURE non autorizzato
+            // Per sicurezza REST, restituiamo 404 in entrambi i casi
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         SottomissioneRispostaDTO risposta = SottomissioneRispostaDTO.fromSottomissione(sottomissione);
