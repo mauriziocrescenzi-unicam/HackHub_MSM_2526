@@ -48,27 +48,27 @@ public class TeamService {
      *
      * @param nome Nome del team
      * @param descrizione Descrizione del team
-     * @param idUtenteCreatore ID dell'utente che crea il team
+     * @param idUtente ID dell'utente che crea il team
      * @return true se la creazione è riuscita, false altrimenti
      */
-    public boolean creaTeam(String nome, String descrizione, Long idUtenteCreatore) {
+    public boolean creaTeam(String nome, String descrizione, Long idUtente) {
         // Validazione input base
         if (nome == null || nome.trim().isEmpty()) {
             return false;
         }
-        if(utenteService.findById(idUtenteCreatore) == null) return false;
+        if(utenteService.findById(idUtente) == null) return false;
 
         // Verifica che l'utente non sia già membro di un team
-        if (!membroTeamService.verificaDisponibilitaMembro(idUtenteCreatore)) {
+        if (!membroTeamService.verificaDisponibilitaMembro(idUtente)) {
             return false; // Utente già membro di un team
         }
 
         // Crea e persisti il team
-        Team nuovoTeam = new Team(nome, descrizione, idUtenteCreatore);
+        Team nuovoTeam = new Team(nome, descrizione);
         repository.save(nuovoTeam);
 
         // Aggiungi il creatore come primo membro (amministratore)
-        membroTeamService.addMembro(idUtenteCreatore, nuovoTeam.getId());
+        membroTeamService.addMembro(idUtente, nuovoTeam.getId());
 
         return true;
     }

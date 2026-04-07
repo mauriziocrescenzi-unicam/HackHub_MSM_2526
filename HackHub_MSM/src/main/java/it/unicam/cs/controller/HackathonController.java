@@ -87,26 +87,5 @@ public class HackathonController {
         return ResponseEntity.ok(dto);
     }
 
-    //TODO testing e modifica metodi alla base uno riceve 2 entita uno due long
-    @PutMapping("{id}/iscriviTeam")
-    public ResponseEntity<String> iscrivereTeam(@PathVariable long id,@RequestBody Map<String,Object> body){
-        Hackathon hackathon = hackathonService.getHackathonByID(id);
-        if (hackathon == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
-        if(body.get("teamId")==null) return ResponseEntity.badRequest().body("Dati non validi");
-        long teamId= ((Number) body.get("teamId")).longValue();
-        Team team = teamService.getTeamById(teamId);
-        if(teamHackathonService.iscrivereTeam(hackathon,team)) return ResponseEntity.ok("Team iscritto al hackathon");
-        return ResponseEntity.badRequest().body("Dati non validi");
-    }
-    @PutMapping("/{id}/disiscrivereTeam")
-    public ResponseEntity<String> disiscrivereTeam(@PathVariable long id,@RequestBody Map<String,Object> body){
-        if (id <0)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
-        if(body.get("teamId")==null) return ResponseEntity.badRequest().body("Dati non validi");
-        long teamId= ((Number) body.get("teamId")).longValue();
-        if(teamHackathonService.disiscrivereTeam(teamId,id)) return ResponseEntity.ok("Team iscritto al hackathon");
-        return ResponseEntity.badRequest().body("Dati non validi");
-    }
 
 }

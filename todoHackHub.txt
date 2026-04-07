@@ -31,20 +31,11 @@ da rivedere getSottomissione di MembroStaff per capire se va bene (controllo hac
 
 
 Sistemare metodi TeamHackathon
-Simone 10
-    Hackathon
-    Organizzatore
-    Segnalazione
-    sottomissione
-    teamHackathon
-Matteo
-    Team
-    Invito
-    Mentore
-Maurizio
-    MembroTeam
-    Giudice
-    MembroStaff
+- segnalaTeam: possibilità di segnalare più volte un team (già segnalato);
+- abbandona team ed elimina membro, passare gli id dal body non direttamente dal path;
+- quando un team viene eliminato/rimosso/abbandona un hackathon, impostare a false il valore boolean do TeamHackathon.
+- implementare inviaRichiestaSupporto su MembroTeamService e Controller
+- controllare inviareInvito nel service
 ------------tutor---------------
 chiedere come gestire i casi d'uso con include o extend e nel caso di include come riportarlo sui sequence (proclama vincitore --include--> erogazione premio)
 

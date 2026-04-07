@@ -2,6 +2,7 @@ package it.unicam.cs.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Objects;
  */
 @Entity
 @Getter
+@Setter
 @Table(name = "team")
 public class Team {
 
@@ -29,9 +31,7 @@ public class Team {
     @Column(name = "data_creazione")
     private LocalDateTime dataCreazione;
 
-    // ID dell'amministratore del team (riferimento a Utente)
-    @Column(name = "amministratore_id")
-    private Long amministratoreId;
+
 
     /**
      * Relazione uno-a-molti con TeamHackathon.
@@ -58,40 +58,14 @@ public class Team {
      *
      * @param nome Nome del team
      * @param descrizione Descrizione del team
-     * @param amministratoreId ID dell'utente che crea il team
      */
-    public Team(String nome, String descrizione, Long amministratoreId) {
+    public Team(String nome, String descrizione) {
         this.nome = nome;
         this.descrizione = descrizione;
         this.dataCreazione = LocalDateTime.now();
-        this.amministratoreId = amministratoreId;
     }
 
-    // ==================== SETTER ====================
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public void setDescrizione(String descrizione) {
-        this.descrizione = descrizione;
-    }
-
-    public void setDataCreazione(LocalDateTime dataCreazione) {
-        this.dataCreazione = dataCreazione;
-    }
-
-    public void setAmministratoreId(Long amministratoreId) {
-        this.amministratoreId = amministratoreId;
-    }
-
-    public void setHackathonIscritti(List<TeamHackathon> hackathonIscritti) {
-        this.hackathonIscritti = hackathonIscritti;
-    }
-
-    public void setMembri(List<MembroTeam> membri) {
-        this.membri = membri;
-    }
 
     // ==================== METODI DI UTILITÀ ====================
 

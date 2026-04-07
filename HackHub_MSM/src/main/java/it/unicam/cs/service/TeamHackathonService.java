@@ -97,7 +97,12 @@ public class TeamHackathonService {
             return false;
         }
         // Query ottimizzata: restituisce boolean senza caricare entità
-        return repository.existsByTeamIdAndHackathonId(idTeam, idHackathon);
+        TeamHackathon teamHackathon = repository.findByTeamIdAndHackathonId(idTeam, idHackathon);
+        if(teamHackathon==null)
+            return false;
+        else return teamHackathon.isIscritto();
+
+
     }
 
     public boolean rimuoviTeam(long idTeam, long idHackathon){
@@ -113,8 +118,8 @@ public class TeamHackathonService {
         if (teamHackathon == null) {
             return false; // Iscrizione non trovata
         }
-
-        repository.delete(teamHackathon);
+        teamHackathon.setIscritto(false);
+        repository.save(teamHackathon);
         return true;
     }
 
@@ -130,7 +135,9 @@ public class TeamHackathonService {
 
         TeamHackathon teamHackathon = repository.findByTeamIdAndHackathonId(idTeam,idHackathon);
         if (teamHackathon == null) return false;
-        repository.delete(teamHackathon);
+        if (!teamHackathon.isIscritto()) return false;
+        teamHackathon.setIscritto(false);
+        repository.save(teamHackathon);
         return true;
     }
 }

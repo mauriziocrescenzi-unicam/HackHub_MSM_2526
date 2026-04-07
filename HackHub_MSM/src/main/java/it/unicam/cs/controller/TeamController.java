@@ -36,16 +36,4 @@ public class TeamController {
         return ResponseEntity.badRequest().body("Dati non validi");
     }
 
-    @PostMapping("/{idTeam}/hackathons/{idHackathon}")
-    public ResponseEntity<String> iscrivereTeam(@PathVariable Long idTeam, @PathVariable long idHackathon) {
-        Team team = teamService.getTeamById(idTeam);
-        if (team == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Team non trovato");
-        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
-        if (hackathon == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
-        if (teamService.iscrivereTeam(hackathon, team))
-            return ResponseEntity.status(HttpStatus.CREATED).body("Team iscritto con successo");
-        return ResponseEntity.badRequest().body("Iscrizione non riuscita");
-    }
 }

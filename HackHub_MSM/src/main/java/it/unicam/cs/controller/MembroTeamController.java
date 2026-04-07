@@ -113,30 +113,7 @@ public class MembroTeamController {
         return ResponseEntity.ok(presente);
     }
 
-    /**
-     * POST /membro-team/{idMembro}/hackathons/{idHackathon}/sottomissione
-     * Invia una nuova sottomissione per un team in un hackathon.
-     * Usa DTO per l'input invece di Map.
-     */
-    @PostMapping("/{idMembro}/hackathons/{idHackathon}/sottomissione")
-    public ResponseEntity<String> inviaSottomissione(@PathVariable long idMembro,
-                                                     @PathVariable long idHackathon,
-                                                     @RequestBody SottomissioneCreazioneDTO dto) {
-        Team team = teamService.getTeamByMembroId(idMembro);
-        if (team == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Team non trovato");
-        }
-        // Verifica coerenza tra path variables e DTO (opzionale ma consigliato)
-        if (dto.idHackathon() != idHackathon) {
-            return ResponseEntity.badRequest().body("Incoerenza negli ID hackathon");
-        }
-        boolean inviato = sottomissioneService.inviaSottomissione(
-                dto.nome(), dto.link(), team.getId(), idHackathon);
-        if (!inviato) {
-            return ResponseEntity.badRequest().body("Sottomissione non inviata");
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body("Sottomissione inviata con successo");
-    }
+   
 
     // ==================== GESTIONE MEMBRI TEAM ====================
 
