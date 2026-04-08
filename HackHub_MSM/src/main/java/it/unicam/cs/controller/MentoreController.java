@@ -50,10 +50,13 @@ public class MentoreController {
     }
 
     // UC: Visualizzare richieste di supporto
-    @GetMapping("/{id}/hackathons/{idHackathon}/richieste")
+    @PutMapping("/{id}/richieste")
     public ResponseEntity<List<RichiestaSupportoRispostaDTO>> getRichiesteSupporto(
             @PathVariable long id,
-            @PathVariable long idHackathon) {
+            @RequestBody Map<String, Object> body) {
+        if (body.get("idHackathon") == null)
+            return ResponseEntity.badRequest().build();
+        Long idHackathon = ((Number) body.get("idHackathon")).longValue();
         if (mentoreService.getMentoreById(id) == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
@@ -73,15 +76,15 @@ public class MentoreController {
     }
 
     // UC: Rispondere a una richiesta di supporto
-    @PutMapping("/{id}/richieste/{idRichiesta}")
+    @PutMapping("/{id}/richieste/rispondi")
     public ResponseEntity<String> rispostaRichiestaSupporto(
             @PathVariable long id,
-            @PathVariable Long idRichiesta,
             @RequestBody Map<String, Object> body) {
         if (mentoreService.getMentoreById(id) == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
-        if (body.get("risposta") == null)
+        if (body.get("idRichiesta") == null || body.get("risposta") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
+        Long idRichiesta = ((Number) body.get("idRichiesta")).longValue();
         String risposta = body.get("risposta").toString();
         RichiestaSupporto richiesta = mentoreService.getRichiestaSupporto(idRichiesta);
         if (richiesta == null)
@@ -94,16 +97,16 @@ public class MentoreController {
     }
 
     // UC: Segnalare un team
-    @PostMapping("/{id}/hackathons/{idHackathon}/segnalazioni")
+    @PostMapping("/{id}/segnalazioni")
     public ResponseEntity<String> segnalaTeam(
             @PathVariable long id,
-            @PathVariable long idHackathon,
             @RequestBody Map<String, Object> body) {
         if (mentoreService.getMentoreById(id) == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
-        if (body.get("idTeam") == null || body.get("motivazione") == null)
+        if (body.get("idTeam") == null || body.get("idHackathon") == null || body.get("motivazione") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
         long idTeam = ((Number) body.get("idTeam")).longValue();
+        long idHackathon = ((Number) body.get("idHackathon")).longValue();
         String motivazione = body.get("motivazione").toString();
         if (motivazione.isBlank())
             return ResponseEntity.badRequest().body("Motivazione non valida");

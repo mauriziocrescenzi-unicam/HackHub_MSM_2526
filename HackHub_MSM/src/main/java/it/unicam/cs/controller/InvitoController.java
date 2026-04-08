@@ -24,6 +24,7 @@ public class InvitoController {
         this.utenteService = utenteService;
     }
 
+    // UC: Inviare un invito
     @PostMapping
     public ResponseEntity<String> inviareInvito(@RequestBody Map<String, Object> body) {
         if (body.get("idMittente") == null || body.get("idDestinatario") == null)
@@ -44,6 +45,7 @@ public class InvitoController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Invito inviato con successo");
     }
 
+    // UC: Visualizzare lista inviti
     @GetMapping("/{idUtente}")
     public ResponseEntity<List<InvitoRispostaDTO>> getListaInviti(@PathVariable Long idUtente) {
         Utente utente = utenteService.findById(idUtente);
@@ -58,13 +60,13 @@ public class InvitoController {
         return ResponseEntity.ok(risposta);
     }
 
-    @PutMapping("/{idInvito}")
-    public ResponseEntity<String> valutareInvito(
-             @PathVariable Long idInvito,
-            @RequestBody Map<String, Object> body) {
-        if (body.get("idUtente") == null || body.get("risposta") == null)
+    // UC: Valutare un invito
+    @PutMapping("/valuta")
+    public ResponseEntity<String> valutareInvito(@RequestBody Map<String, Object> body) {
+        if (body.get("idUtente") == null || body.get("idInvito") == null || body.get("risposta") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
         Long idUtente = ((Number) body.get("idUtente")).longValue();
+        Long idInvito = ((Number) body.get("idInvito")).longValue();
         boolean risposta = (boolean) body.get("risposta");
         Utente utente = utenteService.findById(idUtente);
         if (utente == null)
