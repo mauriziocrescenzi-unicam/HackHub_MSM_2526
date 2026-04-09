@@ -25,20 +25,17 @@ public class MembroTeamService {
     private final UtenteRepository utenteRepository;
     private final TeamRepository teamRepository;
     private final TeamHackathonRepository teamHackathonRepository;
-    private final HackathonService hackathonService;
     private final RichiestaSupportoService richiestaSupportoService;
 
     public MembroTeamService(MembroTeamRepository repository,
                              UtenteRepository utenteRepository,
                              TeamRepository teamRepository,
                              TeamHackathonRepository teamHackathonRepository,
-                             HackathonService hackathonService,
                              RichiestaSupportoService richiestaSupportoService) {
         this.repository = repository;
         this.utenteRepository = utenteRepository;
         this.teamRepository = teamRepository;
         this.teamHackathonRepository = teamHackathonRepository;
-        this.hackathonService = hackathonService;
         this.richiestaSupportoService = richiestaSupportoService;
     }
 
@@ -182,34 +179,65 @@ public class MembroTeamService {
         return getAllMembri().size();
     }
 
+
     /**
-     * Gestisce l'abbandono di un membro da un team.
-     * Verifica che il membro esista nel team prima di procedere con la rimozione.
-     * Questo metodo è progettato per essere chiamato quando un membro decide
-     * volontariamente di lasciare il team.
+     * Elimina completamente un team dal sistema.
+     * Questo metodo dovrebbe essere chiamato solo quando un team rimane senza membri.
      *
-     * @param idMembro ID del membro che abbandona il team
-     * @param idTeam ID del team da abbandonare
-     * @return true se l'abbandono è avvenuto con successo, false se il membro
-     *         non è stato trovato nel team o si è verificato un errore
+     * @param idTeam ID del team da eliminare
+     * @return true se l'eliminazione è avvenuta con successo, false altrimenti
      */
-    public boolean abbandonaTeam(Long idMembro, Long idTeam) {
-        if (idMembro == null || idTeam == null) {
+    public boolean eliminaTeam(Long idTeam) {
+        if (idTeam == null || idTeam < 0) {
             return false;
         }
 
-        // Trova il membro nel team
-        MembroTeam membroDaRimuovere = repository.findAll().stream()
-                .filter(m -> m.getUtente().getId().equals(idMembro) &&
-                        m.getTeam().getId().equals(idTeam))
-                .findFirst()
-                .orElse(null);
-
-        if (membroDaRimuovere == null) {
-            return false; // Membro non trovato nel team
+        // Verifica che il team esista
+        Team team = teamRepository.findById(idTeam).orElse(null);
+        if (team == null) {
+            return false; // Team non trovato
         }
 
-        return rimuoviMembro(membroDaRimuovere);
+        // Verifica che il team non abbia membri (usa il repository direttamente)
+        List<MembroTeam> membri = repository.findByTeamId(idTeam);
+        if (!membri.isEmpty()) {
+            return false; // Il team ha ancora membri
+        }
+
+        // Rimuovi il team da tutti gli hackathon associati
+        List<TeamHackathon> associazioni = teamHackathonRepository.findByTeamId(idTeam);
+        teamHackathonRepository.deleteAll(associazioni);
+
+        // Elimina il team
+        teamRepository.deleteById(idTeam);
+        return true;
+    }
+
+    /**
+     * Gestisce l'abbandono volontario di un membro da un team.
+     * Se dopo l'abbandono il team rimane senza membri, il team viene eliminato.
+     *
+     * @param idMembro ID del membro che abbandona
+     * @param idTeam ID del team da abbandonare
+     * @return true se l'abbandono è avvenuto con successo, false altrimenti
+     */
+    public boolean abbandonaTeam(Long idMembro, Long idTeam) {
+        if (idMembro == null || idTeam == null || idMembro <= 0 || idTeam <= 0) {
+            return false;
+        }
+        MembroTeam membroTeam = repository.findByUtenteIdAndTeamId(idMembro, idTeam)
+                .orElse(null);
+        if (membroTeam == null) {
+            return false; // Membro non trovato nel team specificato
+        }
+        // Rimuovi l'associazione membro-team
+        repository.delete(membroTeam);
+        // Verifica se il team è rimasto senza membri
+        List<MembroTeam> membriRimanenti = repository.findByTeamId(idTeam);
+        if (membriRimanenti.isEmpty()) {
+            eliminaTeam(idTeam);
+        }
+        return true;
     }
 
     /**
@@ -221,59 +249,37 @@ public class MembroTeamService {
      * @param idTeam ID del team da cui rimuovere il membro
      * @return true se l'eliminazione è avvenuta con successo, false altrimenti
      */
-    public boolean eliminaMembro(Long idMembro, Long idTeam) {
-        // Riutilizza la logica di abbandonaTeam
-        return abbandonaTeam(idMembro, idTeam);
-    }
-    public List<Hackathon> getListahackathon(StatoHackathon stato,Long idMembroTeam){
-        if (stato == null) throw new IllegalArgumentException("Stato non valido.");
-        if (idMembroTeam == null || idMembroTeam <= 0) throw new IllegalArgumentException("MembroTeam non valido.");
-
-        MembroTeam membroTeam = repository.findById(idMembroTeam).orElse(null);
-        if (membroTeam == null) throw new IllegalArgumentException("MembroTeam non trovato.");
-        //prendo la lista di teamhackathon riguardate il team del membroTeam
-        List<TeamHackathon> teamHackathonList= teamHackathonRepository.findAll().stream().filter(th ->
-                th.getHackathon().getStato() == stato && Objects.equals(th.getTeam().getId(), membroTeam.getTeam().getId())).toList();
-        return teamHackathonList.stream().map(TeamHackathon::getHackathon).toList();
-    }
-
     /**
-     * Invia una richiesta di supporto per un hackathon specifico.
-     * Corrisponde a inviaRichiestaSupporto(teamRichiedente, descrizioneRichiesta, data)
-     * nel sequence diagram. Delega la verifica e la creazione al RichiestaSupportoService.
+     * Elimina un membro specifico da un team.
+     * Verifica che entrambi i membri (chi elimina e chi viene eliminato) appartengano allo stesso team.
      *
-     * @param idMembroTeam         ID del membro del team che invia la richiesta
-     * @param descrizioneRichiesta Descrizione del supporto richiesto
-     * @param dataInvio            Data e ora di invio
-     * @param idHackathon          ID dell'hackathon di riferimento
-     * @return true se la richiesta è stata inviata con successo, false altrimenti
+     * @param idMembroCheElimina ID del membro che sta effettuando l'eliminazione
+     * @param idMembroDaEliminare ID del membro da eliminare
+     * @param idTeam ID del team
+     * @return true se l'eliminazione è avvenuta con successo, false altrimenti
      */
-    public boolean inviaRichiestaSupporto(Long idMembroTeam,
-                                          String descrizioneRichiesta,
-                                          LocalDateTime dataInvio,
-                                          Long idHackathon) {
-        if (idMembroTeam == null || idHackathon == null) return false;
-
-        MembroTeam membroTeam = repository.findById(idMembroTeam).orElse(null);
-        if (membroTeam == null) return false;
-
-        Long idTeam = membroTeam.getTeam().getId();
-
-        Hackathon hackathon = null;
-        List<TeamHackathon> lista = teamHackathonRepository.findAll();
-        for (TeamHackathon th : lista) {
-            if (Objects.equals(th.getTeam().getId(), idTeam) &&
-                    Objects.equals(th.getHackathon().getId(), idHackathon)) {
-                hackathon = th.getHackathon();
-                break;
-            }
+    public boolean eliminaMembro(Long idMembroCheElimina, Long idMembroDaEliminare, Long idTeam) {
+        if (idMembroCheElimina == null || idMembroDaEliminare == null || idTeam == null) {
+            return false;
         }
-        if (hackathon == null) return false;
-
-        RichiestaSupporto richiesta = richiestaSupportoService.inviaRichiestaSupporto(
-                idTeam, descrizioneRichiesta, dataInvio, hackathon);
-
-        return richiesta != null;
+        if (idMembroCheElimina <= 0 || idMembroDaEliminare <= 0 || idTeam <= 0) {
+            return false;
+        }
+        MembroTeam membroCheElimina = repository.findByUtenteIdAndTeamId(idMembroCheElimina, idTeam)
+                .orElse(null);
+        if (membroCheElimina == null) {
+            return false; // Il membro che elimina non appartiene al team
+        }
+        MembroTeam membroDaRimuovere = repository.findByUtenteIdAndTeamId(idMembroDaEliminare, idTeam)
+                .orElse(null);
+        if (membroDaRimuovere == null) {
+            return false; // Membro da eliminare non trovato nel team
+        }
+        repository.delete(membroDaRimuovere);
+        List<MembroTeam> membriRimanenti = repository.findByTeamId(idTeam);
+        if (membriRimanenti.isEmpty()) {
+            eliminaTeam(idTeam);
+        }
+        return true;
     }
-
 }

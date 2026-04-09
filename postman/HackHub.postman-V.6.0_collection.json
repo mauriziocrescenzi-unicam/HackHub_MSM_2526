@@ -1,0 +1,1102 @@
+{
+  "info": {
+    "_postman_id": "4ec82c91-9fe4-431e-b3a7-27a806c82ab8",
+    "name": "HackHub Copy 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50915874",
+    "_collection_link": "https://go.postman.co/collection/50915874-4ec82c91-9fe4-431e-b3a7-27a806c82ab8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Team",
+      "item": [
+        {
+          "name": "CreaTeam",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"Team Alpha\",\r\n    \"descrizione\": \"Il nostro team\",\r\n    \"utenteId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/teams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "teams"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hackathon",
+      "item": [
+        {
+          "name": "CreaHackathon",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nome\": \"HackHub 2026\",\n    \"regolamento\": \"I partecipanti devono sviluppare un progetto innovativo entro 48 ore.\",\n    \"scadenzaIscrizione\": \"2026-12-01T12:00:00\",\n    \"dataInizio\": \"2026-12-10T09:00:00\",\n    \"dataFine\": \"2026-12-12T18:00:00\",\n    \"luogo\": \"Camerino\",\n    \"premioInDenaro\": 5000.0,\n    \"dimensioneMassimoTeam\": 5,\n    \"stato\": \"IN_ISCRIZIONE\",\n    \"organizzatoreId\": 2,\n    \"giudiceId\": 4,\n    \"mentoriIds\": [3]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/hackathons",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "hackathons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ModificaHackathon",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"HackHub 2026\",\r\n    \"regolamento\": \"I partecipanti devono sviluppare un progetto innovativo entro 48 ore.\",\r\n    \"scadenzaIscrizione\": \"2026-12-01T12:00:00\",\r\n    \"dataInizio\": \"2026-12-10T09:00:00\",\r\n    \"dataFine\": \"2026-12-12T18:00:00\",\r\n    \"luogo\": \"Camerino\",\r\n    \"premioInDenaro\": 4000.0\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/hackathons/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "hackathons",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ModificaMentori",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"mentoriIds\": [5]\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/hackathons/1/mentori",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "hackathons",
+                "1",
+                "mentori"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetHackathon",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"mentoriIds\": [4]\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/hackathons/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "hackathons",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Organizzatori",
+      "item": [
+        {
+          "name": "GetListaHackathon",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"stato\": \"IN_ISCRIZIONE\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/organizzatori/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "organizzatori",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetSegnalazioni",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"stato\": \"DA_GESTIRE\",\r\n  \"hackathonIds\": [1]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/organizzatori/2/segnalazioni",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "organizzatori",
+                "2",
+                "segnalazioni"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Segnalazione",
+      "item": [
+        {
+          "name": "segnalaTeam",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"teamId\": 1,\r\n  \"hackathonId\": 1,\r\n  \"mentoreId\": 3,\r\n  \"motivazione\": \"Il team non rispetta le regole del hackathon\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/segnalazioni",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "segnalazioni"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "accettaSegnalazione",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/segnalazioni/3/accetta",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "segnalazioni",
+                "3",
+                "accetta"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rifiutaSegnalazione",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/segnalazioni/2/rifiuta",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "segnalazioni",
+                "2",
+                "rifiuta"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sottomissione",
+      "item": [
+        {
+          "name": "CreaSottomissione",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Progetto Alpha\",\r\n  \"link\": \"https://github.com/team/progetto-alpha\",\r\n  \"idTeam\": 2,\r\n  \"idHackathon\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/sottomissioni",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "sottomissioni"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AggiornaSottomissione",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Progetto Alpha v2\",\r\n  \"link\": \"https://github.com/team/progetto-alpha-v2\",\r\n  \"idTeam\": 2,\r\n  \"idHackathon\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/sottomissioni",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "sottomissioni"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Giudici",
+      "item": [
+        {
+          "name": "GetListaHackathon",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"stato\": \"IN_VALUTAZIONE\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/giudici/4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "giudici",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetSottomissioni",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/giudici/4/hackathons/1/sottomissioni",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "giudici",
+                "4",
+                "hackathons",
+                "1",
+                "sottomissioni"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "IsSottomissioneValutata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/giudici/4/sottomissioni/1/valutata",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "giudici",
+                "4",
+                "sottomissioni",
+                "1",
+                "valutata"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ValutaSottomissione",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"voto\": 8,\r\n  \"giudizio\": \"Progetto innovativo e ben strutturato\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/giudici/4/sottomissioni/1/valuta",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "giudici",
+                "4",
+                "sottomissioni",
+                "1",
+                "valuta"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "MembroStaff",
+      "item": [
+        {
+          "name": "GetListaHackathon",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/staff/2/hackathons",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "staff",
+                "2",
+                "hackathons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetSottomissioni",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/staff/2/hackathons/1/sottomissioni",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "staff",
+                "2",
+                "hackathons",
+                "1",
+                "sottomissioni"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetSottomissione",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/staff/2/sottomissioni/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "staff",
+                "2",
+                "sottomissioni",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "MembroTeam",
+      "item": [
+        {
+          "name": "IsIscrittoHackathon",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/membro-team/1/hackathons/iscritto",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "membro-team",
+                "1",
+                "hackathons",
+                "iscritto"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CheckStato",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"stati\": [\"IN_CORSO\"]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/membro-team/1/hackathons/stato",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "membro-team",
+                "1",
+                "hackathons",
+                "stato"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "IsPresente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/membro-team/1/hackathons/2/sottomissione/presente",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "membro-team",
+                "1",
+                "hackathons",
+                "2",
+                "sottomissione",
+                "presente"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetMembri",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/membro-team/team/1/membri",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "membro-team",
+                "team",
+                "1",
+                "membri"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AbbandonaTeam",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"idMembro\": 1, \r\n    \"idTeam\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/membro-team/abbandona",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "membro-team",
+                "abbandona"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EliminaMembro",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"idMembroCheElimina\": 1,\r\n    \"idMembroDaEliminare\": 6,\r\n    \"idTeam\": 3\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/membro-team/elimina",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "membro-team",
+                "elimina"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "InviaRichiestaSupporto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"idMembroTeam\": 1,\r\n    \"descrizioneRichiesta\": \"Abbiamo bisogno di supporto per l'integrazione con le API di pagamento\",\r\n    \"dataInvio\": \"2026-04-09T10:00:00\",\r\n    \"idHackathon\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/membro-team/supporto/richiedi",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "membro-team",
+                "supporto",
+                "richiedi"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TeamHackathon",
+      "item": [
+        {
+          "name": "IsIscrittoHackathon",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/team/2/hackathons",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "team",
+                "2",
+                "hackathons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CheckIscrizioneHackathon",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/team/1/hackathons/1/iscritto",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "team",
+                "1",
+                "hackathons",
+                "1",
+                "iscritto"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "IscrivereTeam",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/team/2/hackathons/1/iscriviti",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "team",
+                "2",
+                "hackathons",
+                "1",
+                "iscriviti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DisiscriviTeam",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/team/1/hackathons/1/disiscriviti",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "team",
+                "1",
+                "hackathons",
+                "1",
+                "disiscriviti"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mentore",
+      "item": [
+        {
+          "name": "GetListaHackathon",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"stato\": \"IN_VALUTAZIONE\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/mentori/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "mentori",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetRichiesteSupporto",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idHackathon\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/mentori/3/richieste",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "mentori",
+                "3",
+                "richieste"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RispondereRichiestaSupporto",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idRichiesta\": 1,\r\n  \"risposta\": \"Ti aiuto così...\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/mentori/3/richieste",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "mentori",
+                "3",
+                "richieste"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Invito",
+      "item": [
+        {
+          "name": "InviareInvito",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idMittente\": 1,\r\n  \"idDestinatario\": 6\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/inviti",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "inviti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetListaInviti",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/inviti/6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "inviti",
+                "6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RifiutoInvito",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idUtente\": 2,\r\n  \"idInvito\": 5,\r\n  \"risposta\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/inviti/valuta",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "inviti",
+                "valuta"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AccettoInvito",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"idUtente\": 6,\r\n  \"idInvito\": 1,\r\n  \"risposta\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/inviti/valuta",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "inviti",
+                "valuta"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

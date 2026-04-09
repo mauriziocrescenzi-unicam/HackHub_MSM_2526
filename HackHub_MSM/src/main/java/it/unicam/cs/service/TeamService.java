@@ -228,50 +228,6 @@ public class TeamService {
         return true;
     }
 
-    /**
-     * Elimina completamente un team dal sistema.
-     * Questo metodo dovrebbe essere chiamato solo quando un team rimane
-     * senza membri.
-     *
-     * Verifica che:
-     * - Il team esista
-     * - Il team non abbia membri rimanenti
-     * - Il team sia stato rimosso da tutti gli hackathon associati
-     *
-     * @param idTeam ID del team da eliminare
-     * @return true se l'eliminazione è avvenuta con successo,
-     *         false se il team non esiste, ha ancora membri o non può essere eliminato
-     */
-    public boolean eliminaTeam(Long idTeam) {
-        if (idTeam == null || idTeam < 0) {
-            return false;
-        }
-
-        // Verifica che il team esista
-        Team team = repository.findById(idTeam).orElse(null);
-        if (team == null) {
-            return false; // Team non trovato
-        }
-
-        // Verifica che il team non abbia membri
-        List<MembroTeam> membri = membroTeamService.getMembri(idTeam);
-        if (!membri.isEmpty()) {
-            return false; // Il team ha ancora membri
-        }
-
-        // Rimuovi il team da tutti gli hackathon associati
-        List<TeamHackathon> associazioni = teamHackathonRepository.findAll();
-        for (TeamHackathon th : associazioni) {
-            if (th.getTeam().getId().equals(idTeam)) {
-                teamHackathonRepository.delete(th);
-            }
-        }
-
-        // Elimina il team
-        repository.deleteById(idTeam);
-        return true;
-    }
-
     public Team getTeamByMembroId(long idMembro) {
         if (idMembro <= 0) {
             return null;

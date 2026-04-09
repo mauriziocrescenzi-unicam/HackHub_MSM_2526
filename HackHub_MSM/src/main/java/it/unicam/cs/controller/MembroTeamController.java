@@ -1,9 +1,8 @@
 package it.unicam.cs.controller;
 
-import it.unicam.cs.dto.HackathonRispostaDTO;
-import it.unicam.cs.dto.MembroTeamRispostaDTO;
-import it.unicam.cs.dto.SottomissioneCreazioneDTO;
+import it.unicam.cs.dto.*;
 import it.unicam.cs.model.*;
+import it.unicam.cs.repository.HackathonRepository;
 import it.unicam.cs.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +22,22 @@ public class MembroTeamController {
     private final HackathonService hackathonService;
     private final SottomissioneService sottomissioneService;
     private final TeamService teamService;
+    private final RichiestaSupportoService richiestaSupportoService;
+    private final HackathonRepository hackathonRepository;
 
     public MembroTeamController(MembroTeamService membroTeamService,
                                 TeamHackathonService teamHackathonService,
                                 HackathonService hackathonService,
                                 SottomissioneService sottomissioneService,
-                                TeamService teamService) {
+                                TeamService teamService, RichiestaSupportoService richiestaSupportoService,
+                                HackathonRepository hackathonRepository) {
         this.membroTeamService = membroTeamService;
         this.teamHackathonService = teamHackathonService;
         this.hackathonService = hackathonService;
         this.sottomissioneService = sottomissioneService;
         this.teamService = teamService;
+        this.richiestaSupportoService = richiestaSupportoService;
+        this.hackathonRepository = hackathonRepository;
     }
 
     // ==================== ISCRIZIONE HACKATHON ====================
@@ -135,39 +139,63 @@ public class MembroTeamController {
     }
 
     /**
-     * PUT /membro-team/{idMembro}/team/{idTeam}/abbandona
+     * PUT /membro-team/abbandona
      * Gestisce l'abbandono volontario di un membro da un team.
-     * Corrisponde ad abbandonaTeam(idMembro, idTeam) nel sequence diagram.
+     * Gli ID del membro e del team vengono passati nel body della richiesta.
      *
-     * @param idMembro ID del membro che abbandona
-     * @param idTeam ID del team da abbandonare
+     * @param dto Corpo della richiesta con idMembro e idTeam
      * @return Messaggio di successo o errore
      */
-    @PutMapping("/{idMembro}/team/{idTeam}/abbandona")
-    public ResponseEntity<String> abbandonaTeam(@PathVariable long idMembro, @PathVariable long idTeam) {
-        boolean abbandonato = membroTeamService.abbandonaTeam(idMembro, idTeam);
+    @PutMapping("/abbandona")
+    public ResponseEntity<String> abbandonaTeam(@RequestBody AbbandonaTeamDTO dto) {
+        boolean abbandonato = membroTeamService.abbandonaTeam(dto.idMembro(), dto.idTeam());
         if (!abbandonato) {
-            return ResponseEntity.badRequest().body("Abbandono non riuscito");
+            return ResponseEntity.badRequest().body("Abbandono non riuscito. Verificare che il membro appartenga al team.");
         }
         return ResponseEntity.ok("Membro ha abbandonato il team con successo");
     }
 
     /**
-     * DELETE /membro-team/{idMembro}/team/{idTeam}/elimina
-     * Elimina un membro specifico da un team (rimozione forzata).
-     * Corrisponde ad eliminaMembro(idMembro, idTeam) nel sequence diagram.
+     * DELETE /membro-team/elimina
+     * Permette a un membro del team di eliminare un altro membro dallo stesso team.
+     * Gli ID vengono passati nel body della richiesta.
      *
-     * @param idMembro ID del membro da eliminare
-     * @param idTeam ID del team da cui rimuovere
+     * @param dto Corpo della richiesta con idMembroCheElimina, idMembroDaEliminare e idTeam
      * @return Messaggio di successo o errore
      */
-    @DeleteMapping("/{idMembro}/team/{idTeam}/elimina")
-    public ResponseEntity<String> eliminaMembro(@PathVariable long idMembro, @PathVariable long idTeam) {
-        boolean eliminato = membroTeamService.eliminaMembro(idMembro, idTeam);
+    @DeleteMapping("/elimina")
+    public ResponseEntity<String> eliminaMembro(@RequestBody EliminaMembroDTO dto) {
+        // Validazione: un membro non può eliminare se stesso
+        if (dto.idMembroCheElimina().equals(dto.idMembroDaEliminare())) {
+            return ResponseEntity.badRequest().body("Impossibile: un membro non può eliminare se stesso dal team, in tal caso abbandonare il team.");
+        }
+        boolean eliminato = membroTeamService.eliminaMembro(
+                dto.idMembroCheElimina(),
+                dto.idMembroDaEliminare(),
+                dto.idTeam());
         if (!eliminato) {
-            return ResponseEntity.badRequest().body("Eliminazione non riuscita");
+            return ResponseEntity.badRequest().body("Eliminazione non riuscita. Verificare che entrambi i membri appartengano al team.");
         }
         return ResponseEntity.ok("Membro eliminato dal team con successo");
     }
 
+    @PostMapping("/supporto/richiedi")
+    public ResponseEntity<String> inviaRichiestaSupporto(@RequestBody RichiestaSupportoInvioDTO dto) {
+        Hackathon hackathon = hackathonRepository.findById(dto.idHackathon())
+                .orElse(null);
+        if (hackathon == null) {
+            return ResponseEntity.badRequest().body("Hackathon non trovato");
+        }
+        RichiestaSupporto richiesta = richiestaSupportoService.inviaRichiestaSupporto(
+                dto.idMembroTeam(),
+                dto.descrizioneRichiesta(),
+                dto.dataInvio(),
+                hackathon
+        );
+        if (richiesta == null) {
+            return ResponseEntity.badRequest()
+                    .body("Validazione richiesta fallita");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body("Richiesta di supporto inviata con successo!");
+    }
 }
