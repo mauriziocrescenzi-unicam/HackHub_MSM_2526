@@ -32,6 +32,12 @@ Sistemare metodi TeamHackathon
 - quando un team viene eliminato/rimosso/abbandona un hackathon, impostare a false il valore boolean do TeamHackathon.
 - controllare inviareInvito nel service
 - controllare altre richieste che passano gli id tramite URL anziché nel body.
+
+------------risposta tutor----------
+1. In questo caso è indifferente. Se volete metterlo non è un errore, ma la terminazione del caso d'uso è implicita.
+2. Sarebbe meglio mostrare l'interazione con il service relativo, dato che viene effettivamente recuperato qualcosa dal DB.
+3. Va bene utilizzare un unico metodo e raggruppare i parametri.
+4. Vi direi che questo è un dettaglio molto implementativo, potete fare come volete a patto che sia chiaro cosa sta accadendo e quali controlli vengono fatti.
 ------------tutor---------------
 chiedere come gestire i casi d'uso con include o extend e nel caso di include come riportarlo sui sequence (proclama vincitore --include--> erogazione premio)
 
