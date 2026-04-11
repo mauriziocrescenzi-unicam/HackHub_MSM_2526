@@ -74,7 +74,7 @@ public class InvitoController {
         List<Invito> inviti = invitoService.getInviti(utente);
         Invito invito = null;
         for (Invito i : inviti) {
-            if (i.getId() == idInvito) {
+            if (i.getId() == idInvito.longValue()) {
                 invito = i;
                 break;
             }

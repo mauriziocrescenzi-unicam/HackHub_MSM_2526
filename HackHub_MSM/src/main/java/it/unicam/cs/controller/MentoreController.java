@@ -38,8 +38,6 @@ public class MentoreController {
         if (body.get("stato") == null)
             return ResponseEntity.badRequest().body(null);
         StatoHackathon stato = StatoHackathon.fromString(body.get("stato").toString());
-        if (stato == null)
-            return ResponseEntity.badRequest().body(null);
         List<Hackathon> lista = mentoreService.getListaHackathons(stato, id);
         if (lista.isEmpty())
             return ResponseEntity.notFound().build();
