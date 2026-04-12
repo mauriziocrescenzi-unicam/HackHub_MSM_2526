@@ -25,18 +25,15 @@ public class MembroTeamService {
     private final UtenteRepository utenteRepository;
     private final TeamRepository teamRepository;
     private final TeamHackathonRepository teamHackathonRepository;
-    private final RichiestaSupportoService richiestaSupportoService;
 
     public MembroTeamService(MembroTeamRepository repository,
                              UtenteRepository utenteRepository,
                              TeamRepository teamRepository,
-                             TeamHackathonRepository teamHackathonRepository,
-                             RichiestaSupportoService richiestaSupportoService) {
+                             TeamHackathonRepository teamHackathonRepository) {
         this.repository = repository;
         this.utenteRepository = utenteRepository;
         this.teamRepository = teamRepository;
         this.teamHackathonRepository = teamHackathonRepository;
-        this.richiestaSupportoService = richiestaSupportoService;
     }
 
     /**

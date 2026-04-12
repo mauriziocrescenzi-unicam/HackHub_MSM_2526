@@ -25,7 +25,6 @@ public class GiudiceService {
     private final SottomissioneService sottomissioneService;
 
     public GiudiceService(GiudiceRepository repository,
-                          HackathonService hackathonService,
                           SottomissioneService sottomissioneService, HackathonRepository hackathonRepository) {
         this.repository = repository;
         this.hackathonRepository = hackathonRepository;

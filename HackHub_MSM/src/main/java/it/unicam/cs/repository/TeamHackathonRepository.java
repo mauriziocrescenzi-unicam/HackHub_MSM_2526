@@ -11,6 +11,4 @@ public interface TeamHackathonRepository extends JpaRepository<TeamHackathon,Lon
 
     List<TeamHackathon> findByTeamId(Long idTeam);
 
-    boolean existsByTeamIdAndHackathonId(Long teamId, Long hackathonId);
-
 }
