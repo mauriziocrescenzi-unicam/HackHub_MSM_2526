@@ -17,16 +17,13 @@ public class MentoreController {
 
     private final MentoreService mentoreService;
     private final HackathonService hackathonService;
-    private final TeamService teamService;
     private final SegnalazioneService segnalazioneService;
 
     public MentoreController(MentoreService mentoreService,
                              HackathonService hackathonService,
-                             TeamService teamService,
                              SegnalazioneService segnalazioneService) {
         this.mentoreService = mentoreService;
         this.hackathonService = hackathonService;
-        this.teamService = teamService;
         this.segnalazioneService = segnalazioneService;
     }
 

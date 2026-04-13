@@ -21,14 +21,10 @@ public class HackathonController {
 
     private final HackathonService hackathonService;
     private final MentoreService mentoreService;
-    private final TeamHackathonService teamHackathonService;
-    private final TeamService teamService;
 
-    public HackathonController(HackathonService hackathonService, MentoreService mentoreService, TeamHackathonService teamHackathonService, TeamService teamService) {
+    public HackathonController(HackathonService hackathonService, MentoreService mentoreService) {
         this.hackathonService = hackathonService;
         this.mentoreService = mentoreService;
-        this.teamHackathonService = teamHackathonService;
-        this.teamService = teamService;
     }
 
     @PostMapping

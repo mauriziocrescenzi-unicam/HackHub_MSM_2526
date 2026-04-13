@@ -15,12 +15,10 @@ import java.util.Map;
 public class TeamController {
 
     private final TeamService teamService;
-    private final HackathonService hackathonService;
 
 
-    public TeamController(TeamService teamService, HackathonService hackathonService) {
+    public TeamController(TeamService teamService) {
         this.teamService = teamService;
-        this.hackathonService = hackathonService;
     }
     @PostMapping
     public ResponseEntity<String> createTeam(@RequestBody Map<String, Object> teamData) {
