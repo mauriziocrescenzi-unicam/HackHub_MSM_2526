@@ -2,10 +2,7 @@ package it.unicam.cs.service;
 
 import it.unicam.cs.dto.ClassificaTeamDTO;
 import it.unicam.cs.model.*;
-import it.unicam.cs.repository.GiudiceRepository;
-import it.unicam.cs.repository.HackathonRepository;
-import it.unicam.cs.repository.MentoreRepository;
-import it.unicam.cs.repository.OrganizzatoreRepository;
+import it.unicam.cs.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,17 +16,13 @@ import java.util.Set;
 @Transactional
 public class HackathonService {
     private final HackathonRepository repository;
-    private final OrganizzatoreRepository organizzatoreRepository;
-    private final GiudiceRepository giudiceRepository;
-    private final MentoreRepository mentoreRepository;
+    private final AccountRepository accountRepository;
 
 
 
-    public HackathonService(HackathonRepository repository, OrganizzatoreRepository organizzatoreRepository, GiudiceRepository giudiceRepository, MentoreRepository mentoreRepository) {
+    public HackathonService(HackathonRepository repository, AccountRepository accountRepository) {
         this.repository = repository;
-        this.organizzatoreRepository = organizzatoreRepository;
-        this.giudiceRepository = giudiceRepository;
-        this.mentoreRepository = mentoreRepository;
+        this.accountRepository = accountRepository;
 
     }
     public boolean creaHackathon(String nome, String regolamento, LocalDateTime scadenzaIscrizione, LocalDateTime dataInizio,
@@ -38,14 +31,17 @@ public class HackathonService {
         if(!verificaRequisiti(scadenzaIscrizione,dataInizio,dataFine)) return false;
         Builder builder = new HackathonBuilder();
         builder.reset();
-        Organizzatore organizzatore = organizzatoreRepository.findById(idorganizzatore)
+        Account organizzatore = accountRepository.findById(idorganizzatore)
                 .orElse(null);
         if(organizzatore == null) return false;
-        Giudice giudice = giudiceRepository.findById(idgiudice)
+        if(organizzatore.getRuolo()!= Ruolo.STAFF)return false;
+        Account giudice = accountRepository.findById(idgiudice)
                 .orElse(null);
         if(giudice == null) return false;
-        List<Mentore> mentori = mentoreRepository.findAllById(idmentori);
+        if(giudice.getRuolo()!= Ruolo.STAFF)return false;
+        List<Account> mentori = accountRepository.findAllById(idmentori);
         if(mentori.isEmpty()) return false;
+        if(mentori.stream().anyMatch(m -> m.getRuolo()!=Ruolo.STAFF)) return false;
         builder.setInfo(nome,regolamento,scadenzaIscrizione,dataInizio,dataFine,luogo,premioInDenaro,
                 dimensioneMassimoTeam,stato,organizzatore);
         builder.setGiudice(giudice);

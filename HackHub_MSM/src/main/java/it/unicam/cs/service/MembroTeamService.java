@@ -22,33 +22,21 @@ import java.util.stream.Collectors;
 public class MembroTeamService {
 
     private final MembroTeamRepository repository;
-    private final UtenteRepository utenteRepository;
+    private final AccountRepository accountRepository;
     private final TeamRepository teamRepository;
     private final TeamHackathonRepository teamHackathonRepository;
 
     public MembroTeamService(MembroTeamRepository repository,
-                             UtenteRepository utenteRepository,
+                             AccountRepository accountRepository,
                              TeamRepository teamRepository,
                              TeamHackathonRepository teamHackathonRepository) {
         this.repository = repository;
-        this.utenteRepository = utenteRepository;
+        this.accountRepository = accountRepository;
         this.teamRepository = teamRepository;
         this.teamHackathonRepository = teamHackathonRepository;
     }
 
-    /**
-     * Verifica se un utente è già membro di un team.
-     * Un utente può appartenere a un solo team alla volta.
-     *
-     * @param utente Utente da verificare
-     * @return true se l'utente è già membro di un team, false altrimenti
-     */
-    public boolean isMembroTeam(Utente utente) {
-        if (utente == null) {
-            return false;
-        }
-        return isMembroTeam(utente.getId());
-    }
+
 
     /**
      * Verifica se un utente è già membro di un team dato il suo ID.
@@ -64,7 +52,7 @@ public class MembroTeamService {
         // Cerca nel database se esiste un MembroTeam per questo utente
         List<MembroTeam> tuttiMembri = repository.findAll();
         for (MembroTeam m : tuttiMembri) {
-            if (m.getUtente().getId().equals(idUtente)) {
+            if (m.getAccount().getId().equals(idUtente)) {
                 return true;
             }
         }
@@ -85,9 +73,9 @@ public class MembroTeamService {
     /**
      * Restituisce il MembroTeam dell'utente
      */
-    public MembroTeam getMembro(Utente utente) {//TODO cambio get all
+    public MembroTeam getMembro(Account account) {//TODO cambio get all
         for (MembroTeam membro : repository.findAll()) {
-            if (membro.getId().getUtenteId().equals(utente.getId()))
+            if (membro.getId().getUtenteId().equals(account.getId()))
                 return membro;
         }
         return null;
@@ -131,7 +119,7 @@ public class MembroTeamService {
         }
 
         // Recupera le entità dal database
-        Utente utente = utenteRepository.getReferenceById( idUtente);
+        Account utente = accountRepository.getReferenceById(idUtente);
         Team team = teamRepository.getReferenceById(idTeam);
 
         // Crea la relazione MembroTeam
@@ -143,20 +131,6 @@ public class MembroTeamService {
         return true;
     }
 
-    /**
-     * Rimuove un membro da un team.
-     *
-     * @param membro MembroTeam da rimuovere
-     * @return true se la rimozione è andata a buon fine, false altrimenti
-     */
-    public boolean rimuoviMembro(MembroTeam membro) {
-        if (membro == null) {
-            return false;
-        }
-
-        repository.delete(membro);
-        return true;
-    }
 
     /**
      * Restituisce tutti i membri presenti nel sistema.

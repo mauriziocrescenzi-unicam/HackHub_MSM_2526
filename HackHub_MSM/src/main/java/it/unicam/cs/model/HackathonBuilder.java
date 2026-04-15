@@ -12,20 +12,20 @@ public class HackathonBuilder implements Builder{
     }
 
     @Override
-    public void setGiudice(Giudice giudice) {
+    public void setGiudice(Account giudice) {
         if(hackathon == null) throw new IllegalStateException("Hackathon non creato");
         hackathon.setGiudice(giudice);
     }
 
     @Override
-    public void setMentori(List<Mentore> mentori) {
+    public void setMentori(List<Account> mentori) {
         if(hackathon == null) throw new IllegalStateException("Hackathon non creato");
         hackathon.setMentori(mentori);
     }
 
     @Override
     public void setInfo(String nome, String regolamento,LocalDateTime scadenzaIscrizioni,LocalDateTime dataInizio, LocalDateTime dataFine,
-                        String luogo, double premio, int dimensione, StatoHackathon stato,Organizzatore organizzatore) {
+                        String luogo, double premio, int dimensione, StatoHackathon stato,Account organizzatore) {
         hackathon= new Hackathon();
         hackathon.setNome(nome);
         hackathon.setRegolamento(regolamento);

@@ -19,9 +19,9 @@ public record MembroTeamRispostaDTO(
      */
     public static MembroTeamRispostaDTO fromMembroTeam(MembroTeam m) {
         return new MembroTeamRispostaDTO(
-                m.getUtente().getId(),
-                m.getUtente().getNome(),
-                m.getUtente().getCognome(),
+                m.getAccount().getId(),
+                m.getAccount().getNome(),
+                m.getAccount().getCognome(),
                 m.getTeam().getId(),
                 m.getDataAdesione()
         );

@@ -4,12 +4,17 @@ import it.unicam.cs.dto.HackathonRispostaDTO;
 import it.unicam.cs.dto.SottomissioneRispostaDTO;
 import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.model.Sottomissione;
+import it.unicam.cs.model.StatoHackathon;
+import it.unicam.cs.service.AccountService;
 import it.unicam.cs.service.MembroDelloStaffService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller REST per la gestione delle operazioni del Membro dello Staff.
@@ -21,13 +26,17 @@ import java.util.List;
 public class MembroDelloStaffController {
 
     private final MembroDelloStaffService membroStaffService;
+    private final AccountService accountService;
 
-    public MembroDelloStaffController(MembroDelloStaffService membroStaffService) {
+    public MembroDelloStaffController(MembroDelloStaffService membroStaffService, AccountService accountService) {
         this.membroStaffService = membroStaffService;
+        this.accountService = accountService;
     }
 
-    @GetMapping("/{id}/hackathons")
-    public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(@PathVariable long id) {
+    @GetMapping("/hackathons")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(Authentication auth) {
+        Long id = accountService.findId(auth.getName());
         List<Hackathon> hackathons = membroStaffService.getListaHackathon(id);
         if (hackathons.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -37,9 +46,27 @@ public class MembroDelloStaffController {
                 .toList();
         return ResponseEntity.ok(risposta);
     }
+    @PutMapping()
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(@RequestBody Map<String, Object> body, Authentication auth){
+        if (body.get("stato")==null) return ResponseEntity.badRequest().body(null);
+        Long id = accountService.findId(auth.getName());
+        StatoHackathon statoHackathon= StatoHackathon.fromString(body.get("stato").toString());
+        List<Hackathon> list= membroStaffService.getListaHackathons(statoHackathon,id);
+        List<HackathonRispostaDTO> risposta= list.stream().map(HackathonRispostaDTO::fromHackathon).toList();
+        if(risposta.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(risposta);
+    }
 
-    @GetMapping("/{idMembro}/hackathons/{idHackathon}/sottomissioni")
-    public ResponseEntity<List<SottomissioneRispostaDTO>> getSottomissioni(@PathVariable long idMembro, @PathVariable long idHackathon) {
+
+    @GetMapping("/hackathons/sottomissioni")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<List<SottomissioneRispostaDTO>> getSottomissioni(@RequestBody Map<String, Object> body, Authentication auth) {
+        Long idMembro = accountService.findId(auth.getName());
+        if (body.get("idHackathon") == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        Long idHackathon = ((Number) body.get("idHackathon")).longValue();
         List<Hackathon> hackathons = membroStaffService.getListaHackathon(idMembro);
         boolean assegnato = hackathons.stream()
                 .anyMatch(h -> h.getId().equals(idHackathon));
@@ -63,8 +90,10 @@ public class MembroDelloStaffController {
         return ResponseEntity.ok(risposta);
     }
 
-    @GetMapping("/{idMembro}/sottomissioni/{idSottomissione}")
-    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione(@PathVariable long idMembro, @PathVariable long idSottomissione) {
+    @GetMapping("/sottomissioni/{idSottomissione}")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione( @PathVariable long idSottomissione,Authentication auth) {
+        Long idMembro = accountService.findId(auth.getName());
         Sottomissione sottomissione = membroStaffService.getSottomissione(idMembro, idSottomissione);
         if (sottomissione == null) {
             // Può significare: sottomissione non trovata OPPURE non autorizzato

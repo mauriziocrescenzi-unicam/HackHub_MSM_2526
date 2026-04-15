@@ -6,6 +6,7 @@ import it.unicam.cs.model.*;
 import it.unicam.cs.service.HackathonService;
 import it.unicam.cs.service.OrganizzatoreService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class OrganizzatoreController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(@PathVariable long id, @RequestBody Map<String, Object> body){
         if (body.get("stato")==null) return ResponseEntity.badRequest().body(null);
         StatoHackathon statoHackathon= StatoHackathon.fromString(body.get("stato").toString());
@@ -36,7 +38,7 @@ public class OrganizzatoreController {
 
     @PutMapping("/{id}/segnalazioni")
     public ResponseEntity<List<SegnalazioneRispostaDTO>> getSegnalazioni(@PathVariable long id, @RequestBody Map<String, Object> body){
-        Organizzatore organizzatore= organizzatoreService.getOrganizzatoreById(id);
+        Account organizzatore= organizzatoreService.getOrganizzatoreById(id);
         if (organizzatore==null)return ResponseEntity.notFound().build();
         if (body.get("stato")==null) return ResponseEntity.badRequest().body(null);
         //controllo che i dati siano validi

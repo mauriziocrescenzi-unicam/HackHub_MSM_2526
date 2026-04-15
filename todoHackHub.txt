@@ -33,6 +33,8 @@ Sistemare metodi TeamHackathon
 - controllare inviareInvito nel service
 - controllare altre richieste che passano gli id tramite URL anziché nel body.
 
+CONTROLLARE per i relativi ruoli organizzatore, mentore, giudice controllare sempre che user è staff o se è di quello specifico hackathon.
+Controllare securityConfig
 ------------risposta tutor----------
 1. In questo caso è indifferente. Se volete metterlo non è un errore, ma la terminazione del caso d'uso è implicita.
 2. Sarebbe meglio mostrare l'interazione con il service relativo, dato che viene effettivamente recuperato qualcosa dal DB.

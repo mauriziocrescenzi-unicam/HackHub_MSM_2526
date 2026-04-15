@@ -33,7 +33,7 @@ public class SegnalazioneService {
      * @param motivazione motivazione della segnalazione
      * @return true se la segnalazione va bene
      */
-    public boolean verificaSegnalazione(Team team,Hackathon hackathon, Mentore mentore, String motivazione){
+    public boolean verificaSegnalazione(Team team,Hackathon hackathon, Account mentore, String motivazione){
         if (team == null) throw new IllegalArgumentException("Team non valido");
         if (motivazione.isEmpty()) throw new IllegalArgumentException("Motivazione non valida");
         //controllo che non ci sia già una segnalazione
@@ -60,7 +60,7 @@ public class SegnalazioneService {
         Team team=teamService.getTeamById(idTeam);
         // Recupera hackathon e mentore dalle rispettive persistence
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
-        Mentore mentore = mentoreService.getMentoreById(idMentore);
+        Account mentore = mentoreService.getMentoreById(idMentore);
         if (team == null ||hackathon==null|| mentore == null) {
             return false;
         }

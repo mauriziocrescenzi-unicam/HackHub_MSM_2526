@@ -16,7 +16,6 @@ public record HackathonCreazioneDTO(
         @NotNull Double premioInDenaro,
         @NotNull Integer dimensioneMassimoTeam,
         @NotNull StatoHackathon stato,
-        @NotNull Long organizzatoreId,
         @NotNull Long giudiceId,
         @NotNull List<Long> mentoriIds
 ){}

@@ -24,17 +24,17 @@ public class Hackathon {
     private StatoHackathon stato;
     @ManyToOne
     @JoinColumn(name = "organizzatore_id")
-    private Organizzatore organizzatore;
+    private Account organizzatore;
     @ManyToOne
     @JoinColumn(name = "giudice_id")
-    private Giudice giudice;
+    private Account giudice;
     @ManyToMany
     @JoinTable(
         name = "hackathon_mentori",
         joinColumns = @JoinColumn(name = "hackathon_id"),
         inverseJoinColumns = @JoinColumn(name = "mentore_id")
     )
-    private List<Mentore> mentori;
+    private List<Account> mentori;
 
     @ManyToOne
     @JoinColumn(name = "team_vincitore_id")
@@ -89,17 +89,17 @@ public class Hackathon {
         this.stato = stato;
     }
 
-    public void setOrganizzatore(Organizzatore organizzatore) {
+    public void setOrganizzatore(Account organizzatore) {
         if (organizzatore == null) throw new IllegalArgumentException();
         this.organizzatore = organizzatore;
     }
 
-    public void setGiudice(Giudice giudice) {
+    public void setGiudice(Account giudice) {
         if (giudice == null) throw new IllegalArgumentException();
         this.giudice = giudice;
     }
 
-    public void setMentori(List<Mentore> mentori) {
+    public void setMentori(List<Account> mentori) {
         if (mentori ==null ||mentori.isEmpty()) throw new IllegalArgumentException();
         this.mentori = mentori;
     }

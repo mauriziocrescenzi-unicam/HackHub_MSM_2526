@@ -1,7 +1,7 @@
 package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.repository.GiudiceRepository;
+import it.unicam.cs.repository.AccountRepository;
 import it.unicam.cs.repository.HackathonRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,22 +20,23 @@ public class GiudiceService {
 
     private static GiudiceService service;
 
-    private final GiudiceRepository repository;
+    private final AccountRepository repository;
     private final HackathonRepository hackathonRepository;
     private final SottomissioneService sottomissioneService;
 
-    public GiudiceService(GiudiceRepository repository,
+    public GiudiceService(AccountRepository repository,
+                          HackathonService hackathonService,
                           SottomissioneService sottomissioneService, HackathonRepository hackathonRepository) {
         this.repository = repository;
         this.hackathonRepository = hackathonRepository;
         this.sottomissioneService = sottomissioneService;
     }
 
-    public List<Giudice> getListaGiudici() {
+    public List<Account> getListaGiudici() {
         return repository.findAll();
     }
 
-    public boolean verificaGiudice(Giudice giudice) {
+    public boolean verificaGiudice(Account giudice) {
         if (giudice == null) return false;
         return repository.findById(giudice.getId()).isPresent();
     }
@@ -47,7 +48,7 @@ public class GiudiceService {
         if (stato == null) throw new IllegalArgumentException("Stato non valido.");
         if (idGiudice == null || idGiudice <= 0) throw new IllegalArgumentException("Giudice non valido.");
 
-        Giudice giudice = repository.findById(idGiudice).orElse(null);
+        Account giudice = repository.findById(idGiudice).orElse(null);
         if (giudice == null) throw new IllegalArgumentException("Giudice non trovato.");
 
         // Recupera tutti gli hackathon e filtra per giudice assegnato e stato
@@ -79,7 +80,7 @@ public class GiudiceService {
         return sottomissioneService.valutaSottomissione(sottomissione, voto, giudizio);
     }
 
-    public Giudice getGiudiceById(Long idGiudice) {
+    public Account getGiudiceById(Long idGiudice) {
         if (idGiudice == null || idGiudice <= 0) {
             return null;
         }

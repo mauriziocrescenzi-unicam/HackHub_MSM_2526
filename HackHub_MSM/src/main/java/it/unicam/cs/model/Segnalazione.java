@@ -16,14 +16,14 @@ public class Segnalazione {
     @ManyToOne
     Team team;
     @ManyToOne
-    Mentore mentore;
+    Account mentore;
     @ManyToOne
     Hackathon hackathon;
 
     public Segnalazione() {
     }
 
-    public Segnalazione(StatoSegnalazione stato, LocalDateTime dataSegnalazione, String motivazione, Team team, Mentore mentore, Hackathon hackathon) {
+    public Segnalazione(StatoSegnalazione stato, LocalDateTime dataSegnalazione, String motivazione, Team team, Account mentore, Hackathon hackathon) {
         this.stato = stato;
         this.dataSegnalazione = dataSegnalazione;
         this.motivazione = motivazione;
@@ -53,7 +53,7 @@ public class Segnalazione {
         this.team = team;
     }
 
-    public void setMentore(Mentore mentore) {
+    public void setMentore(Account mentore) {
         if(mentore==null) throw new IllegalArgumentException("Mentore non valido");
         this.mentore = mentore;
     }

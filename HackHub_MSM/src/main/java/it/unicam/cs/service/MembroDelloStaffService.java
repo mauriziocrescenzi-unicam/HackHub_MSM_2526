@@ -22,6 +22,20 @@ public class MembroDelloStaffService {
         this.hackathonRepository = hackathonRepository;
     }
 
+    //TODO cambio nome metodo
+    /**
+     * Restituisce la lista degli hackathon di un determinato organizzatore in base allo stato
+     * @param stato stato degli hackathon
+     * @param id id del membro dello staff
+     * @return lista degli hackathon
+     */
+    public List<Hackathon> getListaHackathons(StatoHackathon stato,long id){
+        if(stato == null) throw new NullPointerException("Stato dell'hackathon non valido");
+        if(id < 0) throw new IllegalArgumentException("Id dell'organizzatore non valido");
+        return hackathonRepository.findAll().stream()
+                .filter(h -> h.getOrganizzatore().getId() == id && h.getStato() == stato)
+                .toList();
+    }
     /**
      * Restituisce la lista degli hackathon a cui è assegnato un membro dello staff.
      *

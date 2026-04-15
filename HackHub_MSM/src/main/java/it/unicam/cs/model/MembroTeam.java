@@ -25,7 +25,7 @@ public class MembroTeam implements Serializable {
     @ManyToOne
     @MapsId("utenteId") // Collega il campo utenteId della chiave composta
     @JoinColumn(name = "utente_id")
-    private Utente utente;
+    private Account account;
 
     @ManyToOne
     @MapsId("teamId") // Collega il campo teamId della chiave composta
@@ -44,14 +44,14 @@ public class MembroTeam implements Serializable {
      * Costruttore per creare una nuova associazione utente-team.
      * Inizializza automaticamente la chiave composta con gli ID delle entità.
      *
-     * @param utente Utente da associare
+     * @param account Account da associare
      * @param team Team a cui associare l'utente
      */
-    public MembroTeam(Utente utente, Team team) {
-        this.utente = utente;
+    public MembroTeam(Account account, Team team) {
+        this.account = account;
         this.team = team;
         this.dataAdesione = LocalDateTime.now();
-        this.id = new MembroTeamId(utente.getId(), team.getId());
+        this.id = new MembroTeamId(account.getId(), team.getId());
     }
 
     // ==================== SETTER ====================
@@ -60,10 +60,10 @@ public class MembroTeam implements Serializable {
      * Aggiorna il riferimento all'utente e sincronizza la chiave composta.
      * Mantiene la consistenza tra l'entità e l'ID embedded.
      */
-    public void setUtente(Utente utente) {
-        this.utente = utente;
-        if (utente != null && id != null) {
-            id.setUtenteId(utente.getId());
+    public void setUtente(Account account) {
+        this.account = account;
+        if (account != null && id != null) {
+            id.setUtenteId(account.getId());
         }
     }
 

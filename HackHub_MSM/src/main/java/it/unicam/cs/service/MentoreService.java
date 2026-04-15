@@ -1,11 +1,8 @@
 package it.unicam.cs.service;
 
-import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.Mentore;
-import it.unicam.cs.model.RichiestaSupporto;
-import it.unicam.cs.model.StatoHackathon;
+import it.unicam.cs.model.*;
+import it.unicam.cs.repository.AccountRepository;
 import it.unicam.cs.repository.HackathonRepository;
-import it.unicam.cs.repository.MentoreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +11,11 @@ import java.util.*;
 @Service
 @Transactional
 public class MentoreService {
-    private final MentoreRepository repository;
+    private final AccountRepository repository;
     private final HackathonRepository hackathonRepository;
     private final RichiestaSupportoService richiestaSupportoService;
 
-    public MentoreService(MentoreRepository repository,
+    public MentoreService(AccountRepository repository,
                           HackathonRepository hackathonRepository,
                           RichiestaSupportoService richiestaSupportoService) {
         this.repository = repository;
@@ -27,7 +24,7 @@ public class MentoreService {
     }
 
 
-    public  boolean assegnaMentore(Hackathon hackathon, List<Mentore> mentori){
+    public  boolean assegnaMentore(Hackathon hackathon, List<Account> mentori){
         if(hackathon ==null || mentori.isEmpty()) throw new NullPointerException();
         verificaMentore(mentori);
         hackathon.setMentori(mentori);
@@ -35,19 +32,19 @@ public class MentoreService {
         return true;
     }
 
-    public static boolean verificaMentore(List<Mentore> mentori){
+    public static boolean verificaMentore(List<Account> mentori){
         if (mentori == null || mentori.isEmpty())
             throw new IllegalArgumentException("La lista dei mentori non può essere nulla o vuota");
 
         if (mentori.stream().anyMatch(Objects::isNull))
             throw new IllegalArgumentException("La lista non può contenere mentori nulli");
 
-        if (mentori.stream().map(Mentore::getId).distinct().count() != mentori.size())
+        if (mentori.stream().map(Account::getId).distinct().count() != mentori.size())
             throw new IllegalArgumentException("La lista contiene mentori duplicati");
 
         return true;
     }
-    public List<Mentore> getListaMentori(){
+    public List<Account> getListaMentori(){
         return repository.findAll();
     }
 
@@ -61,12 +58,12 @@ public class MentoreService {
         if(hackathon == null) throw new NullPointerException("Hackathon non valido");
         if (mentori == null) throw new NullPointerException("La lista dei mentori non può essere nulla");
         //prendo i mentori dalla lista
-        List<Mentore> mentoriDaAggiungere = mentori.stream().map(this::getMentoreById).toList();
+        List<Account> mentoriDaAggiungere = mentori.stream().map(this::getMentoreById).toList();
         //controllo che non ci siano mentori nulli
         if (mentoriDaAggiungere.stream().anyMatch(Objects::isNull)) return false;
         verificaMentore(mentoriDaAggiungere);
         //aggiungo i mentori al hackathon
-        Set<Mentore> mentoriEsistenti = new HashSet<>(hackathon.getMentori());
+        Set<Account> mentoriEsistenti = new HashSet<>(hackathon.getMentori());
         mentoriEsistenti.addAll(mentoriDaAggiungere);
         hackathon.setMentori(new ArrayList<>(mentoriEsistenti));
         hackathonRepository.save(hackathon);
@@ -87,7 +84,7 @@ public class MentoreService {
                         && h.getStato() == stato).toList();
     }
 
-    public Mentore getMentoreById(long idMentore) {
+    public Account getMentoreById(long idMentore) {
         return repository.findById(idMentore).orElse(null);
     }
 

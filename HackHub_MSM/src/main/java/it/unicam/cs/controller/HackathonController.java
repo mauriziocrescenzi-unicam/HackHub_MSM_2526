@@ -3,14 +3,13 @@ package it.unicam.cs.controller;
 import it.unicam.cs.dto.HackathonCreazioneDTO;
 import it.unicam.cs.dto.HackathonModificaDTO;
 import it.unicam.cs.dto.HackathonRispostaDTO;
-import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.Team;
-import it.unicam.cs.service.HackathonService;
-import it.unicam.cs.service.MentoreService;
-import it.unicam.cs.service.TeamHackathonService;
-import it.unicam.cs.service.TeamService;
+import it.unicam.cs.model.*;
+import it.unicam.cs.repository.AccountRepository;
+import it.unicam.cs.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +20,20 @@ public class HackathonController {
 
     private final HackathonService hackathonService;
     private final MentoreService mentoreService;
+    private final MembroDelloStaffService membroStaffService;
+    private final AccountService accountService;
 
-    public HackathonController(HackathonService hackathonService, MentoreService mentoreService) {
+    public HackathonController(HackathonService hackathonService, MentoreService mentoreService, MembroDelloStaffService membroStaffService, AccountService accountService) {
         this.hackathonService = hackathonService;
         this.mentoreService = mentoreService;
+        this.membroStaffService = membroStaffService;
+        this.accountService = accountService;
     }
 
     @PostMapping
-    public ResponseEntity<String> createHackathon(@RequestBody HackathonCreazioneDTO createDTO){
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<String> createHackathon(@RequestBody HackathonCreazioneDTO createDTO, Authentication auth){
+        Long organizzatoreId = accountService.findId(auth.getName());
         boolean creato = hackathonService.creaHackathon(
                 createDTO.nome(),
                 createDTO.regolamento(),
@@ -39,7 +44,7 @@ public class HackathonController {
                 createDTO.premioInDenaro(),
                 createDTO.dimensioneMassimoTeam(),
                 createDTO.stato(),
-                createDTO.organizzatoreId(),
+                organizzatoreId,
                 createDTO.giudiceId(),
                 createDTO.mentoriIds()
         );
@@ -47,24 +52,36 @@ public class HackathonController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Hackathon creato con successo");
     }
     @PutMapping("/{id}")
-    public ResponseEntity<String> modificaHackathon(@PathVariable long id, @RequestBody HackathonModificaDTO hackathonData){
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<String> modificaHackathon(@PathVariable long id,
+                                                    @RequestBody HackathonModificaDTO hackathonData,
+                                                    Authentication auth) {
+        Account u = accountService.find(auth.getName());
         Hackathon hackathon = hackathonService.getHackathonByID(id);
+
         if (hackathon == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
 
+        if (!hackathon.getOrganizzatore().getId().equals(u.getId()))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato");
         if (!hackathonService.modificaHackathon(hackathon, hackathonData.nome(), hackathonData.regolamento(),
                 hackathonData.scadenzaIscrizione(), hackathonData.dataInizio(), hackathonData.dataFine(),
                 hackathonData.luogo(), hackathonData.premioInDenaro()))
             return ResponseEntity.badRequest().body("Dati non validi");
 
         return ResponseEntity.ok("Hackathon modificato con successo");
-
     }
     @PutMapping("/{id}/mentori")
-    public ResponseEntity<String> aggiungereMentori(@PathVariable long id, @RequestBody Map<String, Object> body){
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<String> aggiungereMentori(@PathVariable long id, @RequestBody Map<String, Object> body, Authentication auth){
+        Account u = accountService.find(auth.getName());
         Hackathon hackathon = hackathonService.getHackathonByID(id);
+
         if (hackathon == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
+
+        if (!hackathon.getOrganizzatore().getId().equals(u.getId()))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato");
 
         List<?> raw = (List<?>) body.get("mentoriIds");
         if (raw == null) return ResponseEntity.badRequest().body("Dati non validi");
@@ -82,6 +99,7 @@ public class HackathonController {
         HackathonRispostaDTO dto= HackathonRispostaDTO.fromHackathon(hackathon);
         return ResponseEntity.ok(dto);
     }
+
 
 
 }

@@ -16,9 +16,9 @@ public record HackathonRispostaDTO(
         @NotNull Double premioInDenaro,
         @NotNull Integer dimensioneMassimoTeam,
         @NotNull StatoHackathon stato,
-        @NotNull Organizzatore organizzatore,
-        @NotNull Giudice giudice,
-        @NotNull List<Mentore> mentori
+        @NotNull Account organizzatore,
+        @NotNull Account giudice,
+        @NotNull List<Account> mentori
 ) {
     public static HackathonRispostaDTO fromHackathon(Hackathon hackathon) {
         return new HackathonRispostaDTO(hackathon.getNome(),hackathon.getRegolamento(),hackathon.getScadenzaIscrizione(),
