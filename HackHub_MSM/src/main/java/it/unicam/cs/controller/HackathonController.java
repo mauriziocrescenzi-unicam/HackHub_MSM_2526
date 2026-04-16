@@ -1,6 +1,7 @@
 package it.unicam.cs.controller;
 
 import it.unicam.cs.dto.HackathonCreazioneDTO;
+import it.unicam.cs.dto.HackathonInfoPubblicoDTO;
 import it.unicam.cs.dto.HackathonModificaDTO;
 import it.unicam.cs.dto.HackathonRispostaDTO;
 import it.unicam.cs.model.*;
@@ -100,6 +101,36 @@ public class HackathonController {
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Test recupero delle informazioni
+     */
+    @GetMapping
+    public ResponseEntity<List<HackathonRispostaDTO>> getAllHackathon(){
+        List<HackathonRispostaDTO> lista = hackathonService.getAllListaHackathon()
+                .stream()
+                .map(HackathonRispostaDTO::fromHackathon)
+                .toList();
+        return ResponseEntity.ok(lista);
+    }
 
+    /**
+     * Test recupero delle informazioni pubbliche
+     */
+    @GetMapping("/{id}/informazioni-pubbliche")
+    public ResponseEntity<HackathonInfoPubblicoDTO> getInformazioniPubbliche(@PathVariable long id){
+        Hackathon h = hackathonService.getHackathonByID(id);
+        if (h == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(HackathonInfoPubblicoDTO.fromHackathon(h));
+    }
 
+    /**
+     * Test recupero delle informazioni
+     */
+    @GetMapping("/{id}/informazioni")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<HackathonRispostaDTO> getAllInformazioni(@PathVariable long id){
+        Hackathon h = hackathonService.getHackathonByID(id);
+        if (h == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(HackathonRispostaDTO.fromHackathon(h));
+    }
 }

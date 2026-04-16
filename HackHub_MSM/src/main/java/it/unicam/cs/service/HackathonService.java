@@ -118,5 +118,39 @@ public class HackathonService {
 
     }
 
+    /**
+     * Recupera tutti gli hackathon presenti nel sistema
+     */
+    public List<Hackathon> getAllListaHackathon() {
+        return repository.findAll();
+    }
+    /**
+     * Recupera le informazioni di un hackathon
+     */
+    public String getAllInformazioni(Hackathon hackathon) {
+        if (hackathon == null) return null;
+        return "ID: " + hackathon.getId() +
+                "\nNome: " + hackathon.getNome() +
+                "\nRegolamento: " + hackathon.getRegolamento() +
+                "\nScadenza Iscrizioni: " + hackathon.getScadenzaIscrizione() +
+                "\nData Inizio: " + hackathon.getDataInizio() +
+                "\nData Fine: " + hackathon.getDataFine() +
+                "\nLuogo: " + hackathon.getLuogo() +
+                "\nPremio: " + hackathon.getPremioInDenaro() +
+                "\nDimensione Max Team: " + hackathon.getDimensioneMassimoTeam() +
+                "\nStato: " + hackathon.getStato() +
+                "\nOrganizzatore: " + hackathon.getOrganizzatore() +
+                "\nGiudice: " + hackathon.getGiudice() +
+                "\nMentori: " + hackathon.getMentori();
+    }
+    /**
+     * Recupera le informazioni pubbliche
+     */
+    public String getInformazioniPubbliche(Hackathon hackathon) {
+        if (hackathon == null) return null;
+        return "Nome: " + hackathon.getNome() +
+                "\nRegolamento: " + hackathon.getRegolamento();
+    }
+
 
 }

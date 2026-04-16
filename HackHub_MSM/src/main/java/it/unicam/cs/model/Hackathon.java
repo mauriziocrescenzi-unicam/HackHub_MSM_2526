@@ -89,6 +89,21 @@ public class Hackathon {
         this.stato = stato;
     }
 
+    public void cambiaStato(StatoHackathon nuovoStato) {
+        if (!transazioneValida(this.stato, nuovoStato))
+            throw new IllegalStateException("Transizione non consentita: " + this.stato + " a " + nuovoStato);
+        this.stato = nuovoStato;
+    }
+
+    private boolean transazioneValida(StatoHackathon from, StatoHackathon to) {
+        return switch (from) {
+            case IN_ISCRIZIONE   -> to == StatoHackathon.IN_CORSO;
+            case IN_CORSO        -> to == StatoHackathon.IN_VALUTAZIONE;
+            case IN_VALUTAZIONE  -> to == StatoHackathon.CONCLUSO;
+            case CONCLUSO        -> false;
+        };
+    }
+
     public void setOrganizzatore(Account organizzatore) {
         if (organizzatore == null) throw new IllegalArgumentException();
         this.organizzatore = organizzatore;
