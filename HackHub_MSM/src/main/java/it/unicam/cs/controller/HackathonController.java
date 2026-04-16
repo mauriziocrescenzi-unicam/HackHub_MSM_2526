@@ -63,7 +63,7 @@ public class HackathonController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
 
         if (!hackathon.getOrganizzatore().getId().equals(u.getId()))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Il tuo ruolo non consente di effettuare questa operazione");
         if (!hackathonService.modificaHackathon(hackathon, hackathonData.nome(), hackathonData.regolamento(),
                 hackathonData.scadenzaIscrizione(), hackathonData.dataInizio(), hackathonData.dataFine(),
                 hackathonData.luogo(), hackathonData.premioInDenaro()))
@@ -81,7 +81,7 @@ public class HackathonController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
 
         if (!hackathon.getOrganizzatore().getId().equals(u.getId()))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Il tuo ruolo non consente di effettuare questa operazione");
 
         List<?> raw = (List<?>) body.get("mentoriIds");
         if (raw == null) return ResponseEntity.badRequest().body("Dati non validi");

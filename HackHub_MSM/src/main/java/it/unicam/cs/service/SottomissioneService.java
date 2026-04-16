@@ -28,16 +28,41 @@ public class SottomissioneService {
     private final TeamHackathonService teamHackathonService;
     private final HackathonRepository hackathonRepository;
     private final RepositoryFacade repositoryFacade;
+    private final MembroTeamService membroTeamService;
+
 
     public SottomissioneService(SottomissioneRepository repository, HackathonService hackathonService,
-            TeamService teamService, TeamHackathonService teamHackathonService, HackathonRepository hackathonRepository,
-            RepositoryFacade repositoryFacade) {
+                                TeamService teamService, TeamHackathonService teamHackathonService, HackathonRepository hackathonRepository,
+                                RepositoryFacade repositoryFacade, MembroTeamService membroTeamService) {
         this.repository = repository;
         this.hackathonService = hackathonService;
         this.teamService = teamService;
         this.teamHackathonService = teamHackathonService;
         this.hackathonRepository = hackathonRepository;
         this.repositoryFacade = repositoryFacade;
+        this.membroTeamService = membroTeamService;
+    }
+    private boolean verificaSottomissione(String nome, String link, Team team, Long idHackathon){
+        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
+        if (hackathon == null)
+            return false;
+        // Team deve essere iscritto all'hackathon
+        if (!teamHackathonService.checkIscrizioneHackathon(team.getId(), idHackathon))
+            return false;
+        // Hackathon deve essere IN_CORSO
+        if (hackathon.getStato() != StatoHackathon.IN_CORSO)
+            return false;
+        // Non deve esistere già una sottomissione
+        if (isPresente(team.getId(), idHackathon))
+            return false;
+        // La dataFine dell'hackathon non deve essere passata
+        if (hackathon.getDataFine().isBefore(LocalDateTime.now()))
+            return false;
+        // Valida nome e link
+        if (link == null || link.isBlank())
+            return false;
+
+        return repositoryFacade.validaLink(link);
     }
 
     /**
@@ -45,32 +70,18 @@ public class SottomissioneService {
      *
      * @param nome        Nome della sottomissione
      * @param link        Link al progetto
-     * @param idTeam      ID del team mittente
+     * @param account      account del membro del team che invia la sottomissione
      * @param idHackathon ID dell'hackathon
      * @return true se l'invio è riuscito, false altrimenti
      */
-    public boolean inviaSottomissione(String nome, String link, Long idTeam, Long idHackathon) {
-        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
-        if (hackathon == null)
-            return false;
-
-        // Team deve essere iscritto all'hackathon
-        if (!teamHackathonService.checkIscrizioneHackathon(idTeam, idHackathon))
-            return false;
-        // Hackathon deve essere IN_CORSO
-        if (hackathon.getStato() != StatoHackathon.IN_CORSO)
-            return false;
-        // Non deve esistere già una sottomissione
-        if (isPresente(idTeam, idHackathon))
-            return false;
-        // La dataFine dell'hackathon non deve essere passata
-        if (hackathon.getDataFine().isBefore(LocalDateTime.now()))
-            return false;
-        // Valida nome e link
-        if (!verificaSottomissione(nome, link))
+    public boolean inviaSottomissione(String nome, String link, Account account, Long idHackathon) {
+        Team team = membroTeamService.getMembro(account).getTeam();
+        if (team == null) return false;
+        //verifica se le informazioni vanno bene
+        if (!verificaSottomissione(nome, link, team, idHackathon))
             return false;
         // Crea la sottomissione
-        Sottomissione nuova = new Sottomissione(nome, link, idTeam, idHackathon);
+        Sottomissione nuova = new Sottomissione(nome, link, team.getId(), idHackathon);
         repository.save(nuova);
         return true;
     }
@@ -80,31 +91,21 @@ public class SottomissioneService {
      *
      * @param nome        Nuovo nome della sottomissione
      * @param link        Nuovo link al progetto
-     * @param idTeam      ID del team
+     * @param account      account del membro del team che invia la sottomissione
      * @param idHackathon ID dell'hackathon
      * @return true se l'aggiornamento è riuscito, false altrimenti
      */
-    public boolean aggiornaSottomissione(String nome, String link, Long idTeam, Long idHackathon) {
-        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
-        if (hackathon == null)
-            return false;
-        // Team deve essere iscritto all'hackathon
-        if (!teamHackathonService.checkIscrizioneHackathon(idTeam, idHackathon))
-            return false;
-        // Hackathon deve essere IN_CORSO
-        if (hackathon.getStato() != StatoHackathon.IN_CORSO)
+    public boolean aggiornaSottomissione(String nome, String link, Account account, Long idHackathon) {
+        Team team = membroTeamService.getMembro(account).getTeam();
+        if (team == null) return false;
+        //verifica se le informazioni vanno bene
+        if (!verificaSottomissione(nome, link, team, idHackathon))
             return false;
         // Deve esistere già una sottomissione
-        if (!isPresente(idTeam, idHackathon))
-            return false;
-        // La dataFine dell'hackathon non deve essere passata
-        if (hackathon.getDataFine().isBefore(LocalDateTime.now()))
-            return false;
-        // Valida nome e link
-        if (!verificaSottomissione(nome, link))
+        if (!isPresente(team.getId(), idHackathon))
             return false;
         // Aggiorna con setInfo — aggiorna anche dataInvio a now()
-        Sottomissione esistente = getSottomissioneByTeamHackathon(idTeam, idHackathon);
+        Sottomissione esistente = getSottomissioneByTeamHackathon(team.getId(), idHackathon);
         if (esistente == null)
             return false;
         esistente.setInfo(nome, link);
@@ -189,22 +190,6 @@ public class SottomissioneService {
         return sottomissione.getVoto() >= 0 && sottomissione.getGiudizio() != null;
     }
 
-    /**
-     * Valida nome e link della sottomissione.
-     * Corrisponde a verificaSottomissione(nome, link) del sequence diagram.
-     *
-     * @param nome Nome da validare
-     * @param link Link da validare
-     * @return true se entrambi validi, false altrimenti
-     */
-    public boolean verificaSottomissione(String nome, String link) {
-        if (nome == null || nome.isBlank())
-            return false;
-        if (link == null || link.isBlank())
-            return false;
-
-        return repositoryFacade.validaLink(link);
-    }
 
     /**
      * Valida voto e giudizio prima della valutazione.

@@ -30,7 +30,7 @@ public class TeamController {
     public ResponseEntity<String> createTeam(@RequestBody Map<String, Object> teamData, Authentication auth) {
         String nome = (String) teamData.get("nome");
         if (nome == null || nome.trim().isEmpty() ) {
-            return ResponseEntity.badRequest().body("Dati non validi");
+            return ResponseEntity.badRequest().body("Non sono stati inseriti i dati richiesti");
         }
         String descrizione = (String) teamData.get("descrizione");
         Long utenteId = accountService.findId(auth.getName());

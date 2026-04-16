@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -104,4 +105,21 @@ public class SegnalazioneService {
     }
 
     public Segnalazione getSegnalazioneById(long id){return repository.findById(id).orElse(null);}
+
+    /**
+     * Restituisce la lista delle segnalazioni di un determinato organizzatore
+     * @param organizzatore organizzatore che ha segnalato
+     * @param hackathon hackathon relativo alle segnalazioni
+     * @param stato stato delle segnalazioni
+     * @return lista delle segnalazioni
+     */
+    public List<Segnalazione> getSegnalazioni(Account organizzatore, List<Hackathon> hackathon, StatoSegnalazione stato){
+        if (organizzatore == null)throw new NullPointerException("Organizzatore non valido");
+        if (hackathon==null || hackathon.isEmpty()) throw new IllegalArgumentException("Hackathon non valido");
+        if (stato==null) throw new NullPointerException("Stato non valido");
+        return repository.findAll().stream().filter(s -> hackathon.contains(s.getHackathon())
+                && s.getHackathon().getOrganizzatore().equals(organizzatore) && s.getStato() == stato).toList();
+
+
+    }
 }
