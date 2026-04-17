@@ -127,7 +127,6 @@ public class HackathonController {
      * Test recupero delle informazioni
      */
     @GetMapping("/{id}/informazioni")
-    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<HackathonRispostaDTO> getAllInformazioni(@PathVariable long id){
         Hackathon h = hackathonService.getHackathonByID(id);
         if (h == null) return ResponseEntity.notFound().build();

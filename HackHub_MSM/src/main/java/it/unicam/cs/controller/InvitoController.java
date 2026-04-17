@@ -28,6 +28,7 @@ public class InvitoController {
 
     // UC: Inviare un invito
     @PostMapping
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> inviareInvito(@RequestBody Map<String, Object> body, Authentication auth) {
         if (body.get("emailDestinatario") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
@@ -35,7 +36,7 @@ public class InvitoController {
 
         if (mittente == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mittente non trovato");
-            Account destinatario = accountService.find(body.get("emailDestinatario").toString());
+        Account destinatario = accountService.find(body.get("emailDestinatario").toString());
         if (destinatario == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Destinatario non trovato");
         try {
@@ -64,6 +65,7 @@ public class InvitoController {
 
     // UC: Valutare un invito
     @PutMapping("/valuta")
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> valutareInvito(@RequestBody Map<String, Object> body, Authentication auth) {
         if (body.get("idUtente") == null || body.get("idInvito") == null || body.get("risposta") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
