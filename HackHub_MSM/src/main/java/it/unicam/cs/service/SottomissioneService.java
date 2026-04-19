@@ -321,4 +321,21 @@ public class SottomissioneService {
 
         return true;
     }
+
+    /**
+     * Restituisce la lista degli hackathon assegnati a un giudice filtrati per stato.
+     * @param idAccount ID dell'account che fa da giudice
+     * @param stato Stato dell'hackathon da filtrare
+     * @return Lista di Hackathon
+     */
+    public List<Hackathon> getListaHackathonPerGiudice(Long idAccount, StatoHackathon stato) {
+        if (stato == null) throw new IllegalArgumentException("Stato non valido.");
+        if (idAccount == null || idAccount <= 0) throw new IllegalArgumentException("Account non valido.");
+        // Filtra gli hackathon dove il giudice assegnato corrisponde all'account e lo stato corrisponde
+        return hackathonRepository.findAll().stream()
+                .filter(h -> h.getGiudice() != null)
+                .filter(h -> h.getGiudice().getId().equals(idAccount))
+                .filter(h -> h.getStato() == stato)
+                .toList();
+    }
 }
