@@ -53,7 +53,7 @@ public class SottomissioneController {
      * GET /sottomissioni/hackathons?stato=IN_CORSO
      */
     @GetMapping("/hackathons")
-    @PreAuthorize("hasRole('STAFF')") // O il ruolo corretto per i giudici
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<HackathonRispostaDTO>> getMieiHackathonDaGiudicare(@RequestParam String stato, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -6,6 +6,8 @@ import it.unicam.cs.repository.HackathonRepository;
 import it.unicam.cs.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,13 +26,15 @@ public class MembroTeamController {
     private final TeamService teamService;
     private final RichiestaSupportoService richiestaSupportoService;
     private final HackathonRepository hackathonRepository;
+    private final AccountService accountService;
 
     public MembroTeamController(MembroTeamService membroTeamService,
                                 TeamHackathonService teamHackathonService,
                                 HackathonService hackathonService,
                                 SottomissioneService sottomissioneService,
                                 TeamService teamService, RichiestaSupportoService richiestaSupportoService,
-                                HackathonRepository hackathonRepository) {
+                                HackathonRepository hackathonRepository,
+                                AccountService accountService) {
         this.membroTeamService = membroTeamService;
         this.teamHackathonService = teamHackathonService;
         this.hackathonService = hackathonService;
@@ -38,25 +42,29 @@ public class MembroTeamController {
         this.teamService = teamService;
         this.richiestaSupportoService = richiestaSupportoService;
         this.hackathonRepository = hackathonRepository;
+        this.accountService = accountService;
     }
 
     // ==================== ISCRIZIONE HACKATHON ====================
 
+
     /**
-     * GET /membro-team/{idMembro}/hackathons/iscritto
+     * POST /membro-team/hackathons/iscritto
      * Restituisce la lista degli hackathon a cui il team del membro è iscritto.
-     * Usa DTO per non esporre entità JPA.
+     * ID passato nel body: { "idMembro": 1 }
      */
-    @GetMapping("/{idMembro}/hackathons/iscritto")
-    public ResponseEntity<List<HackathonRispostaDTO>> isIscrittoHackathon(@PathVariable long idMembro) {
+    @PostMapping("/hackathons/iscritto")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<HackathonRispostaDTO>> isIscrittoHackathon(@RequestBody Map<String, Long> body, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        Long idMembro = body.get("idMembro");
+        if (account == null || !account.getId().equals(idMembro)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Team team = teamService.getTeamByMembroId(idMembro);
-        if (team == null) {
-            return ResponseEntity.notFound().build();
-        }
+        if (team == null) return ResponseEntity.notFound().build();
         List<Hackathon> hackathons = teamHackathonService.isIscrittoHackathon(team);
-        if (hackathons.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        if (hackathons.isEmpty()) return ResponseEntity.notFound().build();
         List<HackathonRispostaDTO> risposta = hackathons.stream()
                 .map(HackathonRispostaDTO::fromHackathon)
                 .toList();
@@ -64,32 +72,26 @@ public class MembroTeamController {
     }
 
     /**
-     * GET /membro-team/{idMembro}/hackathons/stato
+     * POST /membro-team/hackathons/stato
      * Verifica se almeno un hackathon del team è in uno degli stati specificati.
-     * Corrisponde a checkStato(listaHackathon, stati...) nel sequence diagram.
-     *
-     * @param idMembro ID del membro del team
-     * @param body Corpo della richiesta con array di stati (es. {"stati": ["IN_ISCRIZIONE", "CONCLUSO"]})
-     * @return true se almeno un hackathon è in uno degli stati, false altrimenti
+     * Body: { "idMembro": 1, "stati": ["IN_ISCRIZIONE", "CONCLUSO"] }
      */
-    @GetMapping("/{idMembro}/hackathons/stato")
-    public ResponseEntity<Boolean> checkStato(@PathVariable long idMembro, @RequestBody Map<String, Object> body) {
-        if (body.get("stati") == null) {
-            return ResponseEntity.badRequest().body(null);
+    @PostMapping("/hackathons/stato")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Boolean> checkStato(@RequestBody Map<String, Object> body, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        Long idMembro = ((Number) body.get("idMembro")).longValue();
+        if (account == null || !account.getId().equals(idMembro)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false);
         }
-        // Estrae gli stati dal body e li converte in enum
+        if (body.get("stati") == null) return ResponseEntity.badRequest().body(null);
         List<?> statiRaw = (List<?>) body.get("stati");
         StatoHackathon[] stati = statiRaw.stream()
                 .map(s -> StatoHackathon.fromString(s.toString()))
                 .toArray(StatoHackathon[]::new);
-        // Recupera il team del membro
         Team team = teamService.getTeamByMembroId(idMembro);
-        if (team == null) {
-            return ResponseEntity.notFound().build();
-        }
-        // Recupera gli hackathon a cui il team è iscritto
+        if (team == null) return ResponseEntity.notFound().build();
         List<Hackathon> listaHackathon = teamHackathonService.isIscrittoHackathon(team);
-        // Verifica lo stato usando HackathonService.checkStato (varargs)
         boolean risultato = hackathonService.checkStato(listaHackathon, stati);
         return ResponseEntity.ok(risultato);
     }
@@ -97,41 +99,43 @@ public class MembroTeamController {
     // ==================== SOTTOMISSIONE ====================
 
     /**
-     * GET /membro-team/{idMembro}/hackathons/{idHackathon}/sottomissione/presente
+     * POST /membro-team/sottomissione/presente
      * Verifica se esiste già una sottomissione per il team nell'hackathon.
-     * Corrisponde a isPresente(idTeam, idHackathon) nel sequence diagram.
-     *
-     * @param idMembro ID del membro del team
-     * @param idHackathon ID dell'hackathon
-     * @return true se la sottomissione esiste, false altrimenti
+     * Body: { "idMembro": 1, "idHackathon": 10 }
      */
-    @GetMapping("/{idMembro}/hackathons/{idHackathon}/sottomissione/presente")
-    public ResponseEntity<Boolean> isPresente(@PathVariable long idMembro,
-                                              @PathVariable long idHackathon) {
-
-        Team team = teamService.getTeamByMembroId(idMembro);
-        if (team == null) {
-            return ResponseEntity.notFound().build();
+    @PostMapping("/sottomissione/presente")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Boolean> isPresente(@RequestBody Map<String, Long> body, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        Long idMembro = body.get("idMembro");
+        if (account == null || !account.getId().equals(idMembro)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false);
         }
+        Team team = teamService.getTeamByMembroId(idMembro);
+        if (team == null) return ResponseEntity.notFound().build();
+        Long idHackathon = body.get("idHackathon");
         boolean presente = sottomissioneService.isPresente(team.getId(), idHackathon);
         return ResponseEntity.ok(presente);
     }
 
-   
-
     // ==================== GESTIONE MEMBRI TEAM ====================
 
     /**
-     * GET /membro-team/team/{idTeam}/membri
+     * POST /membro-team/team/membri
      * Restituisce la lista dei membri di un team specifico.
-     * Usa DTO per non esporre entità JPA.
+     * Body: { "idTeam": 5 }
      */
-    @GetMapping("/team/{idTeam}/membri")
-    public ResponseEntity<List<MembroTeamRispostaDTO>> getMembri(@PathVariable long idTeam) {
-        List<MembroTeam> membri = membroTeamService.getMembri(idTeam);
-        if (membri.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    @PostMapping("/team/membri")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<MembroTeamRispostaDTO>> getMembri(@RequestBody Map<String, Long> body, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Long idTeam = body.get("idTeam");
+        if (!membroTeamService.isMembroTeam(account.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        List<MembroTeam> membri = membroTeamService.getMembri(idTeam);
+        if (membri.isEmpty()) return ResponseEntity.notFound().build();
         List<MembroTeamRispostaDTO> risposta = membri.stream()
                 .map(MembroTeamRispostaDTO::fromMembroTeam)
                 .toList();
@@ -139,16 +143,21 @@ public class MembroTeamController {
     }
 
     /**
-     * PUT /membro-team/abbandona
+     * POST /membro-team/abbandona
      * Gestisce l'abbandono volontario di un membro da un team.
-     * Gli ID del membro e del team vengono passati nel body della richiesta.
-     *
-     * @param dto Corpo della richiesta con idMembro e idTeam
-     * @return Messaggio di successo o errore
+     * Body: { "idMembro": 1, "idTeam": 5 }
      */
-    @PutMapping("/abbandona")
-    public ResponseEntity<String> abbandonaTeam(@RequestBody AbbandonaTeamDTO dto) {
-        boolean abbandonato = membroTeamService.abbandonaTeam(dto.idMembro(), dto.idTeam());
+    @PostMapping("/abbandona")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> abbandonaTeam(@RequestBody Map<String, Long> body, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
+        Long idMembro = body.get("idMembro");
+        Long idTeam = body.get("idTeam");
+        if (!account.getId().equals(idMembro)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Puoi abbandonare solo il tuo team");
+        }
+        boolean abbandonato = membroTeamService.abbandonaTeam(idMembro, idTeam);
         if (!abbandonato) {
             return ResponseEntity.badRequest().body("Abbandono non riuscito. Verificare che il membro appartenga al team.");
         }
@@ -156,45 +165,67 @@ public class MembroTeamController {
     }
 
     /**
-     * DELETE /membro-team/elimina
+     * POST /membro-team/elimina
      * Permette a un membro del team di eliminare un altro membro dallo stesso team.
-     * Gli ID vengono passati nel body della richiesta.
-     *
-     * @param dto Corpo della richiesta con idMembroCheElimina, idMembroDaEliminare e idTeam
-     * @return Messaggio di successo o errore
+     * Body: { "idMembroCheElimina": 1, "idMembroDaEliminare": 2, "idTeam": 5 }
      */
-    @DeleteMapping("/elimina")
-    public ResponseEntity<String> eliminaMembro(@RequestBody EliminaMembroDTO dto) {
-        // Validazione: un membro non può eliminare se stesso
-        if (dto.idMembroCheElimina().equals(dto.idMembroDaEliminare())) {
+    @PostMapping("/elimina")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> eliminaMembro(@RequestBody Map<String, Long> body, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
+        Long idMembroCheElimina = body.get("idMembroCheElimina");
+        Long idMembroDaEliminare = body.get("idMembroDaEliminare");
+        Long idTeam = body.get("idTeam");
+        if (!account.getId().equals(idMembroCheElimina)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi eliminare solo membri del tuo team");
+        }
+        if (idMembroCheElimina.equals(idMembroDaEliminare)) {
             return ResponseEntity.badRequest().body("Impossibile: un membro non può eliminare se stesso dal team, in tal caso abbandonare il team.");
         }
-        boolean eliminato = membroTeamService.eliminaMembro(
-                dto.idMembroCheElimina(),
-                dto.idMembroDaEliminare(),
-                dto.idTeam());
+        boolean eliminato = membroTeamService.eliminaMembro(idMembroCheElimina, idMembroDaEliminare, idTeam);
         if (!eliminato) {
             return ResponseEntity.badRequest().body("Eliminazione non riuscita. Verificare che entrambi i membri appartengano al team.");
         }
         return ResponseEntity.ok("Membro eliminato dal team con successo");
     }
 
+    /**
+     * POST /membro-team/supporto/richiedi
+     * Invia una richiesta di supporto.
+     * Body: { "idMembroTeam": 1, "descrizioneRichiesta": "...", "dataInvio": "2026-04-10T14:30:00", "idHackathon": 10 }
+     */
     @PostMapping("/supporto/richiedi")
-    public ResponseEntity<String> inviaRichiestaSupporto(@RequestBody RichiestaSupportoInvioDTO dto) {
-        Hackathon hackathon = hackathonRepository.findById(dto.idHackathon())
-                .orElse(null);
-        if (hackathon == null) {
-            return ResponseEntity.badRequest().body("Hackathon non trovato");
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> inviaRichiestaSupporto(@RequestBody Map<String, Object> body, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
+        // Estrazione dati dalla Map (richiede cast perché i valori sono Object)
+        Long idMembroTeam = ((Number) body.get("idMembroTeam")).longValue();
+        String descrizioneRichiesta = (String) body.get("descrizioneRichiesta");
+        Long idHackathon = ((Number) body.get("idHackathon")).longValue();
+        // Gestione della data: Spring di solito deserializza le date come stringhe nelle Map
+        LocalDateTime dataInvio = null;
+        Object dataObj = body.get("dataInvio");
+        if (dataObj instanceof String) {
+            dataInvio = LocalDateTime.parse((String) dataObj);
+        } else if (dataObj instanceof LocalDateTime) {
+            dataInvio = (LocalDateTime) dataObj;
         }
+        // Verifica autorizzazione
+        if (!account.getId().equals(idMembroTeam)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi inviare richieste solo per te stesso");
+        }
+        Hackathon hackathon = hackathonRepository.findById(idHackathon).orElse(null);
+        if (hackathon == null) return ResponseEntity.badRequest().body("Hackathon non trovato");
         RichiestaSupporto richiesta = richiestaSupportoService.inviaRichiestaSupporto(
-                dto.idMembroTeam(),
-                dto.descrizioneRichiesta(),
-                dto.dataInvio(),
+                idMembroTeam,
+                descrizioneRichiesta,
+                dataInvio,
                 hackathon
         );
         if (richiesta == null) {
-            return ResponseEntity.badRequest()
-                    .body("Validazione richiesta fallita");
+            return ResponseEntity.badRequest().body("Validazione richiesta fallita");
         }
         return ResponseEntity.status(HttpStatus.CREATED).body("Richiesta di supporto inviata con successo!");
     }

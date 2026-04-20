@@ -253,4 +253,14 @@ public class MembroTeamService {
         }
         return true;
     }
+
+    /**
+     * Recupera il MembroTeam associato a un account specifico.
+     * @param idAccount ID dell'account
+     * @return Il MembroTeam se trovato, null altrimenti
+     */
+    public MembroTeam getMembroById(Long idAccount) {
+        if (idAccount == null) return null;
+        return repository.findByAccountId(idAccount).orElse(null);
+    }
 }
