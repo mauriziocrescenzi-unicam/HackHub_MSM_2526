@@ -100,6 +100,18 @@ public class SottomissioneController {
                 .toList();
         return ResponseEntity.ok(risposta);
     }
+    @GetMapping("/sottomissioni/{idSottomissione}")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione( @PathVariable long idSottomissione) {
+        Sottomissione sottomissione = sottomissioneService.getSottomissioneById(idSottomissione);
+        if (sottomissione == null) {
+            // Può significare: sottomissione non trovata OPPURE non autorizzato
+            // Per sicurezza REST, restituiamo 404 in entrambi i casi
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        SottomissioneRispostaDTO risposta = SottomissioneRispostaDTO.fromSottomissione(sottomissione);
+        return ResponseEntity.ok(risposta);
+    }
 
     /**
      * Valuta una sottomissione.

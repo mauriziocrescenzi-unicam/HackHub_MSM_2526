@@ -47,11 +47,11 @@ public class TeamHackathonController {
      * Body: { "idTeam": 1 }
      */
     @PostMapping("/lista")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<List<HackathonRispostaDTO>> isIscrittoHackathon(@RequestBody Map<String, Long> body, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        Long idTeam = body.get("idTeam");
+        Long idTeam = membroTeamService.getMembroById(account.getId()).getTeam().getId();
         MembroTeam membro = membroTeamService.getMembroById(account.getId());
         if (membro == null || !membro.getTeam().getId().equals(idTeam)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -72,13 +72,13 @@ public class TeamHackathonController {
      * Body: { "idTeam": 1, "idHackathon": 10 }
      */
     @PostMapping("/iscritto")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<Boolean> checkIscrizioneHackathon(
             @RequestBody Map<String, Long> body,
             Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        Long idTeam = body.get("idTeam");
+        Long idTeam = membroTeamService.getMembroById(account.getId()).getTeam().getId();
         Long idHackathon = body.get("idHackathon");
         MembroTeam membro = membroTeamService.getMembro(account);
         if (membro == null || !membro.getTeam().getId().equals(idTeam)) {
@@ -94,11 +94,11 @@ public class TeamHackathonController {
      * Body: { "idTeam": 1, "idHackathon": 10 }
      */
     @PostMapping("/iscriviti")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> iscrivereTeam(@RequestBody Map<String, Long> body, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        Long idTeam = body.get("idTeam");
+        Long idTeam = membroTeamService.getMembroById(account.getId()).getTeam().getId();
         Long idHackathon = body.get("idHackathon");
         MembroTeam membro = membroTeamService.getMembro(account);
         if (membro == null || !membro.getTeam().getId().equals(idTeam)) {
@@ -125,11 +125,11 @@ public class TeamHackathonController {
      * Body: { "idTeam": 1, "idHackathon": 10 }
      */
     @PostMapping("/disiscriviti")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> disiscrivitiHackathon(@RequestBody Map<String, Long> body, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        Long idTeam = body.get("idTeam");
+        Long idTeam = membroTeamService.getMembroById(account.getId()).getTeam().getId();
         Long idHackathon = body.get("idHackathon");
         MembroTeam membro = membroTeamService.getMembro(account);
         if (membro == null || !membro.getTeam().getId().equals(idTeam)) {

@@ -93,12 +93,16 @@ public class HackathonController {
         return ResponseEntity.badRequest().body("Dati non validi");
     }
     @GetMapping("/{id}")
-    public ResponseEntity<HackathonRispostaDTO> getHackathon(@PathVariable long id){
+    public ResponseEntity<?> getHackathon(@PathVariable long id,Authentication auth){
         Hackathon hackathon = hackathonService.getHackathonByID(id);
         if (hackathon == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        HackathonRispostaDTO dto= HackathonRispostaDTO.fromHackathon(hackathon);
-        return ResponseEntity.ok(dto);
+        if(auth==null) {
+            return ResponseEntity.ok(HackathonInfoPubblicoDTO.fromHackathon(hackathon));
+        }else {
+            HackathonRispostaDTO dto= HackathonRispostaDTO.fromHackathon(hackathon);
+            return ResponseEntity.ok(dto);
+        }
     }
 
     /**
@@ -113,23 +117,5 @@ public class HackathonController {
         return ResponseEntity.ok(lista);
     }
 
-    /**
-     * Test recupero delle informazioni pubbliche
-     */
-    @GetMapping("/{id}/informazioni-pubbliche")
-    public ResponseEntity<HackathonInfoPubblicoDTO> getInformazioniPubbliche(@PathVariable long id){
-        Hackathon h = hackathonService.getHackathonByID(id);
-        if (h == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(HackathonInfoPubblicoDTO.fromHackathon(h));
-    }
 
-    /**
-     * Test recupero delle informazioni
-     */
-    @GetMapping("/{id}/informazioni")
-    public ResponseEntity<HackathonRispostaDTO> getAllInformazioni(@PathVariable long id){
-        Hackathon h = hackathonService.getHackathonByID(id);
-        if (h == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(HackathonRispostaDTO.fromHackathon(h));
-    }
 }

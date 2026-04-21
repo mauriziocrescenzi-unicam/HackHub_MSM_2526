@@ -47,6 +47,7 @@ public class SegnalazioneController {
         return ResponseEntity.badRequest().body("Dati non validi");
     }
 
+
     @PutMapping("/{id}/accetta")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<String> accettaSegnalazione (@PathVariable long id, Authentication auth){

@@ -69,7 +69,6 @@ public class InvitoController {
     public ResponseEntity<String> valutareInvito(@RequestBody Map<String, Object> body, Authentication auth) {
         if (body.get("idUtente") == null || body.get("idInvito") == null || body.get("risposta") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
-        Long idUtente = ((Number) body.get("idUtente")).longValue();
         Long idInvito = ((Number) body.get("idInvito")).longValue();
         boolean risposta = (boolean) body.get("risposta");
         Account account = accountService.find(auth.getName());

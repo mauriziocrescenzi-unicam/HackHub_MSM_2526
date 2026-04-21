@@ -13,6 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Console;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,19 +48,25 @@ public class MembroDelloStaffController {
                 .toList();
         return ResponseEntity.ok(risposta);
     }
+    //TODO controllo che il dato sia valido
     @PutMapping()
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(@RequestBody Map<String, Object> body, Authentication auth){
         if (body.get("stato")==null) return ResponseEntity.badRequest().body(null);
         Long id = accountService.findId(auth.getName());
-        StatoHackathon statoHackathon= StatoHackathon.fromString(body.get("stato").toString());
-        List<Hackathon> list= membroStaffService.getListaHackathons(statoHackathon,id);
+        List<Hackathon> list;
+        if(StatoHackathon.valueOf(body.get("stato").toString())==null)
+            list = membroStaffService.getListaHackathon(id);
+        else {
+            StatoHackathon statoHackathon= StatoHackathon.fromString(body.get("stato").toString());
+            list= membroStaffService.getListaHackathons(statoHackathon,id);
+        }
         List<HackathonRispostaDTO> risposta= list.stream().map(HackathonRispostaDTO::fromHackathon).toList();
         if(risposta.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(risposta);
     }
-
-
+    //TODO controllare con quelli di sottomissioneController
+    /*
     @GetMapping("/hackathons/sottomissioni")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<SottomissioneRispostaDTO>> getSottomissioni(@RequestBody Map<String, Object> body, Authentication auth) {
@@ -89,7 +97,8 @@ public class MembroDelloStaffController {
                 .toList();
         return ResponseEntity.ok(risposta);
     }
-
+    */
+    /*
     @GetMapping("/sottomissioni/{idSottomissione}")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<SottomissioneRispostaDTO> getSottomissione( @PathVariable long idSottomissione,Authentication auth) {
@@ -103,4 +112,6 @@ public class MembroDelloStaffController {
         SottomissioneRispostaDTO risposta = SottomissioneRispostaDTO.fromSottomissione(sottomissione);
         return ResponseEntity.ok(risposta);
     }
+
+     */
 }
