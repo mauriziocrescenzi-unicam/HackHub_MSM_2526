@@ -48,20 +48,20 @@ public class InvitoController {
     }
 
     // UC: Visualizzare lista inviti
-    @GetMapping("/{idUtente}")
-    @PreAuthorize("hasRole('UTENTE')")
-    public ResponseEntity<List<InvitoRispostaDTO>> getListaInviti(Authentication auth) {
-        Account account = accountService.find(auth.getName());
-        if (account == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        List<Invito> inviti = invitoService.getInviti(account);
-        if (inviti.isEmpty())
-            return ResponseEntity.notFound().build();
-        List<InvitoRispostaDTO> risposta = inviti.stream()
-                .map(InvitoRispostaDTO::fromInvito)
-                .toList();
-        return ResponseEntity.ok(risposta);
-    }
+        @GetMapping("/{idUtente}")
+        @PreAuthorize("hasRole('UTENTE')")
+        public ResponseEntity<List<InvitoRispostaDTO>> getListaInviti(Authentication auth) {
+            Account account = accountService.find(auth.getName());
+            if (account == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            List<Invito> inviti = invitoService.getInviti(account);
+            if (inviti.isEmpty())
+                return ResponseEntity.notFound().build();
+            List<InvitoRispostaDTO> risposta = inviti.stream()
+                    .map(InvitoRispostaDTO::fromInvito)
+                    .toList();
+            return ResponseEntity.ok(risposta);
+        }
 
     // UC: Valutare un invito
     @PutMapping("/valuta")

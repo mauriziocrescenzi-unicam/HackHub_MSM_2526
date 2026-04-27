@@ -13,26 +13,19 @@ import java.time.LocalDateTime;
 @Component
 public class HackathonScheduler {
 
-    private final HackathonRepository repository;
+    private final HackathonStatoUpdater updater;
 
-    public HackathonScheduler(HackathonRepository repository) {
-        this.repository = repository;
+    public HackathonScheduler(HackathonStatoUpdater updater) {
+        this.updater = updater;
     }
 
-    @EventListener(ApplicationReadyEvent.class) // esegue subito all'avvio
-    @Scheduled(fixedRate = 60000)               // poi ogni minuto
-    @Transactional
-    public void aggiornaStati() {
-        LocalDateTime ora = LocalDateTime.now();
+    @EventListener(ApplicationReadyEvent.class)
+    public void aggiornaStatiAllAvvio() {
+        updater.aggiornaStati();
+    }
 
-        // IN_ISCRIZIONE → IN_CORSO
-        repository.findByStato(StatoHackathon.IN_ISCRIZIONE).stream()
-                .filter(h -> !h.getDataInizio().isAfter(ora))
-                .forEach(h -> h.cambiaStato(StatoHackathon.IN_CORSO));
-
-        // IN_CORSO → IN_VALUTAZIONE
-        repository.findByStato(StatoHackathon.IN_CORSO).stream()
-                .filter(h -> !h.getDataFine().isAfter(ora))
-                .forEach(h -> h.cambiaStato(StatoHackathon.IN_VALUTAZIONE));
+    @Scheduled(fixedRate = 60000)
+    public void aggiornaStatiScheduled() {
+        updater.aggiornaStati();
     }
 }
