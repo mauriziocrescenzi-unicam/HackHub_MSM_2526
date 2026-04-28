@@ -45,12 +45,6 @@ public class MembroTeamController {
         this.accountService = accountService;
     }
 
-
-    /**
-     * POST /membro-team/team/membri
-     * Restituisce la lista dei membri di un team specifico.
-     * Body: { "idTeam": 5 }
-     */
     @GetMapping("/team/membri")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<List<MembroTeamRispostaDTO>> getMembri(Authentication auth) {
@@ -68,22 +62,19 @@ public class MembroTeamController {
         return ResponseEntity.ok(risposta);
     }
 
-    //TODO controllare il tipo di richiesta
-    /**
-     * POST /membro-team/abbandona
-     * Gestisce l'abbandono volontario di un membro da un team.
-     * Body: { "idMembro": 1, "idTeam": 5 }
-     */
     @DeleteMapping("/abbandona")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> abbandonaTeam(Authentication auth) {
         Account account = accountService.find(auth.getName());
-        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        Long idMembro = account.getId();
-        Long idTeam = membroTeamService.getMembroById(idMembro).getTeam().getId();
-        if (!account.getId().equals(idMembro)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Puoi abbandonare solo il tuo team");
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
         }
+        Long idMembro = account.getId();
+        MembroTeam membro = membroTeamService.getMembroById(idMembro);
+        if (membro == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Utente non appartiene a nessun team");
+        }
+        Long idTeam = membro.getTeam().getId();
         boolean abbandonato = membroTeamService.abbandonaTeam(idMembro, idTeam);
         if (!abbandonato) {
             return ResponseEntity.badRequest().body("Abbandono non riuscito. Verificare che il membro appartenga al team.");
@@ -117,34 +108,35 @@ public class MembroTeamController {
         return ResponseEntity.ok("Membro eliminato dal team con successo");
     }
 
-    /**
-     * POST /membro-team/supporto/richiedi
-     * Invia una richiesta di supporto.
-     * Body: { "idMembroTeam": 1, "descrizioneRichiesta": "...", "dataInvio": "2026-04-10T14:30:00", "idHackathon": 10 }
-     */
     @PostMapping("/supporto/richiedi")
     @PreAuthorize("hasRole('UTENTE')")
-    public ResponseEntity<String> inviaRichiestaSupporto(@RequestBody Map<String, Object> body, Authentication auth) {
+    public ResponseEntity<String> inviaRichiestaSupporto(
+            @RequestBody RichiestaSupportoInvioDTO dto,
+            Authentication auth) {
+        // 1. Recupera l'account dall'utente autenticato
         Account account = accountService.find(auth.getName());
-        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        // Estrazione dati dalla Map (richiede cast perché i valori sono Object)
-        String descrizioneRichiesta = (String) body.get("descrizioneRichiesta");
-        Long idHackathon = ((Number) body.get("idHackathon")).longValue();
-        // Gestione della data: Spring di solito deserializza le date come stringhe nelle Map
-        LocalDateTime dataInvio = null;
-        Object dataObj = body.get("dataInvio");
-        if (dataObj instanceof String) {
-            dataInvio = LocalDateTime.parse((String) dataObj);
-        } else if (dataObj instanceof LocalDateTime) {
-            dataInvio = (LocalDateTime) dataObj;
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
         }
-        Hackathon hackathon = hackathonRepository.findById(idHackathon).orElse(null);
-        if (hackathon == null) return ResponseEntity.badRequest().body("Hackathon non trovato");
+        // 2. Recupera il membro e il team (con controllo null-safe)
+        MembroTeam membro = membroTeamService.getMembroById(account.getId());
+        if (membro == null || membro.getTeam() == null) {
+            return ResponseEntity.badRequest().body("Utente non appartiene a nessun team");
+        }
+        Long idTeam = membro.getTeam().getId();
+        // 3. Recupera l'hackathon
+        Hackathon hackathon = hackathonRepository.findById(dto.idHackathon()).orElse(null);
+        if (hackathon == null) {
+            return ResponseEntity.badRequest().body("Hackathon non trovato");
+        }
+        // 4. Imposta la data di invio automaticamente a now()
+        LocalDateTime dataInvio = LocalDateTime.now();
+        // 5. Invia la richiesta di supporto
         RichiestaSupporto richiesta = richiestaSupportoService.inviaRichiestaSupporto(
-                membroTeamService.getMembroById(account.getId()).getTeam().getId(),
-                descrizioneRichiesta,
-                dataInvio,
-                hackathon
+                idTeam,                      // ← preso dal team dell'utente loggato
+                dto.descrizioneRichiesta(),  // ← dal DTO
+                dataInvio,                   // ← impostato automaticamente
+                hackathon                    // ← recuperato dal DB
         );
         if (richiesta == null) {
             return ResponseEntity.badRequest().body("Validazione richiesta fallita");

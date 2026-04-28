@@ -96,19 +96,43 @@ public class SottomissioneService {
      * @return true se l'aggiornamento è riuscito, false altrimenti
      */
     public boolean aggiornaSottomissione(String nome, String link, Account account, Long idHackathon) {
-        Team team = membroTeamService.getMembro(account).getTeam();
+        // 1. Recupera il team del membro
+        MembroTeam membro = membroTeamService.getMembro(account);
+        if (membro == null) return false;
+        Team team = membro.getTeam();
         if (team == null) return false;
-        //verifica se le informazioni vanno bene
-        if (!verificaSottomissione(nome, link, team, idHackathon))
+
+        // 2. Verifiche specifiche per l'aggiornamento (NON usare verificaSottomissione)
+        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
+        if (hackathon == null) return false;
+
+        // Team deve essere iscritto all'hackathon
+        if (!teamHackathonService.checkIscrizioneHackathon(team.getId(), idHackathon))
             return false;
-        // Deve esistere già una sottomissione
+
+        // Hackathon deve essere IN_CORSO (non IN_ISCRIZIONE!)
+        if (hackathon.getStato() != StatoHackathon.IN_CORSO)
+            return false;
+
+        // ✅ DEVE esistere già una sottomissione (controllo inverso rispetto all'invio)
         if (!isPresente(team.getId(), idHackathon))
             return false;
-        // Aggiorna con setInfo — aggiorna anche dataInvio a now()
-        Sottomissione esistente = getSottomissioneByTeamHackathon(team.getId(), idHackathon);
-        if (esistente == null)
+
+        // La dataFine dell'hackathon non deve essere passata
+        if (hackathon.getDataFine() != null && hackathon.getDataFine().isBefore(LocalDateTime.now()))
             return false;
-        esistente.setInfo(nome, link);
+
+        // Validazione base dei campi
+        if (nome == null || nome.isBlank() || link == null || link.isBlank())
+            return false;
+        if (!repositoryFacade.validaLink(link))
+            return false;
+
+        // 3. Recupera e aggiorna la sottomissione esistente
+        Sottomissione esistente = getSottomissioneByTeamHackathon(team.getId(), idHackathon);
+        if (esistente == null) return false;
+
+        esistente.setInfo(nome, link);  // Aggiorna nome, link e dataInvio a now()
         repository.save(esistente);
         return true;
     }

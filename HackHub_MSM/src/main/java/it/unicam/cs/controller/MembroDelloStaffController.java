@@ -35,83 +35,67 @@ public class MembroDelloStaffController {
         this.accountService = accountService;
     }
 
+    /*
+         * PRIMA: Due metodi separati
+     * ─────────────────────────
+             * 1. GET /staff/hackathons
+     *    - Nessun parametro
+     *    - Restituiva TUTTI gli hackathon assegnati
+     *
+             * 2. PUT /staff (con body JSON)
+     *    - Richiedeva {"stato": "..."} nel body
+     *    - Restituiva hackathon filtrati per stato
+     *    - Metodo HTTP non RESTful (PUT per lettura)
+     *
+             * DOPO: Un unico metodo GET con query parameter
+     * ───────────────────────────────────────────
+             * 1. Endpoint unificato: GET /staff/hackathons?stato=...
+                *    - Più RESTful: GET per operazioni di lettura
+     *    - Query parameter opzionale: facile da testare in Postman/cURL
+     *    - Cache-friendly: le risposte GET possono essere cachate
+     *
+             * 2. Parametro opzionale (@RequestParam(required = false))
+     *    - Se assente → restituisce tutti gli hackathon
+     *    - Se presente → filtra per lo stato specificato
+     *
+             * 3. Gestione errori migliorata
+     *    - Validazione esplicita dello stato con try-catch
+                *    - Risposta 400 Bad Request per stati non validi
+     *
+             * 4. Codice più manutenibile
+     *    - Meno duplicazione: logica di recupero in un solo punto
+     *    - Più facile da estendere: aggiungere nuovi filtri è semplice
+     *
+             * COMPATIBILITÀ:
+                * - Il comportamento funzionale è identico
+     * - I client devono aggiornare le chiamate:
+                *   PUT /staff {"stato":"IN_CORSO"} → GET /staff/hackathons?stato=IN_CORSO
+ */
     @GetMapping("/hackathons")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(Authentication auth) {
+    public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(
+            @RequestParam(required = false) String stato,
+            Authentication auth) {
         Long id = accountService.findId(auth.getName());
-        List<Hackathon> hackathons = membroStaffService.getListaHackathon(id);
-        if (hackathons.isEmpty()) {
+        List<Hackathon> lista;
+        if (stato == null || stato.isBlank()) {
+            // Nessun filtro: recupera tutti
+            lista = membroStaffService.getListaHackathon(id);
+        } else {
+            // Filtro per stato
+            try {
+                StatoHackathon statoHackathon = StatoHackathon.fromString(stato);
+                lista = membroStaffService.getListaHackathons(statoHackathon, id);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(null);
+            }
+        }
+        if (lista.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        List<HackathonRispostaDTO> risposta = hackathons.stream()
+        List<HackathonRispostaDTO> risposta = lista.stream()
                 .map(HackathonRispostaDTO::fromHackathon)
                 .toList();
         return ResponseEntity.ok(risposta);
     }
-    //TODO controllo che il dato sia valido
-    @PutMapping()
-    @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(@RequestBody Map<String, Object> body, Authentication auth){
-        if (body.get("stato")==null) return ResponseEntity.badRequest().body(null);
-        Long id = accountService.findId(auth.getName());
-        List<Hackathon> list;
-        if(StatoHackathon.valueOf(body.get("stato").toString())==null)
-            list = membroStaffService.getListaHackathon(id);
-        else {
-            StatoHackathon statoHackathon= StatoHackathon.fromString(body.get("stato").toString());
-            list= membroStaffService.getListaHackathons(statoHackathon,id);
-        }
-        List<HackathonRispostaDTO> risposta= list.stream().map(HackathonRispostaDTO::fromHackathon).toList();
-        if(risposta.isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(risposta);
-    }
-    //TODO controllare con quelli di sottomissioneController
-    /*
-    @GetMapping("/hackathons/sottomissioni")
-    @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<List<SottomissioneRispostaDTO>> getSottomissioni(@RequestBody Map<String, Object> body, Authentication auth) {
-        Long idMembro = accountService.findId(auth.getName());
-        if (body.get("idHackathon") == null) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        Long idHackathon = ((Number) body.get("idHackathon")).longValue();
-        List<Hackathon> hackathons = membroStaffService.getListaHackathon(idMembro);
-        boolean assegnato = hackathons.stream()
-                .anyMatch(h -> h.getId().equals(idHackathon));
-        if (!assegnato) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        Hackathon hackathon = hackathons.stream()
-                .filter(h -> h.getId().equals(idHackathon))
-                .findFirst()
-                .orElse(null);
-        if (hackathon == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        List<Sottomissione> sottomissioni = membroStaffService.getSottomissioni(hackathon);
-        if (sottomissioni.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        List<SottomissioneRispostaDTO> risposta = sottomissioni.stream()
-                .map(SottomissioneRispostaDTO::fromSottomissione)
-                .toList();
-        return ResponseEntity.ok(risposta);
-    }
-    */
-    /*
-    @GetMapping("/sottomissioni/{idSottomissione}")
-    @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione( @PathVariable long idSottomissione,Authentication auth) {
-        Long idMembro = accountService.findId(auth.getName());
-        Sottomissione sottomissione = membroStaffService.getSottomissione(idMembro, idSottomissione);
-        if (sottomissione == null) {
-            // Può significare: sottomissione non trovata OPPURE non autorizzato
-            // Per sicurezza REST, restituiamo 404 in entrambi i casi
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        SottomissioneRispostaDTO risposta = SottomissioneRispostaDTO.fromSottomissione(sottomissione);
-        return ResponseEntity.ok(risposta);
-    }
-
-     */
 }

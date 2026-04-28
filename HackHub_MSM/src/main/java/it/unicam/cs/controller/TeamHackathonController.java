@@ -42,24 +42,34 @@ public class TeamHackathonController {
     }
 
     /**
-     * POST /team/hackathons/lista
-     * Restituisce la lista degli hackathon a cui il team è iscritto.
-     * Body: { "idTeam": 1 }
+     * GET /team/hackathons/lista
+     * Restituisce la lista degli hackathon a cui il team dell'utente loggato è iscritto.
+     * L'idTeam viene recuperato automaticamente dall'account autenticato.
      */
-    @PostMapping("/lista")
+    @GetMapping("/hackathons/lista")
     @PreAuthorize("hasRole('UTENTE')")
-    public ResponseEntity<List<HackathonRispostaDTO>> isIscrittoHackathon(@RequestBody Map<String, Long> body, Authentication auth) {
+    public ResponseEntity<List<HackathonRispostaDTO>> isIscrittoHackathon(Authentication auth) {
+        // 1. Recupera l'account dall'utente autenticato
         Account account = accountService.find(auth.getName());
-        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        Long idTeam = membroTeamService.getMembroById(account.getId()).getTeam().getId();
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // 2. Recupera il membro e il team (con controllo null-safe)
         MembroTeam membro = membroTeamService.getMembroById(account.getId());
-        if (membro == null || !membro.getTeam().getId().equals(idTeam)) {
+        if (membro == null || membro.getTeam() == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        Long idTeam = membro.getTeam().getId();
+        // 3. Recupera il team e gli hackathon iscritti
         Team team = teamService.getTeamById(idTeam);
-        if (team == null) return ResponseEntity.notFound().build();
+        if (team == null) {
+            return ResponseEntity.notFound().build();
+        }
         List<Hackathon> hackathons = teamHackathonService.isIscrittoHackathon(team);
-        if (hackathons.isEmpty()) return ResponseEntity.notFound().build();
+        if (hackathons.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        // 4. Converti in DTO e restituisci
         List<HackathonRispostaDTO> risposta = hackathons.stream()
                 .map(HackathonRispostaDTO::fromHackathon)
                 .toList();
@@ -89,9 +99,8 @@ public class TeamHackathonController {
     }
 
     /**
-     * POST /team/hackathons/iscriviti
+     * POST /team/iscriviti
      * Iscrive un team a un hackathon.
-     * Body: { "idTeam": 1, "idHackathon": 10 }
      */
     @PostMapping("/iscriviti")
     @PreAuthorize("hasRole('UTENTE')")
@@ -119,22 +128,16 @@ public class TeamHackathonController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Team iscritto con successo");
     }
 
-    /**
-     * POST /team/hackathons/disiscriviti
-     * Disiscrive un team da un hackathon.
-     * Body: { "idTeam": 1, "idHackathon": 10 }
-     */
-    @PostMapping("/disiscriviti")
+    @DeleteMapping("/hackathons/{idHackathon}")
     @PreAuthorize("hasRole('UTENTE')")
-    public ResponseEntity<String> disiscrivitiHackathon(@RequestBody Map<String, Long> body, Authentication auth) {
+    public ResponseEntity<String> disiscrivitiHackathon(@PathVariable Long idHackathon, Authentication auth) {
         Account account = accountService.find(auth.getName());
-        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        Long idTeam = membroTeamService.getMembroById(account.getId()).getTeam().getId();
-        Long idHackathon = body.get("idHackathon");
-        MembroTeam membro = membroTeamService.getMembro(account);
-        if (membro == null || !membro.getTeam().getId().equals(idTeam)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi disiscrivere solo i tuoi team");
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        MembroTeam membro = membroTeamService.getMembroById(account.getId());
+        if (membro == null || membro.getTeam() == null) {
+            return ResponseEntity.badRequest().body("Utente non appartiene a nessun team");
         }
+        Long idTeam = membro.getTeam().getId();
         boolean disiscritto = teamHackathonService.disiscrivereTeam(idTeam, idHackathon);
         if (!disiscritto) {
             return ResponseEntity.badRequest().body("Disiscrizione non riuscita. Verificare che il team sia iscritto.");

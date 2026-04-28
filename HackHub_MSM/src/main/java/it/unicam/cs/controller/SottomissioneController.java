@@ -32,7 +32,7 @@ public class SottomissioneController {
         this.hackathonService = hackathonService;
     }
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> createSottomissione(@RequestBody SottomissioneCreazioneDTO sottomissioneData, Authentication auth){
         Account account = accountService.find(auth.getName());
         boolean creato = sottomissioneService.inviaSottomissione(sottomissioneData.nome(),sottomissioneData.link(),account,sottomissioneData.idHackathon());
@@ -40,12 +40,12 @@ public class SottomissioneController {
         return ResponseEntity.status(201).body("Sottomissione inviata con successo");
     }
     @PutMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> aggiornaSottomissione(@RequestBody SottomissioneCreazioneDTO sottomissioneData, Authentication auth){
         Account account = accountService.find(auth.getName());
         boolean agg = sottomissioneService.aggiornaSottomissione(sottomissioneData.nome(),sottomissioneData.link(),account,sottomissioneData.idHackathon());
         if (!agg) return ResponseEntity.badRequest().body("Dati non validi");
-        return ResponseEntity.status(201).body("Sottomissione aggiornata con successo");
+        return ResponseEntity.status(200).body("Sottomissione aggiornata con successo");
     }
 
     /**
@@ -72,50 +72,54 @@ public class SottomissioneController {
     }
 
     /**
-     * Restituisce le sottomissioni di un hackathon.
-     * Verifica che l'utente loggato sia il giudice di quell'hackathon.
      * GET /sottomissioni/hackathons/{idHackathon}
+     * Restituisce le sottomissioni di un hackathon specifico.
+     * Verifica che l'utente loggato sia il giudice di quell'hackathon.
      */
     @GetMapping("/hackathons/{idHackathon}")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<SottomissioneRispostaDTO>> getSottomissioni(@PathVariable long idHackathon, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         if (hackathon == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
         // Controllo di sicurezza: l'utente loggato deve essere il giudice di questo hackathon
         if (hackathon.getGiudice() == null || !hackathon.getGiudice().getId().equals(account.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-
         List<Sottomissione> sottomissioni = sottomissioneService.getSottomissioni(hackathon);
-        if (sottomissioni.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
+        if (sottomissioni.isEmpty()) return ResponseEntity.notFound().build();
         List<SottomissioneRispostaDTO> risposta = sottomissioni.stream()
                 .map(SottomissioneRispostaDTO::fromSottomissione)
                 .toList();
         return ResponseEntity.ok(risposta);
     }
-    @GetMapping("/sottomissioni/{idSottomissione}")
+
+    /**
+     * GET /sottomissioni/{idSottomissione}
+     * Restituisce il dettaglio di una sottomissione specifica.
+     * Verifica che l'utente loggato sia il giudice dell'hackathon a cui appartiene.
+     */
+    @GetMapping("/{idSottomissione}")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione( @PathVariable long idSottomissione) {
+    public ResponseEntity<SottomissioneRispostaDTO> getSottomissione(@PathVariable long idSottomissione, Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         Sottomissione sottomissione = sottomissioneService.getSottomissioneById(idSottomissione);
-        if (sottomissione == null) {
-            // Può significare: sottomissione non trovata OPPURE non autorizzato
-            // Per sicurezza REST, restituiamo 404 in entrambi i casi
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (sottomissione == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        // Controllo di sicurezza
+        Hackathon hackathon = hackathonService.getHackathonByID(sottomissione.getIdHackathon());
+        if (hackathon == null || hackathon.getGiudice() == null ||
+                !hackathon.getGiudice().getId().equals(account.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        SottomissioneRispostaDTO risposta = SottomissioneRispostaDTO.fromSottomissione(sottomissione);
-        return ResponseEntity.ok(risposta);
+        return ResponseEntity.ok(SottomissioneRispostaDTO.fromSottomissione(sottomissione));
     }
 
     /**
-     * Valuta una sottomissione.
      * PUT /sottomissioni/{idSottomissione}/valuta
+     * Valuta una sottomissione assegnando voto e giudizio.
+     * L'ID viene passato nel path, voto e giudizio nel body.
      */
     @PutMapping("/{idSottomissione}/valuta")
     @PreAuthorize("hasRole('STAFF')")
@@ -139,9 +143,9 @@ public class SottomissioneController {
         Sottomissione sottomissione = sottomissioneService.getSottomissioneById(idSottomissione);
         if (sottomissione == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sottomissione non trovata");
         Hackathon hackathon = hackathonService.getHackathonByID(sottomissione.getIdHackathon());
-        if (hackathon == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        // Controllo di sicurezza: l'utente loggato deve essere il giudice di questo hackathon
-        if (hackathon.getGiudice() == null || !hackathon.getGiudice().getId().equals(account.getId())) {
+        // Controllo di sicurezza
+        if (hackathon == null || hackathon.getGiudice() == null ||
+                !hackathon.getGiudice().getId().equals(account.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: non sei il giudice di questo hackathon");
         }
         if (sottomissioneService.isSottomissioneValutata(sottomissione)) {

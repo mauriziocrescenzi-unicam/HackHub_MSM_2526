@@ -196,7 +196,7 @@ public class MembroTeamService {
         if (idMembro == null || idTeam == null || idMembro <= 0 || idTeam <= 0) {
             return false;
         }
-        MembroTeam membroTeam = repository.findByUtenteIdAndTeamId(idMembro, idTeam)
+        MembroTeam membroTeam = repository.findByAccountIdAndTeamId(idMembro, idTeam)
                 .orElse(null);
         if (membroTeam == null) {
             return false; // Membro non trovato nel team specificato
@@ -236,12 +236,12 @@ public class MembroTeamService {
         if (idMembroCheElimina <= 0 || idMembroDaEliminare <= 0 || idTeam <= 0) {
             return false;
         }
-        MembroTeam membroCheElimina = repository.findByUtenteIdAndTeamId(idMembroCheElimina, idTeam)
+        MembroTeam membroCheElimina = repository.findByAccountIdAndTeamId(idMembroCheElimina, idTeam)
                 .orElse(null);
         if (membroCheElimina == null) {
             return false; // Il membro che elimina non appartiene al team
         }
-        MembroTeam membroDaRimuovere = repository.findByUtenteIdAndTeamId(idMembroDaEliminare, idTeam)
+        MembroTeam membroDaRimuovere = repository.findByAccountIdAndTeamId(idMembroDaEliminare, idTeam)
                 .orElse(null);
         if (membroDaRimuovere == null) {
             return false; // Membro da eliminare non trovato nel team
