@@ -34,7 +34,7 @@ public class SegnalazioneController {
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<String> segnalaTeam(@RequestBody Map<String, Object> body, Authentication auth){
         if(body.get("teamId")==null || body.get("hackathonId")==null
-                ||body.get("mentoreId")==null||body.get("motivazione")==null) return ResponseEntity.badRequest().body("Dati non validi");
+                ||body.get("motivazione")==null) return ResponseEntity.badRequest().body("Dati non validi");
         long teamId = Long.parseLong(body.get("teamId").toString());
         long hackathonId = Long.parseLong(body.get("hackathonId").toString());
         Hackathon hackathon = hackathonService.getHackathonByID(hackathonId);
@@ -72,6 +72,7 @@ public class SegnalazioneController {
             return ResponseEntity.ok("Segnalazione rifiutata con successo");
         return ResponseEntity.badRequest().body("Dati non validi");
     }
+    //TODO cambiare in get
     @GetMapping("/hackathon")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<SegnalazioneRispostaDTO>> getSegnalazioni(@RequestBody Map<String, Object> body, Authentication auth){
@@ -92,7 +93,7 @@ public class SegnalazioneController {
                 .map(hackathonService::getHackathonByID)
                 .filter(Objects::nonNull) // scarta id non trovati
                 .collect(Collectors.toList());
-        if(!hackathons.stream().filter(hackathon -> hackathon.getOrganizzatore()!=organizzatore).toList().isEmpty()) return ResponseEntity.badRequest().body(null);
+        if(!hackathons.stream().filter(hackathon -> !hackathon.getOrganizzatore().getId().equals(organizzatore.getId())).toList().isEmpty()) return ResponseEntity.badRequest().body(null);
         List<Segnalazione> list=segnalazioneService.getSegnalazioni(organizzatore,hackathons,statoSegnalazione);
         if(list.isEmpty()) return ResponseEntity.notFound().build();
         List<SegnalazioneRispostaDTO> risposta= list.stream().map(SegnalazioneRispostaDTO::fromSegnalazione).toList();

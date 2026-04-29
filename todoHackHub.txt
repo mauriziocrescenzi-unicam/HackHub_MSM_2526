@@ -3,38 +3,22 @@ Modificare la creazione del hackathon utilizzando il pattern build
 
 Controllo sequence iscirvere team prima parte sulla visualizzazione delle informazioni
 
-gestire ID account con le varie tabelle (ora ogni id è univoco)
-
-MembroTeamController --> getMembro() --> cambiare getAll().
-
-
 rimuovere i tipi di ritorno dai costruttori
 
 aggiungere setInfo
 Uniformare nome Membro dello staff (codice e Use Case)e MembroStaff (su class diagram)
 Uniformare le boundary con gli attori nei sequence(vedere come è giusto fare per polini)
-Modificare javaDoc, soprattutto HackathonService.checkStato
-ModificaHackathon forse il controllo dell'hackathon se è in iscrizione dopo?
-CASO D'USO: cancellazione hackathon
 
-Modificare caso d'uso iscrivere Team, cambiare il service TeamService con TeamHackathonSercive (e anche il controller), vedere anche altri UC che usano i metodi dentro TeamHackathon
+---CODICE
+Modificare javaDoc da updater
 
-correggere tutti i metodi isQualcosa che restituiscono boolean invece di una lista
-
-da togliere amministratoreId sul DB
-rendere classificaDTO un record 
-
-da rivedere getSottomissione di MembroStaff per capire se va bene (controllo hackathon nel service)
-
-
-Sistemare metodi TeamHackathon
-- segnalaTeam: possibilità di segnalare più volte un team (già segnalato);
-- quando un team viene eliminato/rimosso/abbandona un hackathon, impostare a false il valore boolean do TeamHackathon.
-- controllare inviareInvito nel service
-- controllare altre richieste che passano gli id tramite URL anziché nel body.
 
 CONTROLLARE per i relativi ruoli organizzatore, mentore, giudice controllare sempre che user è staff o se è di quello specifico hackathon.
-Controllare securityConfig
+
+CLASSIFICA E VINCITORE implementare
+Rimuovere mentore service
+TOKEN durata
+SPOSTAre updater e scheduler in cartelle differenti
 ------------risposta tutor----------
 1. In questo caso è indifferente. Se volete metterlo non è un errore, ma la terminazione del caso d'uso è implicita.
 2. Sarebbe meglio mostrare l'interazione con il service relativo, dato che viene effettivamente recuperato qualcosa dal DB.

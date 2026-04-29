@@ -73,7 +73,7 @@ public class MembroTeamService {
     /**
      * Restituisce il MembroTeam dell'utente
      */
-    public MembroTeam getMembro(Account account) {//TODO cambio get all
+    public MembroTeam getMembro(Account account) {
         for (MembroTeam membro : repository.findAll()) {
             if (membro.getId().getUtenteId().equals(account.getId()))
                 return membro;
@@ -140,16 +140,6 @@ public class MembroTeamService {
     public List<MembroTeam> getAllMembri() {
         return repository.findAll();
     }
-
-    /**
-     * Restituisce il numero totale di membri nel sistema.
-     *
-     * @return Numero totale di membri
-     */
-    public int countMembriTotali() {
-        return getAllMembri().size();
-    }
-
 
     /**
      * Elimina completamente un team dal sistema.

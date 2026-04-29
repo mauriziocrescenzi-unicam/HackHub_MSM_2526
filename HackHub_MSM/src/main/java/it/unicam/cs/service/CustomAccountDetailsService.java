@@ -11,13 +11,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+/**
+ * Implementazione personalizzata di {@link UserDetailsService} per Spring Security.
+ * Carica i dettagli dell'utente a partire dall'email, utilizzandola come username.
+ */
 @Service
 public class CustomAccountDetailsService implements UserDetailsService {
 
     @Autowired
     private AccountRepository accountRepository;
-
+    /**
+     * Carica i dettagli dell'utente in base all'email fornita.
+     * Il ruolo dell'account viene mappato come authority Spring Security
+     * nel formato {@code ROLE_<NOME_RUOLO>}.
+     *
+     * @param email l'email dell'account da autenticare
+     * @return un oggetto {@link UserDetails} contenente email, password e ruolo dell'utente
+     * @throws UsernameNotFoundException se nessun account è associato all'email fornita
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email)

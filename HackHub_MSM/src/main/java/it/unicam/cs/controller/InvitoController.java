@@ -5,6 +5,7 @@ import it.unicam.cs.model.Account;
 import it.unicam.cs.model.Invito;
 import it.unicam.cs.service.AccountService;
 import it.unicam.cs.service.InvitoService;
+import it.unicam.cs.service.MembroTeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,10 +21,12 @@ public class InvitoController {
 
     private final InvitoService invitoService;
     private final AccountService accountService;
+    private final MembroTeamService membroTeamService;
 
-    public InvitoController(InvitoService invitoService, AccountService accountService) {
+    public InvitoController(InvitoService invitoService, AccountService accountService, MembroTeamService membroTeamService) {
         this.invitoService = invitoService;
         this.accountService = accountService;
+        this.membroTeamService = membroTeamService;
     }
 
     // UC: Inviare un invito
@@ -36,6 +39,8 @@ public class InvitoController {
 
         if (mittente == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mittente non trovato");
+        if(membroTeamService.getMembroById(mittente.getId())==null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi inviare un invito");
         Account destinatario = accountService.find(body.get("emailDestinatario").toString());
         if (destinatario == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Destinatario non trovato");
@@ -48,7 +53,7 @@ public class InvitoController {
     }
 
     // UC: Visualizzare lista inviti
-        @GetMapping("/{idUtente}")
+        @GetMapping()
         @PreAuthorize("hasRole('UTENTE')")
         public ResponseEntity<List<InvitoRispostaDTO>> getListaInviti(Authentication auth) {
             Account account = accountService.find(auth.getName());
@@ -56,7 +61,7 @@ public class InvitoController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             List<Invito> inviti = invitoService.getInviti(account);
             if (inviti.isEmpty())
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.ok(List.of());
             List<InvitoRispostaDTO> risposta = inviti.stream()
                     .map(InvitoRispostaDTO::fromInvito)
                     .toList();
@@ -67,7 +72,7 @@ public class InvitoController {
     @PutMapping("/valuta")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> valutareInvito(@RequestBody Map<String, Object> body, Authentication auth) {
-        if (body.get("idUtente") == null || body.get("idInvito") == null || body.get("risposta") == null)
+        if (body.get("idInvito") == null || body.get("risposta") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
         Long idInvito = ((Number) body.get("idInvito")).longValue();
         boolean risposta = (boolean) body.get("risposta");

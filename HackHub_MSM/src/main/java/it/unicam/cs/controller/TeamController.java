@@ -1,10 +1,7 @@
 package it.unicam.cs.controller;
 
-import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.Team;
 import it.unicam.cs.service.AccountService;
 import it.unicam.cs.service.TeamService;
-import it.unicam.cs.service.HackathonService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

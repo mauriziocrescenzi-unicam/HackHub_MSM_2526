@@ -75,8 +75,8 @@ public class SottomissioneService {
      * @return true se l'invio è riuscito, false altrimenti
      */
     public boolean inviaSottomissione(String nome, String link, Account account, Long idHackathon) {
+        if(membroTeamService.getMembro(account) == null) return false;
         Team team = membroTeamService.getMembro(account).getTeam();
-        if (team == null) return false;
         //verifica se le informazioni vanno bene
         if (!verificaSottomissione(nome, link, team, idHackathon))
             return false;
@@ -114,7 +114,7 @@ public class SottomissioneService {
         if (hackathon.getStato() != StatoHackathon.IN_CORSO)
             return false;
 
-        // ✅ DEVE esistere già una sottomissione (controllo inverso rispetto all'invio)
+        // DEVE esistere già una sottomissione (controllo inverso rispetto all'invio)
         if (!isPresente(team.getId(), idHackathon))
             return false;
 
@@ -298,11 +298,11 @@ public class SottomissioneService {
         }
 
         // Ordina per punteggio decrescente
-        classifica.sort((c1, c2) -> Double.compare(c2.getPunteggio(), c1.getPunteggio()));
+        classifica.sort((c1, c2) -> Double.compare(c2.punteggio(), c1.punteggio()));
 
-        // Assegna le posizioni
+        // Assegna le posizioni (i record sono immutabili: si sostituisce ogni elemento con withPosizione)
         for (int i = 0; i < classifica.size(); i++) {
-            classifica.get(i).setPosizione(i + 1);
+            classifica.set(i, classifica.get(i).withPosizione(i + 1));
         }
 
         return classifica;

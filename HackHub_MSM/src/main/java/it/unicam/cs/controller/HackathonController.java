@@ -10,6 +10,7 @@ import it.unicam.cs.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -97,7 +98,7 @@ public class HackathonController {
         Hackathon hackathon = hackathonService.getHackathonByID(id);
         if (hackathon == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        if(auth==null) {
+        if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
             return ResponseEntity.ok(HackathonInfoPubblicoDTO.fromHackathon(hackathon));
         }else {
             HackathonRispostaDTO dto= HackathonRispostaDTO.fromHackathon(hackathon);

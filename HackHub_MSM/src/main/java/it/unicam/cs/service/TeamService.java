@@ -73,18 +73,6 @@ public class TeamService {
         return true;
     }
 
-    /**
-     * Verifica se un team è iscritto a un hackathon.
-     *
-     * @param team Team da verificare
-     * @return true se il team è iscritto, false altrimenti
-     */
-    public boolean isIscrittoHackathon(Team team) {
-        if (team == null || team.getHackathonIscritti() == null) {
-            return false;
-        }
-        return !team.getHackathonIscritti().isEmpty();
-    }
 
     /**
      * Verifica la disponibilità di un utente a unirsi a un team.
@@ -100,84 +88,6 @@ public class TeamService {
         return membroTeamService.verificaDisponibilitaMembro(account.getId());
     }
 
-    /**
-     * Verifica la presenza di inviti duplicati per un utente.
-     *
-     * @param account Utente da verificare
-     * @return true se esistono inviti duplicati, false altrimenti
-     */
-    public boolean checkDuplicateInviti(Account account) {
-        // TODO: Implementare con InvitoController quando disponibile
-        return false;
-    }
-
-    /**
-     * Iscrive un team a un hackathon.
-     * Verifica i requisiti di scadenza, dimensione del team e iscrizione precedente.
-     *
-     * @param hackathon Hackathon a cui iscriversi
-     * @param team Team da iscrivere
-     * @return true se l'iscrizione è riuscita, false altrimenti
-     */
-    public boolean iscrivereTeam(Hackathon hackathon, Team team) {
-        if (team == null || hackathon == null) {
-            return false;
-        }
-
-        // Verifica che il team non sia già iscritto
-        if (isIscrittoHackathon(team)) {
-            return false;
-        }
-
-        // Verifica scadenza iscrizioni
-        if (hackathon.getScadenzaIscrizione().isBefore(LocalDateTime.now())) {
-            return false;
-        }
-
-        // Verifica requisiti dimensione team
-        int maxMembri = hackathon.getDimensioneMassimoTeam();
-        if (membroTeamService.getMembri(team.getId()).size() > maxMembri) {
-            return false;
-        }
-
-        // Verifica requisiti minimi (almeno 1 membro)
-        if (membroTeamService.getMembri(team.getId()).isEmpty()) {
-            return false;
-        }
-
-        // Crea e persisti l'associazione TeamHackathon
-        TeamHackathon teamHackathon = new TeamHackathon(team, hackathon);
-        teamHackathonRepository.save(teamHackathon);
-
-        return true;
-    }
-
-    /**
-     * Restituisce tutti gli hackathon a cui un team è iscritto.
-     *
-     * @param team Team di cui recuperare le iscrizioni
-     * @return Lista di hackathon a cui il team è iscritto
-     */
-    public List<Hackathon> getHackathon(Team team) {
-        if (team == null || team.getHackathonIscritti() == null) {
-            return new ArrayList<>();
-        }
-
-        // Estrae gli hackathon dalle associazioni TeamHackathon
-        return team.getHackathonIscritti().stream()
-                .filter(TeamHackathon::isIscritto)
-                .map(TeamHackathon::getHackathon)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Restituisce tutti i team presenti nel sistema.
-     *
-     * @return Lista di tutti i team
-     */
-    public List<Team> getListaTeam() {
-        return repository.findAll();
-    }
 
     /**
      * Restituisce un team specifico tramite il suo ID.
@@ -189,53 +99,5 @@ public class TeamService {
         return repository.findById(idTeam).orElse(null);
     }
 
-    /**
-     * Restituisce tutti i team iscritti a un hackathon specifico.
-     * @param hackathon hackathon di cui recuperare i team
-     * @return lista di team iscritti a hackathon
-     */
-    public List<Team> getTeam(Hackathon hackathon) {
-        if (hackathon == null) throw new NullPointerException("Hackathon non valido");
-        return teamHackathonRepository.findAll().stream()
-                .filter(th -> th.getHackathon().equals(hackathon))
-                .map(TeamHackathon::getTeam)
-                .toList();
-    }
 
-    public boolean checkIscrizioneHackathon(Long idTeam, long idHackathon) {
-        if(idHackathon <0) throw new NullPointerException("Hackathon non valido");
-        if(idTeam <0) throw new NullPointerException("Team non valido");
-        return teamHackathonRepository.findAll().stream()
-                .anyMatch(th -> th.getTeam().getId().equals(idTeam)
-                        && th.getHackathon().getId() ==idHackathon);
-
-    }
-    public boolean rimuoviTeam(long idTeam, long idHackathon){
-        if(idTeam < 0) throw new IllegalArgumentException("Team non valido");
-        if(idHackathon < 0) throw new IllegalArgumentException("Hackathon non valido");
-
-        TeamHackathon teamHackathon = teamHackathonRepository.findAll().stream()
-                .filter(th -> th.getTeam().getId().equals(idTeam)
-                        && th.getHackathon().getId() == idHackathon)
-                .findFirst()
-                .orElse(null);
-
-        if (teamHackathon == null) {
-            return false; // Iscrizione non trovata
-        }
-
-        teamHackathonRepository.delete(teamHackathon);
-        return true;
-    }
-
-    public Team getTeamByMembroId(long idMembro) {
-        if (idMembro <= 0) {
-            return null;
-        }
-        MembroTeam membroTeam = membroTeamRepository.findByUtenteId(idMembro);
-        if (membroTeam == null) {
-            return null; // Membro non appartiene a nessun team
-        }
-        return membroTeam.getTeam();
-    }
 }

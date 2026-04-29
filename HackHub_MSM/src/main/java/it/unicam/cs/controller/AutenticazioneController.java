@@ -44,18 +44,24 @@ public class AutenticazioneController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("Email già registrata");
         }
+        try {
+            Account account = new Account(
+                    req.email(),
+                    passwordEncoder.encode(req.password()),
+                    Ruolo.valueOf(req.ruolo()),
+                    req.nome(),
+                    req.cognome()
+            );
+            accountRepository.save(account);
 
-        Account account = new Account(
-                req.email(),
-                passwordEncoder.encode(req.password()),
-                Ruolo.valueOf(req.ruolo()),
-                req.nome(),
-                req.cognome()
-        );
-        accountRepository.save(account);
+            // Login automatico dopo registrazione
+            return accesso(new LoginRequest(req.email(), req.password()));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Errore durante la registrazione");
+        }
 
-        // Login automatico dopo registrazione
-        return accesso(new LoginRequest(req.email(), req.password()));
+
     }
 
     /**

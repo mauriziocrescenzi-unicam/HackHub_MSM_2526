@@ -23,7 +23,6 @@ public class MentoreService {
         this.richiestaSupportoService = richiestaSupportoService;
     }
 
-
     public  boolean assegnaMentore(Hackathon hackathon, List<Account> mentori){
         if(hackathon ==null || mentori.isEmpty()) throw new NullPointerException();
         verificaMentore(mentori);
@@ -47,6 +46,7 @@ public class MentoreService {
     public List<Account> getListaMentori(){
         return repository.findAll();
     }
+
 
     /**
      * Aggiunge più mentori ad un hackathon
@@ -83,6 +83,7 @@ public class MentoreService {
                 .filter(h -> h.getMentori().stream().anyMatch(m -> m.getId().equals(idMentore))
                         && h.getStato() == stato).toList();
     }
+
 
     public Account getMentoreById(long idMentore) {
         return repository.findById(idMentore).orElse(null);

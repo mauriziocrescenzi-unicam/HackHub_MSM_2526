@@ -32,7 +32,7 @@ public class RichiestaSupportoController {
     }
 
 
-
+    //TODO cambiare in get
     /**
      * POST /mentori/richieste/lista
      * Restituisce le richieste di supporto per un hackathon specifico.
@@ -45,10 +45,6 @@ public class RichiestaSupportoController {
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         Long idMentore = account.getId();
         Long idHackathon = body.get("idHackathon");
-        // Sicurezza: verifica che l'utente loggato sia il mentore che sta richiedendo
-        if (!account.getId().equals(idMentore)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
         // Verifica che il mentore esista
         if (mentoreService.getMentoreById(idMentore) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -80,6 +76,8 @@ public class RichiestaSupportoController {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
         Long idMentore = account.getId();
+        if(body.get("idRichiesta")==null)
+            return ResponseEntity.badRequest().body("Dati non validi");
         Long idRichiesta = ((Number) body.get("idRichiesta")).longValue();
         String risposta = (String) body.get("risposta");
         // Sicurezza: verifica che l'utente loggato sia il mentore che sta rispondendo
@@ -116,7 +114,7 @@ public class RichiestaSupportoController {
     public ResponseEntity<String> segnalaTeam(@RequestBody Map<String, Object> body, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        Long idMentore = ((Number) body.get("idMentore")).longValue();
+        Long idMentore = auth.getName() == null ? null : account.getId();
         Long idTeam = ((Number) body.get("idTeam")).longValue();
         Long idHackathon = ((Number) body.get("idHackathon")).longValue();
         String motivazione = (String) body.get("motivazione");

@@ -35,42 +35,7 @@ public class MembroDelloStaffController {
         this.accountService = accountService;
     }
 
-    /*
-         * PRIMA: Due metodi separati
-     * ─────────────────────────
-             * 1. GET /staff/hackathons
-     *    - Nessun parametro
-     *    - Restituiva TUTTI gli hackathon assegnati
-     *
-             * 2. PUT /staff (con body JSON)
-     *    - Richiedeva {"stato": "..."} nel body
-     *    - Restituiva hackathon filtrati per stato
-     *    - Metodo HTTP non RESTful (PUT per lettura)
-     *
-             * DOPO: Un unico metodo GET con query parameter
-     * ───────────────────────────────────────────
-             * 1. Endpoint unificato: GET /staff/hackathons?stato=...
-                *    - Più RESTful: GET per operazioni di lettura
-     *    - Query parameter opzionale: facile da testare in Postman/cURL
-     *    - Cache-friendly: le risposte GET possono essere cachate
-     *
-             * 2. Parametro opzionale (@RequestParam(required = false))
-     *    - Se assente → restituisce tutti gli hackathon
-     *    - Se presente → filtra per lo stato specificato
-     *
-             * 3. Gestione errori migliorata
-     *    - Validazione esplicita dello stato con try-catch
-                *    - Risposta 400 Bad Request per stati non validi
-     *
-             * 4. Codice più manutenibile
-     *    - Meno duplicazione: logica di recupero in un solo punto
-     *    - Più facile da estendere: aggiungere nuovi filtri è semplice
-     *
-             * COMPATIBILITÀ:
-                * - Il comportamento funzionale è identico
-     * - I client devono aggiornare le chiamate:
-                *   PUT /staff {"stato":"IN_CORSO"} → GET /staff/hackathons?stato=IN_CORSO
- */
+
     @GetMapping("/hackathons")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(

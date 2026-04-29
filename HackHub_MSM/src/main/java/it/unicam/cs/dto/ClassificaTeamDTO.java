@@ -1,36 +1,28 @@
 package it.unicam.cs.dto;
 
 import it.unicam.cs.model.Team;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * DTO per rappresentare un team nella classifica di un hackathon.
  */
-@Getter
-@Setter
-public class ClassificaTeamDTO {
-
-    private final Team team;
-
-    private final double punteggio;
-
-    private final String giudizio;
-
-    private int posizione;
-
+public record ClassificaTeamDTO(
+        Team team,
+        double punteggio,
+        String giudizio,
+        int posizione
+) {
     /**
-     * Costruisce un DTO per la classifica.
-     *
-     * @param team Team classificato
-     * @param punteggio Punteggio ottenuto
-     * @param giudizio Giudizio scritto
+     * Costruttore compatto: posizione inizializzata a 0 (verrà assegnata dopo l'ordinamento).
      */
     public ClassificaTeamDTO(Team team, double punteggio, String giudizio) {
-        this.team = team;
-        this.punteggio = punteggio;
-        this.giudizio = giudizio;
-        this.posizione = 0; // Verrà assegnato dopo l'ordinamento
+        this(team, punteggio, giudizio, 0);
+    }
+
+    /**
+     * Restituisce una copia del record con la posizione aggiornata.
+     */
+    public ClassificaTeamDTO withPosizione(int nuovaPosizione) {
+        return new ClassificaTeamDTO(team, punteggio, giudizio, nuovaPosizione);
     }
 
     @Override

@@ -81,7 +81,7 @@ public class MembroTeamController {
         }
         return ResponseEntity.ok("Membro ha abbandonato il team con successo");
     }
-
+    //TODO cambiare in delete?
     /**
      * POST /membro-team/elimina
      * Permette a un membro del team di eliminare un altro membro dallo stesso team.
@@ -94,6 +94,8 @@ public class MembroTeamController {
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
         Long idMembroCheElimina = account.getId();
         Long idMembroDaEliminare = body.get("idMembroDaEliminare");
+        if(membroTeamService.getMembroById(idMembroCheElimina)==null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi eliminare un membro");
         Long idTeam = membroTeamService.getMembroById(idMembroCheElimina).getTeam().getId();
         if (!account.getId().equals(idMembroCheElimina)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi eliminare solo membri del tuo team");
@@ -129,6 +131,10 @@ public class MembroTeamController {
         if (hackathon == null) {
             return ResponseEntity.badRequest().body("Hackathon non trovato");
         }
+        if(!teamHackathonService.checkIscrizioneHackathon(idTeam, hackathon.getId()))
+            return ResponseEntity.badRequest().body("Non puoi richiedere supporto per questo hackathon");
+        if (hackathon.getStato() != StatoHackathon.IN_CORSO)
+            return ResponseEntity.badRequest().body("Non puoi richiedere supporto per questo hackathon");
         // 4. Imposta la data di invio automaticamente a now()
         LocalDateTime dataInvio = LocalDateTime.now();
         // 5. Invia la richiesta di supporto

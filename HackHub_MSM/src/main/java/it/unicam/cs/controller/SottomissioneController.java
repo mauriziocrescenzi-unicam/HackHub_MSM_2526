@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,11 @@ public class SottomissioneController {
     public ResponseEntity<List<HackathonRispostaDTO>> getMieiHackathonDaGiudicare(@RequestParam String stato, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
+        try {
+            StatoHackathon.fromString(stato);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().body(new ArrayList<>());
+        }
         StatoHackathon statoHackathon = StatoHackathon.fromString(stato);
         List<Hackathon> lista = sottomissioneService.getListaHackathonPerGiudice(account.getId(), statoHackathon);
 
