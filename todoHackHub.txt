@@ -19,6 +19,7 @@ CLASSIFICA E VINCITORE implementare
 Rimuovere mentore service
 TOKEN durata
 SPOSTAre updater e scheduler in cartelle differenti
+Controllo del rest
 ------------risposta tutor----------
 1. In questo caso è indifferente. Se volete metterlo non è un errore, ma la terminazione del caso d'uso è implicita.
 2. Sarebbe meglio mostrare l'interazione con il service relativo, dato che viene effettivamente recuperato qualcosa dal DB.
