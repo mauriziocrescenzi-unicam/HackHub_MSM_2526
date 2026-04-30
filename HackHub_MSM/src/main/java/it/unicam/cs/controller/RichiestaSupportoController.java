@@ -117,7 +117,7 @@ public class RichiestaSupportoController {
         if (mentoreService.getMentoreById(idMentore) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
         }
-        if (idRichiesta == null || risposta == null) {
+        if (risposta == null) {
             return ResponseEntity.badRequest().body("Dati non validi");
         }
         RichiestaSupporto richiesta = mentoreService.getRichiestaSupporto(idRichiesta);
@@ -164,7 +164,7 @@ public class RichiestaSupportoController {
         if (mentoreService.getMentoreById(idMentore) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
         }
-        if (idTeam == null || idHackathon == null || motivazione == null || motivazione.isBlank()) {
+        if (motivazione == null || motivazione.isBlank()) {
             return ResponseEntity.badRequest().body("Dati non validi");
         }
         try {

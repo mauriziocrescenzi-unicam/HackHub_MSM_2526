@@ -82,20 +82,6 @@ public class MentoreService {
         return true;
     }
 
-    /**
-     * Restituisce tutti gli hackathon di un determinato mentore in base allo stato
-     *
-     * @param stato stato degli hackathon
-     * @param idMentore id del mentore
-     * @return lista degli hackathon
-     */
-    public List<Hackathon> getListaHackathons(StatoHackathon stato, long idMentore){
-        if(stato == null) throw new NullPointerException("Stato dell'hackathon non valido");
-        if(idMentore < 0) throw new IllegalArgumentException("Id  del mentore non valido");
-        return hackathonRepository.findAll().stream()
-                .filter(h -> h.getMentori().stream().anyMatch(m -> m.getId().equals(idMentore))
-                        && h.getStato() == stato).toList();
-    }
 
     /**
      * Restituisce l'account del mentore con l'ID specificato.

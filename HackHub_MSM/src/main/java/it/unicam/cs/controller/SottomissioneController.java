@@ -163,7 +163,7 @@ public class SottomissioneController {
     }
     @GetMapping("/hackathons/{idHackathon}/classifica")
     @PreAuthorize("hasAnyRole('STAFF','USER')")
-    public ResponseEntity<List<ClassificaTeamDTO>> getClassifica(@PathVariable long idHackathon, Authentication auth) {
+    public ResponseEntity<List<ClassificaTeamDTO>> getClassifica(@PathVariable long idHackathon) {
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         if (hackathon == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         List<ClassificaTeamDTO> classifica = sottomissioneService.getClassifica(hackathon);

@@ -1,17 +1,9 @@
 package it.unicam.cs.service;
 
 import it.unicam.cs.model.*;
-import it.unicam.cs.repository.HackathonRepository;
-import it.unicam.cs.repository.MembroTeamRepository;
-import it.unicam.cs.repository.TeamHackathonRepository;
 import it.unicam.cs.repository.TeamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service responsabile della gestione dei team nel sistema HackHub.

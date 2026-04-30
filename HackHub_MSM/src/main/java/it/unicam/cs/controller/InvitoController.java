@@ -114,7 +114,7 @@ public class InvitoController {
     public ResponseEntity<String> valutareInvito(@RequestBody Map<String, Object> body, Authentication auth) {
         if (body.get("idInvito") == null || body.get("risposta") == null)
             return ResponseEntity.badRequest().body("Dati non validi");
-        Long idInvito = ((Number) body.get("idInvito")).longValue();
+        long idInvito = ((Number) body.get("idInvito")).longValue();
         boolean risposta = (boolean) body.get("risposta");
         Account account = accountService.find(auth.getName());
         if (account == null)
@@ -122,7 +122,7 @@ public class InvitoController {
         List<Invito> inviti = invitoService.getInviti(account);
         Invito invito = null;
         for (Invito i : inviti) {
-            if (i.getId() == idInvito.longValue()) {
+            if (i.getId() == idInvito) {
                 invito = i;
                 break;
             }

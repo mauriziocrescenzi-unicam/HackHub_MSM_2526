@@ -56,13 +56,12 @@ public class SottomissioneService {
      * Controlla che l'hackathon esista, che il team sia iscritto, che l'hackathon sia
      * in corso, che non esista già una sottomissione e che link e nome siano validi.
      *
-     * @param nome        nome della sottomissione
      * @param link        link al progetto
      * @param team        team che invia la sottomissione
      * @param idHackathon ID dell'hackathon
      * @return {@code true} se tutti i requisiti sono soddisfatti, {@code false} altrimenti
      */
-    private boolean verificaSottomissione(String nome, String link, Team team, Long idHackathon){
+    private boolean verificaSottomissione(String link, Team team, Long idHackathon){
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         if (hackathon == null)
             return false;
@@ -98,7 +97,7 @@ public class SottomissioneService {
         if(membroTeamService.getMembro(account) == null) return false;
         Team team = membroTeamService.getMembro(account).getTeam();
         //verifica se le informazioni vanno bene
-        if (!verificaSottomissione(nome, link, team, idHackathon))
+        if (!verificaSottomissione( link, team, idHackathon))
             return false;
         // Crea la sottomissione
         Sottomissione nuova = new Sottomissione(nome, link, team.getId(), idHackathon);
@@ -247,9 +246,7 @@ public class SottomissioneService {
     public boolean checkValutazione(int voto, String giudizio) {
         if (voto < 0 || voto > 10)
             return false;
-        if (giudizio == null || giudizio.isBlank())
-            return false;
-        return true;
+        return giudizio != null && !giudizio.isBlank();
     }
 
     /**

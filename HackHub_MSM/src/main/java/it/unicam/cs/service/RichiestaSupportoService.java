@@ -2,7 +2,6 @@ package it.unicam.cs.service;
 
 import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.model.RichiestaSupporto;
-import it.unicam.cs.model.Team;
 import it.unicam.cs.repository.RichiestaSupportoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,10 +79,7 @@ public class RichiestaSupportoService {
         if (dataInvio == null || dataInvio.isAfter(LocalDateTime.now())) {
             return false;
         }
-        if (hackathon == null) {
-            return false;
-        }
-        return true;
+        return hackathon != null;
     }
 
     /**
@@ -158,10 +154,6 @@ public class RichiestaSupportoService {
      * @return true se la descrizione è valida, false altrimenti
      */
     public boolean checkRisposta(String descrizioneRisposta) {
-        if (descrizioneRisposta == null || descrizioneRisposta.trim().isEmpty()) {
-            return false;
-        }
-
-        return true;
+        return descrizioneRisposta != null && !descrizioneRisposta.trim().isEmpty();
     }
 }

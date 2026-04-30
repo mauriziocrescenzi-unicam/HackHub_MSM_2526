@@ -1,22 +1,16 @@
 package it.unicam.cs.controller;
 
 import it.unicam.cs.dto.HackathonRispostaDTO;
-import it.unicam.cs.dto.SottomissioneRispostaDTO;
 import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.Sottomissione;
 import it.unicam.cs.model.StatoHackathon;
 import it.unicam.cs.service.AccountService;
 import it.unicam.cs.service.MembroDelloStaffService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.Console;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * Controller REST per la gestione delle operazioni del membro dello staff.
