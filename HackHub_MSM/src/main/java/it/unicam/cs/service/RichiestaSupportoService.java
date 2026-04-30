@@ -29,7 +29,6 @@ public class RichiestaSupportoService {
         this.richiestaSupportoRepository = richiestaSupportoRepository;
     }
 
-    // USE CASE: Invio Richiesta di Supporto (MembroTeam)
     /**
      * Invia una nuova richiesta di supporto da parte di un team.
      * Corrisponde alla chiamata inviaRichiestaSupporto() nel sequence diagram.

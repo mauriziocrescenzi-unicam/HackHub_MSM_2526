@@ -9,16 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service per la gestione dei membri dello staff nel sistema HackHub.
+ * Fornisce operazioni per recuperare gli hackathon associati a un membro dello staff,
+ * sia in base al ruolo (organizzatore, giudice, mentore) che allo stato dell'hackathon.
+ */
 @Service
 @Transactional
 public class MembroDelloStaffService {
 
-    private final SottomissioneService sottomissioneService;
     private final HackathonRepository hackathonRepository;
-
-    public MembroDelloStaffService(SottomissioneService sottomissioneService,
-                                   HackathonRepository hackathonRepository) {
-        this.sottomissioneService = sottomissioneService;
+    /**
+     * Costruisce un'istanza di {@code MembroDelloStaffService} con le dipendenze necessarie.
+     *
+     * @param hackathonRepository  repository per l'accesso agli hackathon
+     */
+    public MembroDelloStaffService(HackathonRepository hackathonRepository) {
         this.hackathonRepository = hackathonRepository;
     }
 

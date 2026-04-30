@@ -14,30 +14,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Controller responsabile della gestione dei Team nel sistema HackHub.
- * Implementa il pattern Singleton per garantire un'unica istanza del controller.
- * Contiene tutta la logica di business per operazioni sui team.
- *
+ * Service responsabile della gestione dei team nel sistema HackHub.
+ * Fornisce operazioni di creazione, recupero e verifica della disponibilità
+ * dei membri per i team.
  */
 @Service
 @Transactional
 public class TeamService {
 
     private final TeamRepository repository;
-    private final HackathonRepository hackathonRepository;
-    private final TeamHackathonRepository teamHackathonRepository;
     private final MembroTeamService membroTeamService;
-    private final MembroTeamRepository membroTeamRepository;
-    private final HackathonService hackathonService;
     private final AccountService accountService;
-
-    public TeamService(TeamRepository repository, HackathonRepository hackathonRepository, TeamHackathonRepository teamHackathonRepository, MembroTeamService membroTeamService, MembroTeamRepository membroTeamRepository, HackathonService hackathonService,AccountService accountService) {
+    /**
+     * Costruisce un'istanza di {@code TeamService} con le dipendenze necessarie.
+     *
+     * @param repository               repository per l'accesso ai team
+     * @param membroTeamService        service per la gestione dei membri del team
+     * @param accountService           service per la gestione degli account
+     */
+    public TeamService(TeamRepository repository, MembroTeamService membroTeamService,AccountService accountService) {
         this.repository = repository;
-        this.hackathonRepository = hackathonRepository;
-        this.teamHackathonRepository = teamHackathonRepository;
         this.membroTeamService = membroTeamService;
-        this.membroTeamRepository = membroTeamRepository;
-        this.hackathonService = hackathonService;
         this.accountService = accountService;
     }
 

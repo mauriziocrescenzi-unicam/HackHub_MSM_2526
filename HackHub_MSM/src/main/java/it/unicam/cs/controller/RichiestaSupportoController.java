@@ -11,7 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+/**
+ * Controller REST per la gestione delle richieste di supporto e delle segnalazioni dei mentori.
+ * Espone endpoint per visualizzare e rispondere alle richieste di supporto,
+ * e per segnalare team in violazione del regolamento.
+ * Accessibile solo agli utenti con ruolo {@code STAFF}.
+ */
 @RestController
 @RequestMapping("/mentori")
 public class RichiestaSupportoController {
@@ -20,7 +25,14 @@ public class RichiestaSupportoController {
     private final HackathonService hackathonService;
     private final SegnalazioneService segnalazioneService;
     private final AccountService accountService;
-
+    /**
+     * Costruisce un'istanza di {@code RichiestaSupportoController} con le dipendenze necessarie.
+     *
+     * @param mentoreService     service per la gestione dei mentori
+     * @param hackathonService   service per la gestione degli hackathon
+     * @param segnalazioneService service per la gestione delle segnalazioni
+     * @param accountService     service per la gestione degli account
+     */
     public RichiestaSupportoController(MentoreService mentoreService,
                                        HackathonService hackathonService,
                                        SegnalazioneService segnalazioneService,
@@ -34,9 +46,18 @@ public class RichiestaSupportoController {
 
     //TODO cambiare in get
     /**
-     * POST /mentori/richieste/lista
+     * {@code POST /mentori/richieste/lista}
      * Restituisce le richieste di supporto per un hackathon specifico.
-     * Body: { "idMentore": 1, "idHackathon": 10 }
+     * Il mentore autenticato deve essere effettivamente assegnato all'hackathon richiesto.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param body il body della richiesta contenente {@code idHackathon} (Long)
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 200 OK} con la lista delle richieste di supporto;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se il mentore non è assegnato all'hackathon;
+     *         {@code 404 Not Found} se il mentore o l'hackathon non esistono,
+     *         o se non ci sono richieste
      */
     @PostMapping("/richieste/lista")
     @PreAuthorize("hasRole('STAFF')")
@@ -65,10 +86,19 @@ public class RichiestaSupportoController {
         return ResponseEntity.ok(risposta);
     }
 
+
     /**
-     * POST /mentori/richieste/rispondi
-     * Invia una risposta a una richiesta di supporto.
-     * Body: { "idMentore": 1, "idRichiesta": 5, "risposta": "Testo della risposta..." }
+     * {@code POST /mentori/richieste/rispondi}
+     * Invia una risposta testuale a una richiesta di supporto.
+     * Il mentore autenticato non può rispondere a richieste già risolte.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param body il body della richiesta contenente {@code idRichiesta} (Long) e {@code risposta} (String)
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 200 OK} se la risposta è stata inviata con successo;
+     *         {@code 400 Bad Request} se i dati mancano, la richiesta è già risolta o la risposta non è valida;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 404 Not Found} se il mentore o la richiesta non esistono
      */
     @PostMapping("/richieste/rispondi")
     @PreAuthorize("hasRole('STAFF')")
@@ -105,9 +135,18 @@ public class RichiestaSupportoController {
 
     //TODO controllo con segnalazioniController
     /**
-     * POST /mentori/segnalazioni/invia
-     * Segnala un team per violazione del regolamento.
-     * Body: { "idMentore": 1, "idTeam": 5, "idHackathon": 10, "motivazione": "Testo..." }
+     * {@code POST /mentori/segnalazioni/invia}
+     * Segnala un team per violazione del regolamento durante un hackathon.
+     * Il mentore autenticato deve essere assegnato all'hackathon specificato.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param body il body della richiesta contenente {@code idTeam} (Long),
+     *             {@code idHackathon} (Long) e {@code motivazione} (String)
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 201 Created} se la segnalazione è stata inviata con successo;
+     *         {@code 400 Bad Request} se i dati sono mancanti, vuoti o la segnalazione fallisce;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 404 Not Found} se il mentore non esiste
      */
     @PostMapping("/segnalazioni/invia")
     @PreAuthorize("hasRole('STAFF')")

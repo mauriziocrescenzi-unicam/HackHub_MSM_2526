@@ -14,9 +14,8 @@ import java.util.List;
 
 /**
  * Service responsabile della gestione delle sottomissioni nel sistema HackHub.
- * Implementa il pattern Singleton.
- * Gestisce i casi d'uso: inviare, aggiornare, valutare e accedere alle
- * sottomissioni.
+ * Gestisce i casi d'uso di invio, aggiornamento, valutazione e recupero delle
+ * sottomissioni, oltre al calcolo della classifica e alla proclamazione del vincitore.
  */
 @Service
 @Transactional
@@ -30,7 +29,17 @@ public class SottomissioneService {
     private final RepositoryFacade repositoryFacade;
     private final MembroTeamService membroTeamService;
 
-
+    /**
+     * Costruisce un'istanza di {@code SottomissioneService} con le dipendenze necessarie.
+     *
+     * @param repository           repository per l'accesso alle sottomissioni
+     * @param hackathonService     service per la gestione degli hackathon
+     * @param teamService          service per la gestione dei team
+     * @param teamHackathonService service per la gestione delle iscrizioni team-hackathon
+     * @param hackathonRepository  repository per il salvataggio degli hackathon
+     * @param repositoryFacade     facade per la validazione dei link
+     * @param membroTeamService    service per la gestione dei membri del team
+     */
     public SottomissioneService(SottomissioneRepository repository, HackathonService hackathonService,
                                 TeamService teamService, TeamHackathonService teamHackathonService, HackathonRepository hackathonRepository,
                                 RepositoryFacade repositoryFacade, MembroTeamService membroTeamService) {
@@ -42,6 +51,17 @@ public class SottomissioneService {
         this.repositoryFacade = repositoryFacade;
         this.membroTeamService = membroTeamService;
     }
+    /**
+     * Verifica i requisiti necessari per inviare una nuova sottomissione.
+     * Controlla che l'hackathon esista, che il team sia iscritto, che l'hackathon sia
+     * in corso, che non esista già una sottomissione e che link e nome siano validi.
+     *
+     * @param nome        nome della sottomissione
+     * @param link        link al progetto
+     * @param team        team che invia la sottomissione
+     * @param idHackathon ID dell'hackathon
+     * @return {@code true} se tutti i requisiti sono soddisfatti, {@code false} altrimenti
+     */
     private boolean verificaSottomissione(String nome, String link, Team team, Long idHackathon){
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         if (hackathon == null)
@@ -262,18 +282,12 @@ public class SottomissioneService {
     }
 
     /**
-     * Calcola la classifica dei team per un determinato hackathon.
-     * La classifica è ordinata per punteggio decrescente (dal primo all'ultimo
-     * posto).
-     * <p>
-     * Questo metodo recupera tutte le sottomissioni valutate per l'hackathon
-     * e le ordina in base al voto ricevuto.
-     * </p>
+     * Calcola la classifica dei team per un determinato hackathon, ordinata per punteggio decrescente.
+     * Vengono incluse solo le sottomissioni già valutate; a ogni elemento viene assegnata la posizione finale.
      *
-     * @param hackathon Hackathon per cui calcolare la classifica
-     * @return Lista di {@link ClassificaTeamDTO} ordinata per punteggio
-     *         decrescente,
-     *         o lista vuota se non ci sono sottomissioni valutate
+     * @param hackathon l'hackathon per cui calcolare la classifica; se {@code null} restituisce lista vuota
+     * @return lista di {@link ClassificaTeamDTO} ordinata per punteggio decrescente,
+     *         o lista vuota se non ci sono sottomissioni valutate o {@code hackathon} è {@code null}
      */
     public List<ClassificaTeamDTO> getClassifica(Hackathon hackathon) {
         if (hackathon == null) {
@@ -309,18 +323,14 @@ public class SottomissioneService {
     }
 
     /**
-     * Proclama il team vincitore di un hackathon.
-     * <p>
-     * Verifica che:
-     * - L'hackathon esista
-     * - L'hackathon sia in stato IN_VALUTAZIONE
-     * - Tutte le sottomissioni siano state valutate
-     * - Il team proclamato sia effettivamente primo in classifica
-     * </p>
+     * Proclama il team vincitore di un hackathon e imposta lo stato dell'hackathon a {@link StatoHackathon#CONCLUSO}.
+     * Verifica che l'hackathon sia in stato {@link StatoHackathon#IN_VALUTAZIONE} e che
+     * tutte le sottomissioni siano già state valutate.
      *
-     * @param hackathon     Hackathon per cui proclamare il vincitore
-     * @param teamVincitore Team da proclamare vincitore
-     * @return true se la proclamazione è riuscita, false altrimenti
+     * @param hackathon     l'hackathon per cui proclamare il vincitore; non può essere {@code null}
+     * @param teamVincitore il team da proclamare vincitore; non può essere {@code null}
+     * @return {@code true} se la proclamazione è riuscita, {@code false} se i parametri sono {@code null},
+     *         l'hackathon non è in stato corretto, o alcune sottomissioni non sono ancora valutate
      */
     public boolean proclamaTeamVincitore(Hackathon hackathon, Team teamVincitore) {
         if (hackathon == null || teamVincitore == null) {

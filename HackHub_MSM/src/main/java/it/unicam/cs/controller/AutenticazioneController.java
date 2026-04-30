@@ -14,7 +14,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import it.unicam.cs.model.Ruolo;
-
+/**
+ * Controller REST per la gestione dell'autenticazione degli utenti.
+ * Espone endpoint per la registrazione, il login e il recupero dei dati dell'account autenticato.
+ */
 @RestController
 @RequestMapping("/auth")
 public class AutenticazioneController {
@@ -23,7 +26,14 @@ public class AutenticazioneController {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-
+    /**
+     * Costruisce un'istanza di {@code AutenticazioneController} con le dipendenze necessarie.
+     *
+     * @param authenticationManager gestore dell'autenticazione Spring Security
+     * @param accountRepository     repository per l'accesso agli account
+     * @param passwordEncoder       encoder per la cifratura delle password
+     * @param jwtUtil               utility per la generazione dei token JWT
+     */
     public AutenticazioneController(AuthenticationManager authenticationManager,
                                     AccountRepository accountRepository,
                                     PasswordEncoder passwordEncoder,
@@ -35,8 +45,14 @@ public class AutenticazioneController {
     }
 
     /**
-     * POST /auth/signup
-     * Registra un nuovo account con ruolo USER di default.
+     * {@code POST /auth/registrazione}
+     * Registra un nuovo account con il ruolo specificato nella richiesta.
+     * Se la registrazione va a buon fine, esegue il login automatico e restituisce il token JWT.
+     *
+     * @param req la richiesta di registrazione contenente email, password, ruolo, nome e cognome
+     * @return il token JWT se la registrazione è riuscita;
+     *         {@code 409 Conflict} se l'email è già registrata;
+     *         {@code 500 Internal Server Error} in caso di errore imprevisto
      */
     @PostMapping("/registrazione")
     public ResponseEntity<?> registrazione(@RequestBody RegisterRequest req) {
@@ -65,8 +81,12 @@ public class AutenticazioneController {
     }
 
     /**
-     * POST /auth/login
-     * Autentica e restituisce il JWT.
+     * {@code POST /auth/accesso}
+     * Autentica l'utente con email e password e restituisce un token JWT.
+     *
+     * @param req la richiesta di login contenente email e password
+     * @return il token JWT se le credenziali sono valide;
+     *         {@code 401 Unauthorized} se le credenziali non sono corrette
      */
     @PostMapping("/accesso")
     public ResponseEntity<?> accesso(@RequestBody LoginRequest req) {
@@ -93,8 +113,12 @@ public class AutenticazioneController {
     }
 
     /**
-     * GET /auth/me
-     * Restituisce i dati dell'account loggato.
+     * {@code GET /auth/me}
+     * Restituisce i dati dell'account attualmente autenticato.
+     *
+     * @param auth il contesto di autenticazione corrente, contenente l'email dell'utente
+     * @return un {@link AccountResponse} con id, email, nome, cognome e ruolo dell'utente autenticato;
+     *         lancia {@link IllegalArgumentException} se l'account non viene trovato
      */
     @GetMapping("/me")
     public ResponseEntity<?> getMe(Authentication auth) {

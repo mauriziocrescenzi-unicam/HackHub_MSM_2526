@@ -7,7 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+/**
+ * Service per la gestione delle segnalazioni dei team nel sistema HackHub.
+ * Fornisce operazioni per creare, accettare, rifiutare e recuperare segnalazioni
+ * effettuate dai mentori nei confronti dei team durante gli hackathon.
+ */
 @Service
 @Transactional
 public class SegnalazioneService {
@@ -16,7 +20,15 @@ public class SegnalazioneService {
     private final HackathonService hackathonService;
     private final MentoreService mentoreService;
     private final TeamHackathonService teamHackathonService;
-
+    /**
+     * Costruisce un'istanza di {@code SegnalazioneService} con le dipendenze necessarie.
+     *
+     * @param repository           repository per l'accesso alle segnalazioni
+     * @param teamService          service per la gestione dei team
+     * @param hackathonService     service per la gestione degli hackathon
+     * @param mentoreService       service per la gestione dei mentori
+     * @param teamHackathonService service per la gestione delle iscrizioni team-hackathon
+     */
     public SegnalazioneService(SegnalazioneRepository repository, TeamService teamService, HackathonService hackathonService, MentoreService mentoreService, TeamHackathonService teamHackathonService) {
         this.repository = repository;
         this.teamService = teamService;

@@ -1,15 +1,14 @@
 package it.unicam.cs.controller;
 
+import it.unicam.cs.dto.ClassificaTeamDTO;
 import it.unicam.cs.dto.HackathonRispostaDTO;
 import it.unicam.cs.dto.SottomissioneCreazioneDTO;
 import it.unicam.cs.dto.SottomissioneRispostaDTO;
-import it.unicam.cs.model.Account;
-import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.Sottomissione;
-import it.unicam.cs.model.StatoHackathon;
+import it.unicam.cs.model.*;
 import it.unicam.cs.service.AccountService;
 import it.unicam.cs.service.HackathonService;
 import it.unicam.cs.service.SottomissioneService;
+import it.unicam.cs.service.TeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,11 +25,13 @@ public class SottomissioneController {
     private final SottomissioneService sottomissioneService;
     private final AccountService accountService;
     private final HackathonService hackathonService;
+    private final TeamService teamService;
 
-    public SottomissioneController(SottomissioneService sottomissioneService, AccountService accountService,  HackathonService hackathonService) {
+    public SottomissioneController(SottomissioneService sottomissioneService, AccountService accountService, HackathonService hackathonService, TeamService teamService) {
         this.sottomissioneService = sottomissioneService;
         this.accountService = accountService;
         this.hackathonService = hackathonService;
+        this.teamService = teamService;
     }
     @PostMapping
     @PreAuthorize("hasRole('UTENTE')")
@@ -159,5 +160,40 @@ public class SottomissioneController {
         boolean valutato = sottomissioneService.valutaSottomissione(sottomissione, voto, giudizio);
         if (!valutato) return ResponseEntity.badRequest().body("Valutazione non riuscita");
         return ResponseEntity.ok("Sottomissione valutata con successo");
+    }
+    @GetMapping("/hackathons/{idHackathon}/classifica")
+    @PreAuthorize("hasAnyRole('STAFF','USER')")
+    public ResponseEntity<List<ClassificaTeamDTO>> getClassifica(@PathVariable long idHackathon, Authentication auth) {
+        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
+        if (hackathon == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        List<ClassificaTeamDTO> classifica = sottomissioneService.getClassifica(hackathon);
+        if (classifica.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(classifica);
+    }
+
+    @PutMapping("/hackathons/{idHackathon}/vincitore")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<String> proclamaVincitore(@PathVariable long idHackathon,
+                                                    @RequestBody Map<String, Long> body,
+                                                    Authentication auth) {
+        Account account = accountService.find(auth.getName());
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
+
+        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
+        if (hackathon == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hackathon non trovato");
+
+        if (!hackathon.getGiudice().getId().equals(account.getId()))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato");
+
+        Long idTeam = body.get("idTeam");
+        if (idTeam == null) return ResponseEntity.badRequest().body("idTeam mancante");
+
+        Team team = teamService.getTeamById(idTeam);
+        if (team == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Team non trovato");
+
+        if (!sottomissioneService.proclamaTeamVincitore(hackathon, team))
+            return ResponseEntity.badRequest().body("Proclamazione non riuscita: verifica che tutte le sottomissioni siano valutate e che l'hackathon sia in stato IN_VALUTAZIONE");
+
+        return ResponseEntity.ok("Vincitore proclamato con successo");
     }
 }

@@ -12,10 +12,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Controller responsabile della gestione dei membri dei team nel sistema HackHub.
- * Implementa il pattern Singleton per garantire un'unica istanza del controller.
- * Contiene tutta la logica di business per operazioni sui membri dei team.
- *
+ * Service responsabile della gestione dei membri dei team nel sistema HackHub.
+ * Contiene tutta la logica di business per le operazioni sui membri, incluse
+ * aggiunta, rimozione, abbandono e verifica della disponibilità.
  */
 @Service
 @Transactional
@@ -25,7 +24,14 @@ public class MembroTeamService {
     private final AccountRepository accountRepository;
     private final TeamRepository teamRepository;
     private final TeamHackathonRepository teamHackathonRepository;
-
+    /**
+     * Costruisce un'istanza di {@code MembroTeamService} con le dipendenze necessarie.
+     *
+     * @param repository               repository per l'accesso ai membri del team
+     * @param accountRepository        repository per l'accesso agli account
+     * @param teamRepository           repository per l'accesso ai team
+     * @param teamHackathonRepository  repository per l'accesso alle associazioni team-hackathon
+     */
     public MembroTeamService(MembroTeamRepository repository,
                              AccountRepository accountRepository,
                              TeamRepository teamRepository,
@@ -71,7 +77,10 @@ public class MembroTeamService {
     }
 
     /**
-     * Restituisce il MembroTeam dell'utente
+     * Restituisce il {@link MembroTeam} associato all'account specificato.
+     *
+     * @param account l'account di cui recuperare il membro team
+     * @return il {@link MembroTeam} corrispondente, oppure {@code null} se non trovato
      */
     public MembroTeam getMembro(Account account) {
         for (MembroTeam membro : repository.findAll()) {
@@ -133,15 +142,6 @@ public class MembroTeamService {
 
 
     /**
-     * Restituisce tutti i membri presenti nel sistema.
-     *
-     * @return Lista di tutti i membri
-     */
-    public List<MembroTeam> getAllMembri() {
-        return repository.findAll();
-    }
-
-    /**
      * Elimina completamente un team dal sistema.
      * Questo metodo dovrebbe essere chiamato solo quando un team rimane senza membri.
      *
@@ -201,15 +201,6 @@ public class MembroTeamService {
         return true;
     }
 
-    /**
-     * Elimina un membro specifico da un team.
-     * Metodo utilizzato per la rimozione forzata di un membro
-     * Segue la stessa logica di abbandonaTeam ma con semantica diversa.
-     *
-     * @param idMembro ID del membro da eliminare
-     * @param idTeam ID del team da cui rimuovere il membro
-     * @return true se l'eliminazione è avvenuta con successo, false altrimenti
-     */
     /**
      * Elimina un membro specifico da un team.
      * Verifica che entrambi i membri (chi elimina e chi viene eliminato) appartengano allo stesso team.

@@ -1,7 +1,5 @@
 package it.unicam.cs.dto;
 
-import java.time.LocalDateTime;
-
 /**
  * DTO per la richiesta di supporto da parte di un team a un mentore.
  * idMembroTeam e dataInvio sono gestiti automaticamente dal controller.

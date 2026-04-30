@@ -9,42 +9,56 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+/**
+ * Controller REST per le operazioni dei membri del team.
+ * Espone endpoint per visualizzare i propri compagni di team, abbandonare o eliminare membri
+ * e inviare richieste di supporto durante un hackathon.
+ * Accessibile solo agli utenti con ruolo {@code UTENTE}.
+ */
 @RestController
 @RequestMapping("/membro-team")
 public class MembroTeamController {
 
     private final MembroTeamService membroTeamService;
     private final TeamHackathonService teamHackathonService;
-    private final HackathonService hackathonService;
-    private final SottomissioneService sottomissioneService;
-    private final TeamService teamService;
     private final RichiestaSupportoService richiestaSupportoService;
     private final HackathonRepository hackathonRepository;
     private final AccountService accountService;
-
+    /**
+     * Costruisce un'istanza di {@code MembroTeamController} con le dipendenze necessarie.
+     *
+     * @param membroTeamService        service per la gestione dei membri del team
+     * @param teamHackathonService     service per la gestione delle iscrizioni team-hackathon
+     * @param richiestaSupportoService service per la gestione delle richieste di supporto
+     * @param hackathonRepository      repository per l'accesso diretto agli hackathon
+     * @param accountService           service per la gestione degli account
+     */
     public MembroTeamController(MembroTeamService membroTeamService,
                                 TeamHackathonService teamHackathonService,
-                                HackathonService hackathonService,
-                                SottomissioneService sottomissioneService,
-                                TeamService teamService, RichiestaSupportoService richiestaSupportoService,
+                                RichiestaSupportoService richiestaSupportoService,
                                 HackathonRepository hackathonRepository,
                                 AccountService accountService) {
         this.membroTeamService = membroTeamService;
         this.teamHackathonService = teamHackathonService;
-        this.hackathonService = hackathonService;
-        this.sottomissioneService = sottomissioneService;
-        this.teamService = teamService;
         this.richiestaSupportoService = richiestaSupportoService;
         this.hackathonRepository = hackathonRepository;
         this.accountService = accountService;
     }
-
+    /**
+     * {@code GET /membro-team/team/membri}
+     * Restituisce la lista dei membri del team a cui appartiene l'utente autenticato.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 200 OK} con la lista dei membri;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è membro di nessun team;
+     *         {@code 404 Not Found} se il team non ha membri
+     */
     @GetMapping("/team/membri")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<List<MembroTeamRispostaDTO>> getMembri(Authentication auth) {
@@ -61,7 +75,17 @@ public class MembroTeamController {
                 .toList();
         return ResponseEntity.ok(risposta);
     }
-
+    /**
+     * {@code DELETE /membro-team/abbandona}
+     * Permette all'utente autenticato di abbandonare il proprio team.
+     * Se il team rimane senza membri, viene automaticamente eliminato.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 200 OK} se l'abbandono è avvenuto con successo;
+     *         {@code 400 Bad Request} se l'utente non appartiene a nessun team o l'operazione fallisce;
+     *         {@code 401 Unauthorized} se l'account non è trovato
+     */
     @DeleteMapping("/abbandona")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> abbandonaTeam(Authentication auth) {
@@ -83,9 +107,17 @@ public class MembroTeamController {
     }
     //TODO cambiare in delete?
     /**
-     * POST /membro-team/elimina
-     * Permette a un membro del team di eliminare un altro membro dallo stesso team.
-     * Body: { "idMembroCheElimina": 1, "idMembroDaEliminare": 2, "idTeam": 5 }
+     * {@code POST /membro-team/elimina}
+     * Permette a un membro del team di rimuovere un altro membro dallo stesso team.
+     * Un membro non può eliminare se stesso; per uscire dal team deve usare l'endpoint di abbandono.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param body il body della richiesta contenente {@code idMembroDaEliminare} (Long)
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 200 OK} se l'eliminazione è avvenuta con successo;
+     *         {@code 400 Bad Request} se i dati non sono validi o l'operazione fallisce;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è membro di nessun team
      */
     @PostMapping("/elimina")
     @PreAuthorize("hasRole('UTENTE')")
@@ -109,7 +141,20 @@ public class MembroTeamController {
         }
         return ResponseEntity.ok("Membro eliminato dal team con successo");
     }
-
+    /**
+     * {@code POST /membro-team/supporto/richiedi}
+     * Invia una richiesta di supporto al mentore per l'hackathon specificato.
+     * Il team richiedente viene ricavato dall'account autenticato.
+     * L'hackathon deve essere in stato {@link StatoHackathon#IN_CORSO} e il team deve essere iscritto.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param dto  i dati della richiesta di supporto contenenti {@code idHackathon} e {@code descrizioneRichiesta}
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 201 Created} se la richiesta è stata inviata con successo;
+     *         {@code 400 Bad Request} se i dati non sono validi, l'hackathon non è in corso
+     *         o il team non è iscritto;
+     *         {@code 401 Unauthorized} se l'account non è trovato
+     */
     @PostMapping("/supporto/richiedi")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> inviaRichiestaSupporto(

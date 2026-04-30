@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controller REST per la gestione delle operazioni del Membro dello Staff.
- * Espone endpoint per visualizzare hackathon assegnati e sottomissioni.
- * Segue le best practices REST con GET per operazioni di lettura.
+ * Controller REST per la gestione delle operazioni del membro dello staff.
+ * Espone endpoint per visualizzare gli hackathon assegnati.
+ * Accessibile solo agli utenti con ruolo {@code STAFF}.
  */
 @RestController
 @RequestMapping("/staff")
@@ -29,13 +29,30 @@ public class MembroDelloStaffController {
 
     private final MembroDelloStaffService membroStaffService;
     private final AccountService accountService;
-
+    /**
+     * Costruisce un'istanza di {@code MembroDelloStaffController} con le dipendenze necessarie.
+     *
+     * @param membroStaffService service per la gestione dei membri dello staff
+     * @param accountService     service per la gestione degli account
+     */
     public MembroDelloStaffController(MembroDelloStaffService membroStaffService, AccountService accountService) {
         this.membroStaffService = membroStaffService;
         this.accountService = accountService;
     }
 
-
+    /**
+     * {@code GET /staff/hackathons}
+     * Restituisce la lista degli hackathon associati al membro dello staff autenticato.
+     * Se viene fornito il parametro {@code stato}, la lista viene filtrata di conseguenza;
+     * altrimenti vengono restituiti tutti gli hackathon associati.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param stato il filtro opzionale sullo stato dell'hackathon (es. {@code "IN_CORSO"})
+     * @param auth  il contesto di autenticazione corrente
+     * @return {@code 200 OK} con la lista degli hackathon;
+     *         {@code 400 Bad Request} se il valore di {@code stato} non è valido;
+     *         {@code 404 Not Found} se non ci sono hackathon associati
+     */
     @GetMapping("/hackathons")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<HackathonRispostaDTO>> getListaHackathon(
