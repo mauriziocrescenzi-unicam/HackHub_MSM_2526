@@ -16,14 +16,14 @@ public record HackathonRispostaDTO(
         @NotNull Double premioInDenaro,
         @NotNull Integer dimensioneMassimoTeam,
         @NotNull StatoHackathon stato,
-        @NotNull Account organizzatore,
-        @NotNull Account giudice,
-        @NotNull List<Account> mentori
+        @NotNull String organizzatore,
+        @NotNull String giudice,
+        @NotNull List<String> mentori
 ) {
     public static HackathonRispostaDTO fromHackathon(Hackathon hackathon) {
         return new HackathonRispostaDTO(hackathon.getNome(),hackathon.getRegolamento(),hackathon.getScadenzaIscrizione(),
                 hackathon.getDataInizio(),hackathon.getDataFine(),hackathon.getLuogo(),hackathon.getPremioInDenaro(),
-                hackathon.getDimensioneMassimoTeam(),hackathon.getStato(),hackathon.getOrganizzatore(),hackathon.getGiudice(),
-                hackathon.getMentori());
+                hackathon.getDimensioneMassimoTeam(),hackathon.getStato(),hackathon.getOrganizzatore().getEmail(),hackathon.getGiudice().getEmail(),
+                hackathon.getMentori().stream().map(Account::getEmail).toList());
     }
 }

@@ -1,8 +1,6 @@
 package it.unicam.cs.service;
 
 import it.unicam.cs.model.Account;
-import it.unicam.cs.model.Hackathon;
-import it.unicam.cs.model.Ruolo;
 import it.unicam.cs.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 

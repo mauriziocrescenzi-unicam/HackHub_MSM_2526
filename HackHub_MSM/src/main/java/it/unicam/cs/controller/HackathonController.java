@@ -168,12 +168,21 @@ public class HackathonController {
      * @return {@code 200 OK} con la lista completa degli hackathon
      */
     @GetMapping
-    public ResponseEntity<List<HackathonRispostaDTO>> getAllHackathon(){
-        List<HackathonRispostaDTO> lista = hackathonService.getAllListaHackathon()
-                .stream()
-                .map(HackathonRispostaDTO::fromHackathon)
-                .toList();
-        return ResponseEntity.ok(lista);
+    public ResponseEntity<List<?>> getAllHackathon(Authentication auth){
+        if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            List<HackathonInfoPubblicoDTO> lista = hackathonService.getAllListaHackathon()
+                    .stream()
+                    .map(HackathonInfoPubblicoDTO::fromHackathon)
+                    .toList();
+            return ResponseEntity.ok(lista);
+        }else {
+            List<HackathonRispostaDTO> lista = hackathonService.getAllListaHackathon()
+                    .stream()
+                    .map(HackathonRispostaDTO::fromHackathon)
+                    .toList();
+            return ResponseEntity.ok(lista);
+        }
+
     }
 
 

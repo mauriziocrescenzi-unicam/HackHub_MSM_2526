@@ -29,8 +29,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
         try {
-            String header = req.getHeader("Authorization");
 
+            String header = req.getHeader("Authorization");
             if (header != null && header.startsWith("Bearer ")) {
                 String token = header.substring(7);
 
@@ -53,7 +53,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            logger.error("Authentication error: " + e.getMessage());
+            logger.error("Authentication error: " + e.getMessage(),e);
         }
 
         chain.doFilter(req, res);

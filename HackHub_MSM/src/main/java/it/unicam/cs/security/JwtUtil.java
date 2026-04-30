@@ -7,10 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-@Component // ← era mancante, Spring non riusciva a trovarlo come bean
+@Component
 public class JwtUtil {
 
     @Value("${jwt.secret}")

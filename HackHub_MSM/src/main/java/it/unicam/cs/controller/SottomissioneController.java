@@ -19,6 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller REST per la gestione delle sottomissioni dei team agli hackathon.
+ * Espone endpoint per inviare, aggiornare, recuperare e valutare le sottomissioni.
+ * Gli endpoint di invio e aggiornamento richiedono il ruolo {@code UTENTE};
+ * quelli di recupero, valutazione richiedono il ruolo, visualizzazione della classifica e proclamazione vincitore {@code STAFF}.
+ */
 @RestController
 @RequestMapping("/sottomissioni")
 public class SottomissioneController {
@@ -26,13 +32,29 @@ public class SottomissioneController {
     private final AccountService accountService;
     private final HackathonService hackathonService;
     private final TeamService teamService;
-
+    /**
+     * Costruisce un'istanza di {@code SottomissioneController} con le dipendenze necessarie.
+     *
+     * @param sottomissioneService service per la gestione delle sottomissioni
+     * @param accountService       service per la gestione degli account
+     * @param hackathonService     service per la gestione degli hackathon
+     */
     public SottomissioneController(SottomissioneService sottomissioneService, AccountService accountService, HackathonService hackathonService, TeamService teamService) {
         this.sottomissioneService = sottomissioneService;
         this.accountService = accountService;
         this.hackathonService = hackathonService;
         this.teamService = teamService;
     }
+    /**
+     * {@code POST /sottomissioni}
+     * Invia una nuova sottomissione per il team a cui appartiene l'utente autenticato.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param sottomissioneData i dati della sottomissione contenenti nome, link e ID dell'hackathon
+     * @param auth              il contesto di autenticazione corrente
+     * @return {@code 201 Created} se la sottomissione è stata inviata con successo;
+     *         {@code 400 Bad Request} se i dati non sono validi o i requisiti non sono soddisfatti
+     */
     @PostMapping
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> createSottomissione(@RequestBody SottomissioneCreazioneDTO sottomissioneData, Authentication auth){
@@ -41,6 +63,16 @@ public class SottomissioneController {
         if (!creato) return ResponseEntity.badRequest().body("Dati non validi");
         return ResponseEntity.status(201).body("Sottomissione inviata con successo");
     }
+    /**
+     * {@code PUT /sottomissioni}
+     * Aggiorna la sottomissione esistente del team a cui appartiene l'utente autenticato.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param sottomissioneData i nuovi dati della sottomissione contenenti nome, link e ID dell'hackathon
+     * @param auth              il contesto di autenticazione corrente
+     * @return {@code 200 OK} se la sottomissione è stata aggiornata con successo;
+     *         {@code 400 Bad Request} se i dati non sono validi o non esiste una sottomissione da aggiornare
+     */
     @PutMapping
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> aggiornaSottomissione(@RequestBody SottomissioneCreazioneDTO sottomissioneData, Authentication auth){
@@ -51,8 +83,16 @@ public class SottomissioneController {
     }
 
     /**
-     * Restituisce la lista degli hackathon assegnati all'utente loggato (se è giudice/staff) filtrati per stato.
-     * GET /sottomissioni/hackathons?stato=IN_CORSO
+     * {@code GET /sottomissioni/hackathons?stato=...}
+     * Restituisce la lista degli hackathon assegnati al giudice autenticato, filtrati per stato.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param stato il filtro sullo stato dell'hackathon (es. {@code "IN_VALUTAZIONE"})
+     * @param auth  il contesto di autenticazione corrente
+     * @return {@code 200 OK} con la lista degli hackathon filtrati;
+     *         {@code 400 Bad Request} se il valore di {@code stato} non è valido;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 404 Not Found} se non ci sono hackathon corrispondenti
      */
     @GetMapping("/hackathons")
     @PreAuthorize("hasRole('STAFF')")
@@ -78,9 +118,17 @@ public class SottomissioneController {
     }
 
     /**
-     * GET /sottomissioni/hackathons/{idHackathon}
+     * {@code GET /sottomissioni/hackathons/{idHackathon}}
      * Restituisce le sottomissioni di un hackathon specifico.
-     * Verifica che l'utente loggato sia il giudice di quell'hackathon.
+     * Verifica che l'utente autenticato sia il giudice dell'hackathon indicato.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param idHackathon l'ID dell'hackathon di cui recuperare le sottomissioni
+     * @param auth        il contesto di autenticazione corrente
+     * @return {@code 200 OK} con la lista delle sottomissioni;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è il giudice dell'hackathon;
+     *         {@code 404 Not Found} se l'hackathon non esiste o non ci sono sottomissioni
      */
     @GetMapping("/hackathons/{idHackathon}")
     @PreAuthorize("hasRole('STAFF')")
@@ -102,9 +150,17 @@ public class SottomissioneController {
     }
 
     /**
-     * GET /sottomissioni/{idSottomissione}
+     * {@code GET /sottomissioni/{idSottomissione}}
      * Restituisce il dettaglio di una sottomissione specifica.
-     * Verifica che l'utente loggato sia il giudice dell'hackathon a cui appartiene.
+     * Verifica che l'utente autenticato sia il giudice dell'hackathon a cui appartiene la sottomissione.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param idSottomissione l'ID della sottomissione da recuperare
+     * @param auth            il contesto di autenticazione corrente
+     * @return {@code 200 OK} con i dettagli della sottomissione;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è il giudice dell'hackathon associato;
+     *         {@code 404 Not Found} se la sottomissione non viene trovata
      */
     @GetMapping("/{idSottomissione}")
     @PreAuthorize("hasRole('STAFF')")
@@ -123,9 +179,20 @@ public class SottomissioneController {
     }
 
     /**
-     * PUT /sottomissioni/{idSottomissione}/valuta
-     * Valuta una sottomissione assegnando voto e giudizio.
-     * L'ID viene passato nel path, voto e giudizio nel body.
+     * {@code PUT /sottomissioni/{idSottomissione}/valuta}
+     * Valuta una sottomissione assegnando un voto (0-10) e un giudizio scritto.
+     * Verifica che l'utente autenticato sia il giudice dell'hackathon associato
+     * e che la sottomissione non sia già stata valutata.
+     * Richiede il ruolo {@code STAFF}.
+     *
+     * @param idSottomissione l'ID della sottomissione da valutare
+     * @param body            il body della richiesta contenente {@code voto} (int) e {@code giudizio} (String)
+     * @param auth            il contesto di autenticazione corrente
+     * @return {@code 200 OK} se la valutazione è avvenuta con successo;
+     *         {@code 400 Bad Request} se voto o giudizio non sono validi, o la sottomissione è già valutata;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è il giudice dell'hackathon;
+     *         {@code 404 Not Found} se la sottomissione non viene trovata
      */
     @PutMapping("/{idSottomissione}/valuta")
     @PreAuthorize("hasRole('STAFF')")
@@ -162,7 +229,7 @@ public class SottomissioneController {
         return ResponseEntity.ok("Sottomissione valutata con successo");
     }
     @GetMapping("/hackathons/{idHackathon}/classifica")
-    @PreAuthorize("hasAnyRole('STAFF','USER')")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<ClassificaTeamDTO>> getClassifica(@PathVariable long idHackathon) {
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         if (hackathon == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

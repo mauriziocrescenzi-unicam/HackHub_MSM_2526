@@ -46,14 +46,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // ← bean mancante nel tuo SecurityConfig originale — necessario per il login
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // ← collega UserDetailsService e PasswordEncoder all'AuthenticationManager
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
