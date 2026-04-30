@@ -21,26 +21,26 @@ import java.util.Map;
 @RequestMapping("/mentori")
 public class RichiestaSupportoController {
 
-    private final MentoreService mentoreService;
     private final HackathonService hackathonService;
     private final SegnalazioneService segnalazioneService;
     private final AccountService accountService;
+    private final MembroDelloStaffService membroDelloStaffService;
+    private final RichiestaSupportoService richiestaSupportoService;
     /**
      * Costruisce un'istanza di {@code RichiestaSupportoController} con le dipendenze necessarie.
      *
-     * @param mentoreService     service per la gestione dei mentori
      * @param hackathonService   service per la gestione degli hackathon
      * @param segnalazioneService service per la gestione delle segnalazioni
      * @param accountService     service per la gestione degli account
      */
-    public RichiestaSupportoController(MentoreService mentoreService,
-                                       HackathonService hackathonService,
+    public RichiestaSupportoController(HackathonService hackathonService,
                                        SegnalazioneService segnalazioneService,
-                                       AccountService accountService  ) {
-        this.mentoreService = mentoreService;
+                                       AccountService accountService, MembroDelloStaffService membroDelloStaffService, RichiestaSupportoService richiestaSupportoService) {
         this.hackathonService = hackathonService;
         this.segnalazioneService = segnalazioneService;
         this.accountService = accountService;
+        this.membroDelloStaffService = membroDelloStaffService;
+        this.richiestaSupportoService = richiestaSupportoService;
     }
 
 
@@ -67,7 +67,7 @@ public class RichiestaSupportoController {
         Long idMentore = account.getId();
         Long idHackathon = body.get("idHackathon");
         // Verifica che il mentore esista
-        if (mentoreService.getMentoreById(idMentore) == null) {
+        if (membroDelloStaffService.getMembroStaffById(idMentore) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
@@ -78,7 +78,7 @@ public class RichiestaSupportoController {
         if (!assegnato) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-        List<RichiestaSupporto> richieste = mentoreService.getRichiesteSupporto(hackathon);
+        List<RichiestaSupporto> richieste = richiestaSupportoService.getRichiesteSupporto(hackathon);
         if (richieste.isEmpty()) return ResponseEntity.notFound().build();
         List<RichiestaSupportoRispostaDTO> risposta = richieste.stream()
                 .map(RichiestaSupportoRispostaDTO::fromRichiestaSupporto)
@@ -114,20 +114,22 @@ public class RichiestaSupportoController {
         if (!account.getId().equals(idMentore)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi rispondere solo con il tuo account");
         }
-        if (mentoreService.getMentoreById(idMentore) == null) {
+        if (membroDelloStaffService.getMembroStaffById(idMentore) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
         }
         if (risposta == null) {
             return ResponseEntity.badRequest().body("Dati non validi");
         }
-        RichiestaSupporto richiesta = mentoreService.getRichiestaSupporto(idRichiesta);
+        RichiestaSupporto richiesta = richiestaSupportoService.getRichiestaSupporto(idRichiesta);
         if (richiesta == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Richiesta non trovata");
         }
-        if (mentoreService.isRichiestaSupportoRisolta(richiesta)) {
+        if(richiesta.getHackathon().getMentori().stream().noneMatch(m -> m.getId().equals(idMentore)))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: non sei assegnato a questo hackathon");
+        if (richiestaSupportoService.isRichiestaSupportoRisolta(richiesta)) {
             return ResponseEntity.badRequest().body("Richiesta già risolta");
         }
-        if (!mentoreService.rispostaRichiestaSupporto(richiesta, risposta)) {
+        if (!richiestaSupportoService.rispostaRichiestaSupporto(richiesta, risposta)) {
             return ResponseEntity.badRequest().body("Dati non validi");
         }
         return ResponseEntity.ok("Risposta inviata con successo");
@@ -161,12 +163,15 @@ public class RichiestaSupportoController {
         if (!account.getId().equals(idMentore)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi segnalare solo con il tuo account");
         }
-        if (mentoreService.getMentoreById(idMentore) == null) {
+        if (membroDelloStaffService.getMembroStaffById(idMentore) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
         }
         if (motivazione == null || motivazione.isBlank()) {
             return ResponseEntity.badRequest().body("Dati non validi");
         }
+        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
+        if(hackathon.getMentori().stream().noneMatch(m -> m.getId().equals(idMentore)))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: non sei assegnato a questo hackathon");
         try {
             if (!segnalazioneService.segnalaTeam(idTeam, idHackathon, idMentore, motivazione)) {
                 return ResponseEntity.badRequest().body("Segnalazione non riuscita");

@@ -18,23 +18,22 @@ public class SegnalazioneService {
     private final SegnalazioneRepository repository;
     private final TeamService teamService;
     private final HackathonService hackathonService;
-    private final MentoreService mentoreService;
     private final TeamHackathonService teamHackathonService;
+    private final MembroDelloStaffService membroDelloStaffService;
+
     /**
      * Costruisce un'istanza di {@code SegnalazioneService} con le dipendenze necessarie.
      *
      * @param repository           repository per l'accesso alle segnalazioni
      * @param teamService          service per la gestione dei team
      * @param hackathonService     service per la gestione degli hackathon
-     * @param mentoreService       service per la gestione dei mentori
      * @param teamHackathonService service per la gestione delle iscrizioni team-hackathon
      */
-    public SegnalazioneService(SegnalazioneRepository repository, TeamService teamService, HackathonService hackathonService, MentoreService mentoreService, TeamHackathonService teamHackathonService) {
+    public SegnalazioneService(SegnalazioneRepository repository, TeamService teamService, HackathonService hackathonService, TeamHackathonService teamHackathonService, MembroDelloStaffService membroDelloStaffService) {
         this.repository = repository;
         this.teamService = teamService;
-        this.hackathonService = hackathonService;
-        this.mentoreService = mentoreService;
-        this.teamHackathonService = teamHackathonService;
+        this.hackathonService = hackathonService;this.teamHackathonService = teamHackathonService;
+        this.membroDelloStaffService = membroDelloStaffService;
     }
 
 
@@ -49,6 +48,10 @@ public class SegnalazioneService {
     public boolean verificaSegnalazione(Team team,Hackathon hackathon, Account mentore, String motivazione){
         if (team == null) throw new IllegalArgumentException("Team non valido");
         if (motivazione.isEmpty()) throw new IllegalArgumentException("Motivazione non valida");
+        if (hackathon == null) throw new IllegalArgumentException("Hackathon non valido");
+        if (mentore == null) throw new IllegalArgumentException("Mentore non valido");
+        if(!hackathon.getMentori().contains(mentore))
+            throw new IllegalArgumentException("Il tuo ruolo non consente di effettuare questa operazione");
         //controllo che non ci sia già una segnalazione
         return repository.findAll().stream()
                 .anyMatch(s -> s.getTeam().equals(team)
@@ -73,7 +76,7 @@ public class SegnalazioneService {
         Team team=teamService.getTeamById(idTeam);
         // Recupera hackathon e mentore dalle rispettive persistence
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
-        Account mentore = mentoreService.getMentoreById(idMentore);
+        Account mentore = membroDelloStaffService.getMembroStaffById(idMentore);
         if (team == null ||hackathon==null|| mentore == null) {
             return false;
         }

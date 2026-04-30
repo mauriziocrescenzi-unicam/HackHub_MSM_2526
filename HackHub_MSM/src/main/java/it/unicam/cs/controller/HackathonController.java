@@ -23,19 +23,20 @@ import java.util.Map;
 public class HackathonController {
 
     private final HackathonService hackathonService;
-    private final MentoreService mentoreService;
     private final AccountService accountService;
+    private final MembroDelloStaffService membroDelloStaffService;
+
     /**
      * Costruisce un'istanza di {@code HackathonController} con le dipendenze necessarie.
      *
      * @param hackathonService  service per la gestione degli hackathon
-     * @param mentoreService    service per la gestione dei mentori
      * @param accountService    service per la gestione degli account
+     * @param membroDelloStaffService service per la gestione dei membri dello staff
      */
-    public HackathonController(HackathonService hackathonService, MentoreService mentoreService, AccountService accountService) {
+    public HackathonController(HackathonService hackathonService, AccountService accountService, MembroDelloStaffService membroDelloStaffService) {
         this.hackathonService = hackathonService;
-        this.mentoreService = mentoreService;
         this.accountService = accountService;
+        this.membroDelloStaffService = membroDelloStaffService;
     }
     /**
      * {@code POST /hackathons}
@@ -133,7 +134,7 @@ public class HackathonController {
         List<Long> mentoriIds = raw.stream()
                 .map(n -> ((Number) n).longValue())
                 .toList();
-        if(mentoreService.aggiungiMentori(mentoriIds,hackathon)) return ResponseEntity.ok("Hackathon modificato con successo");
+        if(membroDelloStaffService.aggiungiMentori(mentoriIds,hackathon)) return ResponseEntity.ok("Hackathon modificato con successo");
         return ResponseEntity.badRequest().body("Dati non validi");
     }
     /**
