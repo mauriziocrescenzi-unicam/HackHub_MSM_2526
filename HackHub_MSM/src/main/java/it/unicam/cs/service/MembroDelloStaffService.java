@@ -30,7 +30,6 @@ public class MembroDelloStaffService {
         this.repository = repository;
     }
 
-    //TODO cambio nome metodo con quello inferiore
     /**
      * Restituisce la lista degli hackathon di un determinato organizzatore in base allo stato
      * @param stato stato degli hackathon

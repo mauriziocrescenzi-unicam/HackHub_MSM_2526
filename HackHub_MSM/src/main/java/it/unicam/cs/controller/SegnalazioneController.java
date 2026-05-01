@@ -5,6 +5,7 @@ import it.unicam.cs.model.*;
 import it.unicam.cs.service.AccountService;
 import it.unicam.cs.service.HackathonService;
 import it.unicam.cs.service.SegnalazioneService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -38,32 +39,48 @@ public class SegnalazioneController {
     }
     /**
      * {@code POST /segnalazioni}
-     * Permette a un mentore di segnalare un team per violazione del regolamento.
-     * Verifica che il mentore autenticato sia effettivamente assegnato all'hackathon indicato.
+     * Segnala un team per violazione del regolamento durante un hackathon.
+     * Il mentore autenticato deve essere assegnato all'hackathon specificato.
      * Richiede il ruolo {@code STAFF}.
      *
-     * @param body il body della richiesta contenente {@code teamId} (Long), {@code hackathonId} (Long)
-     *             e {@code motivazione} (String)
+     * @param body il body della richiesta contenente {@code idTeam} (Long),
+     *             {@code idHackathon} (Long) e {@code motivazione} (String)
      * @param auth il contesto di autenticazione corrente
-     * @return {@code 200 OK} se la segnalazione è avvenuta con successo;
-     *         {@code 400 Bad Request} se i dati non sono validi, l'hackathon o il mentore non vengono trovati,
-     *         o il mentore non è assegnato all'hackathon
+     * @return {@code 201 Created} se la segnalazione è stata inviata con successo;
+     *         {@code 400 Bad Request} se i dati sono mancanti, vuoti o la segnalazione fallisce;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 404 Not Found} se il mentore non esiste
      */
     @PostMapping
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<String> segnalaTeam(@RequestBody Map<String, Object> body, Authentication auth){
-        if(body.get("teamId")==null || body.get("hackathonId")==null
-                ||body.get("motivazione")==null) return ResponseEntity.badRequest().body("Dati non validi");
-        long teamId = Long.parseLong(body.get("teamId").toString());
-        long hackathonId = Long.parseLong(body.get("hackathonId").toString());
-        Hackathon hackathon = hackathonService.getHackathonByID(hackathonId);
-        Account mentore = accountService.find(auth.getName());
-        if(hackathon==null || mentore==null) return ResponseEntity.badRequest().body("Hackathon o mentore non trovati");
-        if(!hackathon.getMentori().contains(mentore)) return ResponseEntity.badRequest().body("Il tuo ruolo non consente di effettuare questa operazione");
-        String motivazione = body.get("motivazione").toString();
-        if(segnalazioneService.segnalaTeam(teamId,hackathonId,mentore.getId(),motivazione))
-            return ResponseEntity.ok("Segnalazione effettuata con successo");
-        return ResponseEntity.badRequest().body("Dati non validi");
+        Account account = accountService.find(auth.getName());
+        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
+        Long idMentore = auth.getName() == null ? null : account.getId();
+        long idTeam = ((Number) body.get("idTeam")).longValue();
+        long idHackathon = ((Number) body.get("idHackathon")).longValue();
+        String motivazione = (String) body.get("motivazione");
+        // Sicurezza: verifica che l'utente loggato sia il mentore che sta segnalando
+        if (!account.getId().equals(idMentore)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi segnalare solo con il tuo account");
+        }
+        if (accountService.findById(idMentore) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
+        }
+        if (motivazione == null || motivazione.isBlank()) {
+            return ResponseEntity.badRequest().body("Dati non validi");
+        }
+        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
+        if(hackathon.getMentori().stream().noneMatch(m -> m.getId().equals(idMentore)))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: non sei assegnato a questo hackathon");
+        try {
+            if (!segnalazioneService.segnalaTeam(idTeam, idHackathon, idMentore, motivazione)) {
+                return ResponseEntity.badRequest().body("Segnalazione non riuscita");
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body("Segnalazione inviata con successo");
     }
 
     /**
@@ -113,15 +130,16 @@ public class SegnalazioneController {
             return ResponseEntity.ok("Segnalazione rifiutata con successo");
         return ResponseEntity.badRequest().body("Dati non validi");
     }
-    //TODO cambiare in get
     /**
      * {@code GET /segnalazioni/hackathon}
      * Restituisce la lista delle segnalazioni filtrate per hackathon e stato.
      * Verifica che tutti gli hackathon indicati appartengano all'organizzatore autenticato.
      * Richiede il ruolo {@code STAFF}.
      *
-     * @param body il body della richiesta contenente {@code hackathonIds} (List&lt;Long&gt;)
-     *             e {@code stato} (String)
+     * @param hackathonIds lista degli identificatori degli hackathon da filtrare;
+     *                     non può essere vuota
+     * @param stato        lo stato delle segnalazioni da filtrare (es. {@code DA_GESTIRE});
+     *                     deve corrispondere a un valore valido di {@link StatoSegnalazione}
      * @param auth il contesto di autenticazione corrente
      * @return {@code 200 OK} con la lista delle segnalazioni trovate;
      *         {@code 400 Bad Request} se i dati non sono validi, lo stato non è riconosciuto,
@@ -130,17 +148,18 @@ public class SegnalazioneController {
      */
     @GetMapping("/hackathon")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<List<SegnalazioneRispostaDTO>> getSegnalazioni(@RequestBody Map<String, Object> body, Authentication auth){
+    public ResponseEntity<List<SegnalazioneRispostaDTO>> getSegnalazioni( @RequestParam List<Long> hackathonIds,
+                                                                          @RequestParam String stato, Authentication auth){
         Account organizzatore= accountService.find(auth.getName());
-        if (body.get("stato")==null) return ResponseEntity.badRequest().body(null);
+        if (stato==null) return ResponseEntity.badRequest().body(null);
         //controllo che i dati siano validi
-        List<Long> ids = body.get("hackathonIds") == null ? List.of() :
-                ((List<?>) body.get("hackathonIds")).stream()
+        List<Long> ids = hackathonIds == null ? List.of() :
+                ((List<?>) hackathonIds).stream()
                 .filter(Objects::nonNull)
                 .map(Object::toString)
                 .map(Long::parseLong)
                 .toList();
-        StatoSegnalazione statoSegnalazione= StatoSegnalazione.fromString(body.get("stato").toString());
+        StatoSegnalazione statoSegnalazione= StatoSegnalazione.fromString(stato);
         if(statoSegnalazione==null) return ResponseEntity.badRequest().body(null);
         if(ids.isEmpty()) return ResponseEntity.badRequest().body(null);
         //trasformo i dati in hackathon

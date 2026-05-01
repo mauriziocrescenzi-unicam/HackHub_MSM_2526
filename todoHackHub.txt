@@ -12,12 +12,12 @@ Uniformare le boundary con gli attori nei sequence(vedere come è giusto fare pe
 ---CODICE
 Modificare javaDoc
     -sottomissioneController manca proclama vincitore e classifica
+    -dto
 
-
+CONTROLLARE se l'invio puo essere fatto anche con hackathon concluso nel vpp
 CONTROLLARE per i relativi ruoli organizzatore, mentore, giudice controllare sempre che user è staff o se è di quello specifico hackathon.
 
 TOKEN durata rimuovere e nel filter
-Controllo del rest
 ------------risposta tutor----------
 1. In questo caso è indifferente. Se volete metterlo non è un errore, ma la terminazione del caso d'uso è implicita.
 2. Sarebbe meglio mostrare l'interazione con il service relativo, dato che viene effettivamente recuperato qualcosa dal DB.

@@ -105,40 +105,38 @@ public class MembroTeamController {
         }
         return ResponseEntity.ok("Membro ha abbandonato il team con successo");
     }
-    //TODO cambiare in delete?
+
     /**
-     * {@code POST /membro-team/elimina}
+     * {@code DELETE /membro-team/{idMembroDaEliminare}}
      * Permette a un membro del team di rimuovere un altro membro dallo stesso team.
      * Un membro non può eliminare se stesso; per uscire dal team deve usare l'endpoint di abbandono.
      * Richiede il ruolo {@code UTENTE}.
      *
-     * @param body il body della richiesta contenente {@code idMembroDaEliminare} (Long)
-     * @param auth il contesto di autenticazione corrente
+     * @param idMembroDaEliminare l'identificatore del membro da rimuovere dal team
+     * @param auth                il contesto di autenticazione corrente
      * @return {@code 200 OK} se l'eliminazione è avvenuta con successo;
      *         {@code 400 Bad Request} se i dati non sono validi o l'operazione fallisce;
      *         {@code 401 Unauthorized} se l'account non è trovato;
      *         {@code 403 Forbidden} se l'utente non è membro di nessun team
      */
-    @PostMapping("/elimina")
+    @DeleteMapping("/{idMembroDaEliminare}")
     @PreAuthorize("hasRole('UTENTE')")
-    public ResponseEntity<String> eliminaMembro(@RequestBody Map<String, Long> body, Authentication auth) {
+    public ResponseEntity<String> eliminaMembro(@PathVariable Long idMembroDaEliminare, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        Long idMembroCheElimina = account.getId();
-        Long idMembroDaEliminare = body.get("idMembroDaEliminare");
-        if(membroTeamService.getMembroById(idMembroCheElimina)==null)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non puoi eliminare un membro");
-        Long idTeam = membroTeamService.getMembroById(idMembroCheElimina).getTeam().getId();
-        if (!account.getId().equals(idMembroCheElimina)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi eliminare solo membri del tuo team");
-        }
-        if (idMembroCheElimina.equals(idMembroDaEliminare)) {
-            return ResponseEntity.badRequest().body("Impossibile: un membro non può eliminare se stesso dal team, in tal caso abbandonare il team.");
-        }
-        boolean eliminato = membroTeamService.eliminaMembro(idMembroCheElimina, idMembroDaEliminare, idTeam);
-        if (!eliminato) {
+
+        MembroTeam membroCheElimina = membroTeamService.getMembroById(account.getId());
+        if (membroCheElimina == null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non appartieni a nessun team");
+
+        if (account.getId().equals(idMembroDaEliminare))
+            return ResponseEntity.badRequest().body("Impossibile: un membro non può eliminare se stesso, usa l'endpoint di abbandono.");
+
+        Long idTeam = membroCheElimina.getTeam().getId();
+        boolean eliminato = membroTeamService.eliminaMembro(account.getId(), idMembroDaEliminare, idTeam);
+        if (!eliminato)
             return ResponseEntity.badRequest().body("Eliminazione non riuscita. Verificare che entrambi i membri appartengano al team.");
-        }
+
         return ResponseEntity.ok("Membro eliminato dal team con successo");
     }
     /**

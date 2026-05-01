@@ -76,22 +76,20 @@ public class TeamHackathonController {
         return ResponseEntity.ok(risposta);
     }
 
-    //TODO cambiare in get
     /**
      * POST /team/hackathons/iscritto
      * Verifica se il team è iscritto a un hackathon specifico.
      * Body: { "idTeam": 1, "idHackathon": 10 }
      */
-    @PostMapping("/iscritto")
+    @GetMapping("/iscritto")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<Boolean> checkIscrizioneHackathon(
-            @RequestBody Map<String, Long> body,
+            @RequestParam Long idHackathon,
             Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         if (!membroTeamService.isMembroTeam(account.getId())) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         Long idTeam = membroTeamService.getMembroById(account.getId()).getTeam().getId();
-        Long idHackathon = body.get("idHackathon");
         if (idHackathon == null) return ResponseEntity.badRequest().body(false);
         MembroTeam membro = membroTeamService.getMembro(account);
         if (membro == null || !membro.getTeam().getId().equals(idTeam)) {

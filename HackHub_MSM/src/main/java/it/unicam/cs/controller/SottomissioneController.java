@@ -228,6 +228,14 @@ public class SottomissioneController {
         if (!valutato) return ResponseEntity.badRequest().body("Valutazione non riuscita");
         return ResponseEntity.ok("Sottomissione valutata con successo");
     }
+    /**
+     * {@code GET /sottomissioni/hackathons/{idHackathon}/classifica}
+     * Restituisce la classifica dei team per un hackathon specifico, ordinata per punteggio decrescente.
+     *
+     * @param idHackathon l'ID dell'hackathon di cui calcolare la classifica
+     * @return {@code 200 OK} con la lista ordinata di {@link ClassificaTeamDTO};
+     *         {@code 404 Not Found} se l'hackathon non esiste o non ci sono sottomissioni valutate
+     */
     @GetMapping("/hackathons/{idHackathon}/classifica")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<List<ClassificaTeamDTO>> getClassifica(@PathVariable long idHackathon) {
@@ -237,7 +245,20 @@ public class SottomissioneController {
         if (classifica.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(classifica);
     }
-
+    /**
+     * {@code PUT /sottomissioni/hackathons/{idHackathon}/vincitore}
+     * Proclama il team vincitore di un hackathon.
+     *
+     * @param idHackathon l'ID dell'hackathon per cui proclamare il vincitore
+     * @param body        il body della richiesta contenente {@code idTeam} (Long)
+     * @param auth        il contesto di autenticazione corrente
+     * @return {@code 200 OK} se il vincitore è stato proclamato con successo;
+     *         {@code 400 Bad Request} se {@code idTeam} è assente, non tutte le sottomissioni
+     *         sono valutate o l'hackathon non è nello stato corretto;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è il giudice dell'hackathon;
+     *         {@code 404 Not Found} se l'hackathon o il team non vengono trovati
+     */
     @PutMapping("/hackathons/{idHackathon}/vincitore")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<String> proclamaVincitore(@PathVariable long idHackathon,

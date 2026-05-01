@@ -12,7 +12,6 @@ import java.util.Objects;
  * Ogni istanza indica che un utente è membro di un team con un ruolo specifico.
  * Utilizza una chiave primaria composta (MembroTeamId).
  * Classe modello passiva: la logica di gestione è delegata al MembroTeamController.
- *
  */
 @Entity
 @Getter
@@ -23,12 +22,12 @@ public class MembroTeam implements Serializable {
     private MembroTeamId id;
 
     @ManyToOne
-    @MapsId("utenteId") // Collega il campo utenteId della chiave composta
+    @MapsId("utenteId")
     @JoinColumn(name = "utente_id")
     private Account account;
 
     @ManyToOne
-    @MapsId("teamId") // Collega il campo teamId della chiave composta
+    @MapsId("teamId")
     @JoinColumn(name = "team_id")
     private Team team;
 

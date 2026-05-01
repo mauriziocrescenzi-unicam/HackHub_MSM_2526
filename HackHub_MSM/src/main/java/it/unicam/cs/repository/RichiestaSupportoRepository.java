@@ -4,7 +4,11 @@ import it.unicam.cs.model.Hackathon;
 import it.unicam.cs.model.RichiestaSupporto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
-
+/**
+ * Repository per la gestione della persistenza delle richieste di supporto.
+ * Estende {@link JpaRepository} fornendo le operazioni CRUD di base
+ * più le query personalizzate per filtrare per hackathon.
+ */
 public interface RichiestaSupportoRepository extends JpaRepository<RichiestaSupporto, Long> {
 
     /**

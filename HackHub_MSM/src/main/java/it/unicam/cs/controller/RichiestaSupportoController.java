@@ -12,13 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 /**
- * Controller REST per la gestione delle richieste di supporto e delle segnalazioni dei mentori.
- * Espone endpoint per visualizzare e rispondere alle richieste di supporto,
- * e per segnalare team in violazione del regolamento.
+ * Controller REST per la gestione delle richieste di supporto.
+ * Espone endpoint per visualizzare e rispondere alle richieste di supporto.
  * Accessibile solo agli utenti con ruolo {@code STAFF}.
  */
 @RestController
-@RequestMapping("/mentori")
+@RequestMapping("/richieste")
 public class RichiestaSupportoController {
 
     private final HackathonService hackathonService;
@@ -44,14 +43,13 @@ public class RichiestaSupportoController {
     }
 
 
-    //TODO cambiare in get
     /**
-     * {@code POST /mentori/richieste/lista}
+     * {@code GET /richieste}
      * Restituisce le richieste di supporto per un hackathon specifico.
      * Il mentore autenticato deve essere effettivamente assegnato all'hackathon richiesto.
      * Richiede il ruolo {@code STAFF}.
      *
-     * @param body il body della richiesta contenente {@code idHackathon} (Long)
+     * @param idHackathon l'identificatore dell'hackathon di cui recuperare le richieste
      * @param auth il contesto di autenticazione corrente
      * @return {@code 200 OK} con la lista delle richieste di supporto;
      *         {@code 401 Unauthorized} se l'account non è trovato;
@@ -59,13 +57,13 @@ public class RichiestaSupportoController {
      *         {@code 404 Not Found} se il mentore o l'hackathon non esistono,
      *         o se non ci sono richieste
      */
-    @PostMapping("/richieste/lista")
+    @GetMapping()
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<List<RichiestaSupportoRispostaDTO>> getRichiesteSupporto(@RequestBody Map<String, Long> body, Authentication auth) {
+    public ResponseEntity<List<RichiestaSupportoRispostaDTO>> getRichiesteSupporto(@RequestParam Long idHackathon, Authentication auth) {
         Account account = accountService.find(auth.getName());
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         Long idMentore = account.getId();
-        Long idHackathon = body.get("idHackathon");
+        if (idHackathon == null) return ResponseEntity.badRequest().build();
         // Verifica che il mentore esista
         if (membroDelloStaffService.getMembroStaffById(idMentore) == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -88,7 +86,7 @@ public class RichiestaSupportoController {
 
 
     /**
-     * {@code POST /mentori/richieste/rispondi}
+     * {@code POST /richieste/rispondi}
      * Invia una risposta testuale a una richiesta di supporto.
      * Il mentore autenticato non può rispondere a richieste già risolte.
      * Richiede il ruolo {@code STAFF}.
@@ -100,7 +98,7 @@ public class RichiestaSupportoController {
      *         {@code 401 Unauthorized} se l'account non è trovato;
      *         {@code 404 Not Found} se il mentore o la richiesta non esistono
      */
-    @PostMapping("/richieste/rispondi")
+    @PostMapping("/rispondi")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<String> rispostaRichiestaSupporto(@RequestBody Map<String, Object> body, Authentication auth) {
         Account account = accountService.find(auth.getName());
@@ -135,50 +133,4 @@ public class RichiestaSupportoController {
         return ResponseEntity.ok("Risposta inviata con successo");
     }
 
-    //TODO controllo con segnalazioniController
-    /**
-     * {@code POST /mentori/segnalazioni/invia}
-     * Segnala un team per violazione del regolamento durante un hackathon.
-     * Il mentore autenticato deve essere assegnato all'hackathon specificato.
-     * Richiede il ruolo {@code STAFF}.
-     *
-     * @param body il body della richiesta contenente {@code idTeam} (Long),
-     *             {@code idHackathon} (Long) e {@code motivazione} (String)
-     * @param auth il contesto di autenticazione corrente
-     * @return {@code 201 Created} se la segnalazione è stata inviata con successo;
-     *         {@code 400 Bad Request} se i dati sono mancanti, vuoti o la segnalazione fallisce;
-     *         {@code 401 Unauthorized} se l'account non è trovato;
-     *         {@code 404 Not Found} se il mentore non esiste
-     */
-    @PostMapping("/segnalazioni/invia")
-    @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<String> segnalaTeam(@RequestBody Map<String, Object> body, Authentication auth) {
-        Account account = accountService.find(auth.getName());
-        if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utente non autenticato");
-        Long idMentore = auth.getName() == null ? null : account.getId();
-        Long idTeam = ((Number) body.get("idTeam")).longValue();
-        Long idHackathon = ((Number) body.get("idHackathon")).longValue();
-        String motivazione = (String) body.get("motivazione");
-        // Sicurezza: verifica che l'utente loggato sia il mentore che sta segnalando
-        if (!account.getId().equals(idMentore)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi segnalare solo con il tuo account");
-        }
-        if (membroDelloStaffService.getMembroStaffById(idMentore) == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Mentore non trovato");
-        }
-        if (motivazione == null || motivazione.isBlank()) {
-            return ResponseEntity.badRequest().body("Dati non validi");
-        }
-        Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
-        if(hackathon.getMentori().stream().noneMatch(m -> m.getId().equals(idMentore)))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: non sei assegnato a questo hackathon");
-        try {
-            if (!segnalazioneService.segnalaTeam(idTeam, idHackathon, idMentore, motivazione)) {
-                return ResponseEntity.badRequest().body("Segnalazione non riuscita");
-            }
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body("Segnalazione inviata con successo");
-    }
 }

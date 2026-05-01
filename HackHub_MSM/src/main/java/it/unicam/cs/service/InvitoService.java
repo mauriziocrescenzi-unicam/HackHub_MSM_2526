@@ -58,10 +58,10 @@ public class InvitoService {
         Team teamMittente = getTeamByAccount(mittente);
         Hackathon hackathon = teamHackathonService.getHackathon(teamMittente)
                 .stream().findFirst().orElse(null);
-
         if (hackathon == null ||
-                hackathonService.getStatoHackathon(hackathon) != StatoHackathon.IN_ISCRIZIONE)
-            throw new IllegalArgumentException("Hackathon non in stato di iscrizione.");
+                (hackathonService.getStatoHackathon(hackathon) != StatoHackathon.IN_ISCRIZIONE &&
+                        hackathonService.getStatoHackathon(hackathon) != StatoHackathon.CONCLUSO))
+            throw new IllegalArgumentException("Hackathon non in stato valido per inviare inviti.");
         if (!accountService.isPresent(destinatario.getEmail()))
             throw new IllegalArgumentException("Utente non esistente.");
         if (!teamService.verificaDisponibilitaMembro(destinatario))
