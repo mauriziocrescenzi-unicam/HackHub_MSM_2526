@@ -19,8 +19,7 @@ import java.io.IOException;
 public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtUtil jwtUtil; // ← era "jwtUtils" in AuthTokenFilter ma "jwtUtils" nel campo — ora coerente
-
+    private JwtUtil jwtUtil;
     @Autowired
     private CustomAccountDetailsService service;
 
@@ -34,7 +33,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             if (header != null && header.startsWith("Bearer ")) {
                 String token = header.substring(7);
 
-                // ← validazione aggiunta: se il token non è valido, salta l'autenticazione
                 if (jwtUtil.validateToken(token)) {
                     String email = jwtUtil.getEmailFromToken(token);
 
@@ -53,7 +51,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            logger.error("Authentication error: " + e.getMessage(),e);
+            logger.error("Authentication error: " + e.getMessage());
         }
 
         chain.doFilter(req, res);

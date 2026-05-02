@@ -21,7 +21,6 @@ import java.util.Map;
 public class RichiestaSupportoController {
 
     private final HackathonService hackathonService;
-    private final SegnalazioneService segnalazioneService;
     private final AccountService accountService;
     private final MembroDelloStaffService membroDelloStaffService;
     private final RichiestaSupportoService richiestaSupportoService;
@@ -29,14 +28,11 @@ public class RichiestaSupportoController {
      * Costruisce un'istanza di {@code RichiestaSupportoController} con le dipendenze necessarie.
      *
      * @param hackathonService   service per la gestione degli hackathon
-     * @param segnalazioneService service per la gestione delle segnalazioni
      * @param accountService     service per la gestione degli account
      */
     public RichiestaSupportoController(HackathonService hackathonService,
-                                       SegnalazioneService segnalazioneService,
                                        AccountService accountService, MembroDelloStaffService membroDelloStaffService, RichiestaSupportoService richiestaSupportoService) {
         this.hackathonService = hackathonService;
-        this.segnalazioneService = segnalazioneService;
         this.accountService = accountService;
         this.membroDelloStaffService = membroDelloStaffService;
         this.richiestaSupportoService = richiestaSupportoService;

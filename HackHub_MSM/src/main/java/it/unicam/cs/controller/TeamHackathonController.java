@@ -17,7 +17,9 @@ import java.util.Map;
 
 /**
  * Controller REST per la gestione delle iscrizioni dei team agli hackathon.
- * Espone endpoint per iscrivere, verificare e disiscrivere team dagli hackathon.
+ * Espone endpoint per iscrivere, verificare lo stato di iscrizione
+ * e disiscrivere un team da un hackathon.
+ * Accessibile solo agli utenti con ruolo {@code UTENTE}.
  */
 @RestController
 @RequestMapping("/team")
@@ -28,7 +30,15 @@ public class TeamHackathonController {
     private final HackathonService hackathonService;
     private final MembroTeamService membroTeamService;
     private final AccountService accountService;
-
+    /**
+     * Costruisce un'istanza di {@code TeamHackathonController} con le dipendenze necessarie.
+     *
+     * @param teamHackathonService service per la gestione delle iscrizioni team-hackathon
+     * @param teamService          service per la gestione dei team
+     * @param hackathonService     service per la gestione degli hackathon
+     * @param accountService       service per la gestione degli account
+     * @param membroTeamService    service per la gestione dei membri del team
+     */
     public TeamHackathonController(TeamHackathonService teamHackathonService,
                                    TeamService teamService,
                                    HackathonService hackathonService,
@@ -42,9 +52,16 @@ public class TeamHackathonController {
     }
 
     /**
-     * GET /team/hackathons/lista
-     * Restituisce la lista degli hackathon a cui il team dell'utente loggato è iscritto.
-     * L'idTeam viene recuperato automaticamente dall'account autenticato.
+     * {@code GET /team/hackathons/lista}
+     * Restituisce la lista degli hackathon a cui è iscritto il team dell'utente autenticato.
+     * Il team viene ricavato automaticamente dall'account autenticato.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 200 OK} con la lista degli hackathon a cui il team è iscritto;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è membro di nessun team;
+     *         {@code 404 Not Found} se il team non esiste o non ha iscrizioni attive
      */
     @GetMapping("/hackathons/lista")
     @PreAuthorize("hasRole('UTENTE')")
@@ -77,9 +94,16 @@ public class TeamHackathonController {
     }
 
     /**
-     * POST /team/hackathons/iscritto
-     * Verifica se il team è iscritto a un hackathon specifico.
-     * Body: { "idTeam": 1, "idHackathon": 10 }
+     * {@code GET /team/iscritto}
+     * Verifica se il team dell'utente autenticato è iscritto a un hackathon specifico.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param idHackathon l'id del hackathon da verificare
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 200 OK} con {@code true} se il team è iscritto, {@code false} altrimenti;
+     *         {@code 400 Bad Request} se {@code idHackathon} è assente;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è membro di nessun team
      */
     @GetMapping("/iscritto")
     @PreAuthorize("hasRole('UTENTE')")
@@ -100,8 +124,18 @@ public class TeamHackathonController {
     }
 
     /**
-     * POST /team/iscriviti
-     * Iscrive un team a un hackathon.
+     * {@code POST /team/iscriviti}
+     * Iscrive il team dell'utente autenticato a un hackathon.
+     * L'hackathon deve essere in stato {@link it.unicam.cs.model.StatoHackathon #IN_ISCRIZIONE}.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param body il body della richiesta contenente {@code idHackathon} (Long)
+     * @param auth il contesto di autenticazione corrente
+     * @return {@code 201 Created} se l'iscrizione è avvenuta con successo;
+     *         {@code 400 Bad Request} se le iscrizioni non sono aperte o i requisiti non sono soddisfatti;
+     *         {@code 401 Unauthorized} se l'account non è trovato;
+     *         {@code 403 Forbidden} se l'utente non è membro di nessun team;
+     *         {@code 404 Not Found} se il team o l'hackathon non vengono trovati
      */
     @PostMapping("/iscriviti")
     @PreAuthorize("hasRole('UTENTE')")
@@ -129,7 +163,17 @@ public class TeamHackathonController {
         }
         return ResponseEntity.status(HttpStatus.CREATED).body("Team iscritto con successo");
     }
-
+    /**
+     * {@code DELETE /team/hackathons/{idHackathon}}
+     * Disiscrive il team dell'utente autenticato da un hackathon specifico.
+     * Richiede il ruolo {@code UTENTE}.
+     *
+     * @param idHackathon l'ID dell'hackathon da cui disiscriversi
+     * @param auth        il contesto di autenticazione corrente
+     * @return {@code 200 OK} se la disiscrizione è avvenuta con successo;
+     *         {@code 400 Bad Request} se l'utente non è in un team o la disiscrizione fallisce;
+     *         {@code 401 Unauthorized} se l'account non è trovato
+     */
     @DeleteMapping("/hackathons/{idHackathon}")
     @PreAuthorize("hasRole('UTENTE')")
     public ResponseEntity<String> disiscrivitiHackathon(@PathVariable Long idHackathon, Authentication auth) {

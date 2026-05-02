@@ -137,7 +137,6 @@ public class SottomissioneController {
         if (account == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         Hackathon hackathon = hackathonService.getHackathonByID(idHackathon);
         if (hackathon == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        // Controllo di sicurezza: l'utente loggato deve essere il giudice di questo hackathon
         if (hackathon.getGiudice() == null || !hackathon.getGiudice().getId().equals(account.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }

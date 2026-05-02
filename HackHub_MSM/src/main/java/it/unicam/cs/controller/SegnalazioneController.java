@@ -60,7 +60,6 @@ public class SegnalazioneController {
         long idTeam = ((Number) body.get("idTeam")).longValue();
         long idHackathon = ((Number) body.get("idHackathon")).longValue();
         String motivazione = (String) body.get("motivazione");
-        // Sicurezza: verifica che l'utente loggato sia il mentore che sta segnalando
         if (!account.getId().equals(idMentore)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Non autorizzato: puoi segnalare solo con il tuo account");
         }

@@ -182,10 +182,10 @@ public class MembroTeamController {
         LocalDateTime dataInvio = LocalDateTime.now();
         // 5. Invia la richiesta di supporto
         RichiestaSupporto richiesta = richiestaSupportoService.inviaRichiestaSupporto(
-                idTeam,                      // ← preso dal team dell'utente loggato
-                dto.descrizioneRichiesta(),  // ← dal DTO
-                dataInvio,                   // ← impostato automaticamente
-                hackathon                    // ← recuperato dal DB
+                idTeam,
+                dto.descrizioneRichiesta(),
+                dataInvio,
+                hackathon
         );
         if (richiesta == null) {
             return ResponseEntity.badRequest().body("Validazione richiesta fallita");

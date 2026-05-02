@@ -36,12 +36,21 @@ public class MembroDelloStaffService {
      * @param id id del membro dello staff
      * @return lista degli hackathon
      */
-    public List<Hackathon> getListaHackathons(StatoHackathon stato,long id){
-        if(stato == null) throw new NullPointerException("Stato dell'hackathon non valido");
-        if(id < 0) throw new IllegalArgumentException("Id dell'organizzatore non valido");
-        return hackathonRepository.findAll().stream()
-                .filter(h -> h.getOrganizzatore().getId() == id && h.getStato() == stato)
-                .toList();
+    public List<Hackathon> getListaHackathons(StatoHackathon stato,Long id){
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("ID del membro dello staff non valido.");
+        }
+
+        List<Hackathon> risultato = new ArrayList<>();
+
+        risultato.addAll(hackathonRepository.findByOrganizzatoreId(id));
+        risultato.addAll(hackathonRepository.findByGiudiceId(id));
+        risultato.addAll(hackathonRepository.findByMentoriId(id));
+
+        return risultato.stream()
+                .distinct()
+                .filter(hackathon -> stato == null || hackathon.getStato() == stato)
+                .collect(Collectors.toList());
     }
     /**
      * Restituisce la lista degli hackathon a cui è assegnato un membro dello staff.

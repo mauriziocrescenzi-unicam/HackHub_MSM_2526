@@ -9,13 +9,13 @@ aggiungere setInfo
 Uniformare nome Membro dello staff (codice e Use Case)e MembroStaff (su class diagram)
 Uniformare le boundary con gli attori nei sequence(vedere come è giusto fare per polini)
 
+CONTROLLARE se l'invio puo essere fatto anche con hackathon concluso nel vpp
+
+
 ---CODICE
 Modificare javaDoc
-    -sottomissioneController manca proclama vincitore e classifica
-    -dto
+    -security
 
-CONTROLLARE se l'invio puo essere fatto anche con hackathon concluso nel vpp
-CONTROLLARE per i relativi ruoli organizzatore, mentore, giudice controllare sempre che user è staff o se è di quello specifico hackathon.
 
 TOKEN durata rimuovere e nel filter
 ------------risposta tutor----------

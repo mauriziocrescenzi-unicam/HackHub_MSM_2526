@@ -92,19 +92,13 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers(
                                         "/h2-console/**",
-                                        "/auth/**",
-                                        "/test/all"
+                                        "/auth/**"
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.GET,
                                         "/hackathons",
                                         "/hackathons/*"
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/teams").permitAll()
-                                .requestMatchers(
-                                        "/v3/api-docs/**",
-                                        "/swagger-ui/**",
-                                        "/swagger-ui.html"
-                                ).permitAll()
                                 .anyRequest().authenticated()
                 );
 
